@@ -1,0 +1,9 @@
+646645|xhttp://new.paho.org/bireme/index.php?Itemid=43&lang=pt|TESTE
+646645|http://new.paho.org/bireme/indexx.php?Itemid=43&lang=pt|TESTE
+646645|http://new.paho.org/bireme/index.php?Itemid=43&lang=xpt|TESTE
+646645|http://new.paho.org/bireme/indexx.php?Itemid=43&lang=xpt|TESTE
+646645|http://new.paho.org/bireme2/indexx.php?Itemid=43&lang=xpt|TESTE
+646645|xhttp://new.paho.org/bireme/index.php?option=com_content&view=article&id=33&Itemid=43&lang=pt|TESTE
+646645|http://new.paho.org/bireme/indexx.php?option=com_content&view=article&id=33&Itemid=43&lang=pt|TESTE
+646645|http://new.paho.org/bireme/index.php?option=com_content&view=article&id=33&Itemid=43&lang=xpt|TESTE
+646645|http://new.paho.org/bireme/indexx.php?option=com_content&view=article&id=33&Itemid=43&lang=xpt|TESTE
