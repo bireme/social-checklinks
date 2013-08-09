@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    <context-param>
+        <param-name>Host</param-name>
+        <param-value>ts01vm.bireme.br</param-value>
+    </context-param>
+    <servlet>
+        <servlet-name>authenticate</servlet-name>
+        <servlet-class>br.bireme.web.AuthenticationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CheckOneLinkServlet</servlet-name>
+        <servlet-class>br.bireme.web.CheckOneLinkServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CheckManyLinksServlet</servlet-name>
+        <servlet-class>br.bireme.web.CheckManyLinksServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>authenticate</servlet-name>
+        <url-pattern>/authenticate</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CheckOneLinkServlet</servlet-name>
+        <url-pattern>/CheckOneLinkServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CheckManyLinksServlet</servlet-name>
+        <url-pattern>/CheckManyLinksServlet</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout>
+            15
+        </session-timeout>
+    </session-config>
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+</web-app>
