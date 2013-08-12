@@ -17,10 +17,10 @@ import org.json.simple.parser.ParseException;
  * date: 20130731
  */
 public class Authentication {
-    final static String DEFAULT_HOST = "";
-    final static int DEFAULT_PORT = 8000;
-    final static String DEFAULT_PATH = "/api/auth/login/";
-    final static String SERVICE_NAME = "SocialChecklinks";
+    final static String DEFAULT_HOST = "accounts.teste.bireme.org";
+    final static int DEFAULT_PORT = 80;
+    final static String DEFAULT_PATH = "/api/auth/login/?format=json";
+    final static String SERVICE_NAME = "DIREVE"; //"SocialChecklinks";
     
     final String host;
     final int port;
@@ -46,11 +46,8 @@ public class Authentication {
         if (response == null) {
             throw new NullPointerException("response");
         }
-        final boolean ret = true;
         
-        // TODO
-        
-        return ret;
+        return (Boolean)response.get("success");
     }
     
     public String getCenterId(final JSONObject response) throws IOException, 
@@ -58,9 +55,15 @@ public class Authentication {
         if (response == null) {
             throw new NullPointerException("response");
         }
-        final String id = null;
-        
-        //TODO
+        String id = null;
+                
+        if (isAuthenticated(response)) {
+            final JSONObject jobj = (JSONObject)response.get("data");
+            
+            if (jobj != null) {
+                id = (String)jobj.get("cc");
+            }
+        } 
         
         return id;
     }
@@ -77,26 +80,41 @@ public class Authentication {
         
         final JSONObject parameters = new JSONObject();
         parameters.put("username", user);
-        parameters.put("password", password);
-        parameters.put("format", "json");
+        parameters.put("password", password);      
         parameters.put("service", SERVICE_NAME);  
+        parameters.put("format", "json");
         
-        final URL url = new URL("http", host, port, DEFAULT_PATH);
+        //final URL url = new URL("http", host, port, DEFAULT_PATH);
+        final URL url = new URL("http://" + host + DEFAULT_PATH);
         final HttpURLConnection connection = 
-                                        (HttpURLConnection)url.openConnection();                
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("content-type", 
-                                      "application/json; charset=utf-8");                          
+                                        (HttpURLConnection)url.openConnection(); 
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoInput(true);
+        connection.setDoOutput(true);
         connection.connect();
         
         final StringBuilder builder = new StringBuilder();
         final BufferedWriter writer = new BufferedWriter(
                  new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
+        
+ final String message = parameters.toJSONString();
+ System.out.println(message);
+ 
         writer.write(parameters.toJSONString());
         writer.newLine(); 
-            
-        final BufferedReader reader = new BufferedReader(
-                   new InputStreamReader(connection.getInputStream(), "UTF-8"));
+        writer.close();
+
+        final boolean respCodeOk = (connection.getResponseCode() == 200);
+        final BufferedReader reader;
+        
+        if (respCodeOk) {
+            reader = new BufferedReader(new InputStreamReader(
+                                                  connection.getInputStream()));
+        } else {
+            reader = new BufferedReader(new InputStreamReader(
+                                                  connection.getErrorStream()));
+        }
+
         while (true) {
             final String line = reader.readLine();
             if (line == null) {
@@ -107,8 +125,23 @@ public class Authentication {
         }
         
         reader.close();
-        writer.close();
+        
+        if (!respCodeOk) {
+            throw new IOException(builder.toString());
+        }
         
         return (JSONObject) new JSONParser().parse(builder.toString());
     }    
+    
+    public static void main(String[] args) throws IOException, ParseException {
+        final Authentication aut = new Authentication();
+        
+        final JSONObject jobj = aut.getUser("barbieri@paho.org", "heitor");
+        final boolean isAuthenticated = aut.isAuthenticated(jobj);
+        
+        System.out.println("isAthenticated=" + isAuthenticated);
+        if (isAuthenticated) {
+            System.out.println("centerId=" + aut.getCenterId(jobj));
+        }        
+    }
 }

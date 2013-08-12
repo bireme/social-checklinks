@@ -15,9 +15,11 @@ import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -50,8 +52,8 @@ public class MongoOperations {
         return set;
     }
     
-    public static Set<IdUrl> getCenterUrls(final DBCollection coll,
-                                           final String centerId) {
+    public static List<IdUrl> getCenterUrls(final DBCollection coll,
+                                            final String centerId) {
         return getCenterUrls(coll, centerId, 1, Integer.MAX_VALUE);
     }
     
@@ -62,10 +64,10 @@ public class MongoOperations {
      * @param from indice inicial a ser recuperado. Começa de 1.
      * @return 
      */
-    public static Set<IdUrl> getCenterUrls(final DBCollection coll,
-                                           final String centerId,
-                                           final int from,
-                                           final int count) {
+    public static List<IdUrl> getCenterUrls(final DBCollection coll,
+                                            final String centerId,
+                                            final int from,
+                                            final int count) {
         if (coll == null) {
             throw new NullPointerException("coll");
         }
@@ -78,7 +80,7 @@ public class MongoOperations {
         if (count < 1) {
             throw new IllegalArgumentException("count[" + count + "] < 1");
         }
-        final Set<IdUrl> set = new TreeSet<IdUrl>();
+        final List<IdUrl> lst = new ArrayList<IdUrl>();
         final BasicDBObject query = new BasicDBObject(CENTER_FIELD, centerId);        
         final DBCursor cursor = coll.find(query).skip(from - 1).limit(count);
         
@@ -86,11 +88,12 @@ public class MongoOperations {
             final DBObject doc = cursor.next();
             final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD), 
                                        (String)doc.get(BROKEN_URL_FIELD));
-            set.add(iu);
+            lst.add(iu);
+System.out.println("#=" + lst.size() + " hash=" + iu.hashCode() + " id=" + iu.id + " url=" + iu.url);
         }
         cursor.close();
         
-        return set;
+        return lst;
     }
            
     public static int getCenterUrlsNum(final DBCollection coll,
@@ -197,7 +200,7 @@ public class MongoOperations {
         if (fixedUrl == null) {
             throw new NullPointerException("fixedUrl");
         }
-        final String[] patterns = Tools.getPatterns(brokenUrl, fixedUrl);
+        final String[] patterns = Tools.getPatterns(brokenUrl, fixedUrl);        
         final Set<IdUrl> docs = getDocsWith(coll, centerId, patterns[0]);                                                                        
         final Set<IdUrl> converted = Tools.getConvertedUrls(docs, 
                                                       patterns[0], patterns[1]);
@@ -238,7 +241,7 @@ public class MongoOperations {
         }
         System.out.println();
         
-        final Set<IdUrl> ius = getCenterUrls(coll, "PE1.1");
+        final List<IdUrl> ius = getCenterUrls(coll, "PE1.1");
         for (IdUrl iu : ius) {
             System.out.println("1) " + iu.id + "  " + iu.url);
         }

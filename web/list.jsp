@@ -1,6 +1,6 @@
 <%@page language="java"%>
 <%@page session="true" %>
-<%@page import="java.util.Set,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
+<%@page import="java.util.List,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
 
 <% 
     if (session.getAttribute("user") == null) {
@@ -10,19 +10,18 @@
     final String user = (String)session.getAttribute("user");
     final String centerId = (String)session.getAttribute("centerId");
     final int maxUrls = (Integer)session.getAttribute("maxUrls");
-    //final int group = (Integer)session.getAttribute("group");
     final int group = Integer.parseInt(request.getParameter("group"));
     final int groupSize = 15;
-    final int initGroupRange = (group / 5) * 5;
     final int lastGroup = (maxUrls / groupSize);
+    final int initGroup = (group <= 1) ? 0 : (group >= lastGroup - 2) 
+                                                 ? (lastGroup -5) : (group - 2);
     final int from = (group * groupSize) + 1;
     final DBCollection coll = (DBCollection)getServletContext()
                                                     .getAttribute("collection");
-    final Set<IdUrl> set = MongoOperations.getCenterUrls(coll, centerId, from, groupSize);
-    final String firstActive = (group > 4) ? "enabled" : "disabled";
-    final String lastActive = ((group + 5) < lastGroup) ? "enabled" : "disabled";
-    final String previousActiveGroup = (group > 4) ? "enabled" : "disabled";
-    final String nextActiveGroup = ((group + 1) < lastGroup) ? "enabled" : "disabled";
+    final List<IdUrl> lst = MongoOperations.getCenterUrls(coll, centerId, from, 
+                                                                     groupSize);
+    final String firstActive = "enabled";
+    final String lastActive = "enabled";
 %>
 
 <!-- ================================================== -->
@@ -100,7 +99,7 @@
 				<tbody>
                                     <%
                                         int cur = from;
-                                        for (IdUrl iu: set) {
+                                        for (IdUrl iu: lst) {
                                             final String nurl = iu.url.replace("&","<<amp;>>");
                                     %>                                                                        
 					<tr>
@@ -117,9 +116,8 @@
 			<div class="pagination pagination-centered">
 				<ul>
 					<li class=<%=firstActive%>><a href="?group=0">«</a></li>
-                                        <li class=<%=previousActiveGroup%>><a href="?group=<%=(initGroupRange > 0) ? initGroupRange - 1 : initGroupRange%>">&lsaquo;</a></li>
                                         <%                                        
-                                        for (int idx = initGroupRange; idx < initGroupRange+5; idx++) {
+                                        for (int idx = initGroup; idx < initGroup+5; idx++) {
                                             if (idx == group) {
                                         %>
                                             <li class="active"><a href=""><%=idx+1%></a></li>
@@ -135,7 +133,6 @@
                                             }
                                         }    
                                         %>
-                                        <li class=<%=nextActiveGroup%>><a href="?group=<%=(initGroupRange+5 <= lastGroup) ? (initGroupRange+5) : lastGroup %>">&rsaquo;</a></li>
 					<li class=<%=lastActive%>><a href="?group=<%=lastGroup%>">»</a></li>
 				</ul>
 			</div>

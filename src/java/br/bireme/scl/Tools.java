@@ -90,7 +90,7 @@ public class Tools {
                                        final String oldPattern,
                                        final String newPattern) {
         assert inSet != null;
-        assert oldPattern != null;
+        assert oldPattern != null;                                                                                                                                                                                                                                                                      
         assert newPattern != null;
         
         final Set<IdUrl> outSet = new HashSet<IdUrl>();

@@ -84,7 +84,7 @@
 					<a class="brand" href="#">BIREME Social CheckLinks</a>
 					<div class="nav-collapse collapse">
 						<ul class="nav">
-							<li class="active"><a href="list.html">Home</a></li>
+							<li class="active"><a href="list.jsp?group=0">Home</a></li>
 							<li><a href="#about">About</a></li>
 							<li><a href="http://reddes.bvsalud.org/">Contact</a></li>
 						</ul>
@@ -158,6 +158,7 @@
 		</div> <!-- /container -->
 		<div id="push"></div>
 	</div>
+
 	<footer id="footer">
 		<div class="container">
 			<strong>BIREME Social CheckLinks - V0.1 - 2013</strong><br/>

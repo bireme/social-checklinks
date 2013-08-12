@@ -61,12 +61,13 @@ public class AuthenticationServlet extends HttpServlet {
         final String username = request.getParameter("email");
         final String password = request.getParameter("password");
                 
-        boolean isAccountsWorking = false;        
+        boolean isAccountsWorking = true;        
         
         if (isAccountsWorking) {
             if ((username == null) || (username.isEmpty()) || 
                 (password == null) || (password.isEmpty())) {
                 response.sendRedirect("index.html");
+                return;
             }
             
             try {            
@@ -75,7 +76,7 @@ public class AuthenticationServlet extends HttpServlet {
                 final String centerId = auth.getCenterId(user);
                 final HttpSession session = request.getSession();
                 
-                if (auth.isAuthenticated(user)) {                    
+                if (auth.isAuthenticated(user) && (centerId != null)) {                    
                     final ServletContext context = getServletContext();
                     final DBCollection coll = 
                                (DBCollection)context.getAttribute("collection");
@@ -95,17 +96,18 @@ public class AuthenticationServlet extends HttpServlet {
                     response.sendRedirect("index.html");
                 }            
             } catch(Exception ex) {
+ex.printStackTrace();
                 response.sendRedirect("index.html");
             }
         } else {
             final ServletContext context = getServletContext();
             final DBCollection coll = 
                                (DBCollection)context.getAttribute("collection");
-            final int maxUrls = MongoOperations.getCenterUrlsNum(coll, "BR1.1");
+            final int maxUrls = MongoOperations.getCenterUrlsNum(coll, "PE1.1");
             final HttpSession session = request.getSession();
             session.setAttribute("user", username); // Login user.
-            session.setAttribute("centerId", "BR1.1");
-            //session.setAttribute("centerId", "PE1.1");
+            //session.setAttribute("centerId", "BR1.1");
+            session.setAttribute("centerId", "PE1.1");
             session.setAttribute("maxUrls", maxUrls);
             //session.setAttribute("group", 0);
             response.sendRedirect("list.jsp?group=0");

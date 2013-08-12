@@ -17,12 +17,12 @@
     final String url = (String)session.getAttribute("url");
     final Set<IdUrl> fixed = (Set<IdUrl>)session.getAttribute("IdUrls");
     final int fixedUrls = fixed.size();
-    final int group = (Integer)session.getAttribute("group");//(Integer)session.getAttribute("group");
-    final int initGroupRange = (group / 5) * 5;
+    final int group = (Integer)session.getAttribute("group");
     final int lastGroup = (fixedUrls / 15);
-    final int from = (group * 5) + 1;
-    final String firstActive = (group > 0) ? "enabled" : "disabled";
-    final String lastActive = ((group + 5) < lastGroup) ? "enabled" : "disabled";    
+    final int initGroup = (group <= 1) ? 0 : (group >= lastGroup - 2) 
+                                                 ? (lastGroup -5) : (group - 2);
+    final String firstActive = "enabled";
+    final String lastActive = "enabled";    
     final DBCollection coll = (DBCollection)getServletContext()
                                                     .getAttribute("collection");
     final String centerId = (String)session.getAttribute("centerId");
@@ -130,7 +130,7 @@
                                                     <ul>
                                                         <li class=<%=firstActive%>><a href="?group=0">«</a></li>
                                                         <%                                        
-                                                        for (int idx = initGroupRange; idx < initGroupRange+5; idx++) {
+                                                        for (int idx = initGroup; idx < initGroup+5; idx++) {
                                                             if (idx == group) {
                                                         %>
                                                         <li class="active"><a href=""><%=idx+1%></a></li>

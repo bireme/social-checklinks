@@ -1,10 +1,10 @@
 package br.bireme.scl;
 
-import static br.bireme.scl.CreateBrokenLinks.BROKEN_URL_FIELD;
-import static br.bireme.scl.CreateBrokenLinks.CENTER_FIELD;
-import static br.bireme.scl.CreateBrokenLinks.ID_FIELD;
-import static br.bireme.scl.CreateBrokenLinks.MONGO_COL;
-import static br.bireme.scl.CreateBrokenLinks.MONGO_DB;
+import static br.bireme.scl.BrokenLinks.BROKEN_URL_FIELD;
+import static br.bireme.scl.BrokenLinks.CENTER_FIELD;
+import static br.bireme.scl.BrokenLinks.ID_FIELD;
+import static br.bireme.scl.BrokenLinks.MONGO_COL;
+import static br.bireme.scl.BrokenLinks.MONGO_DB;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
