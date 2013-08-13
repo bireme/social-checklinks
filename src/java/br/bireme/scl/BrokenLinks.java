@@ -4,7 +4,6 @@ import bruma.BrumaException;
 import bruma.master.Master;
 import bruma.master.MasterFactory;
 import bruma.master.Record;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;

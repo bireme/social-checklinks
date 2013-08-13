@@ -97,8 +97,8 @@ public class Authentication {
         final BufferedWriter writer = new BufferedWriter(
                  new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
         
- final String message = parameters.toJSONString();
- System.out.println(message);
+ //final String message = parameters.toJSONString();
+ //System.out.println(message);
  
         writer.write(parameters.toJSONString());
         writer.newLine(); 

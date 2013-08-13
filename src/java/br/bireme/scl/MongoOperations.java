@@ -89,7 +89,6 @@ public class MongoOperations {
             final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD), 
                                        (String)doc.get(BROKEN_URL_FIELD));
             lst.add(iu);
-System.out.println("#=" + lst.size() + " hash=" + iu.hashCode() + " id=" + iu.id + " url=" + iu.url);
         }
         cursor.close();
         

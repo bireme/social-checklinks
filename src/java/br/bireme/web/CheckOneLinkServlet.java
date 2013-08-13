@@ -11,7 +11,8 @@ import javax.servlet.http.HttpSession;
 
 /**
  *
- * @author heitor
+ * @author Heitor Barbieri
+ * 20130719
  */
 public class CheckOneLinkServlet extends HttpServlet {
 
