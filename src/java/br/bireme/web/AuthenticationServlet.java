@@ -1,15 +1,41 @@
+/*=========================================================================
+
+    Copyright © 2013 BIREME/PAHO/WHO
+
+    This file is part of SocialCheckLinks.
+
+    SocialCheckLinks is free software: you can redistribute it and/or 
+    modify it under the terms of the GNU Lesser General Public License as 
+    published by the Free Software Foundation, either version 2.1 of 
+    the License, or (at your option) any later version.
+
+    SocialCheckLinks is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public 
+    License along with SocialCheckLinks. If not, see 
+    <http://www.gnu.org/licenses/>.
+
+=========================================================================*/
+
 package br.bireme.web;
 
 import br.bireme.accounts.Authentication;
 import static br.bireme.scl.BrokenLinks.HISTORY_MONGO_COL;
 import static br.bireme.scl.BrokenLinks.MONGO_COL;
 import static br.bireme.scl.BrokenLinks.MONGO_DB;
+import br.bireme.scl.IdUrl;
 import br.bireme.scl.MongoOperations;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContext;
@@ -34,7 +60,7 @@ public class AuthenticationServlet extends HttpServlet {
             final MongoClient mongoClient = new MongoClient(host);
             final DB db = mongoClient.getDB(MONGO_DB);
             final DBCollection coll = db.getCollection(MONGO_COL);
-            final DBCollection hcoll = db.getCollection(HISTORY_MONGO_COL);
+            final DBCollection hcoll = db.getCollection(HISTORY_MONGO_COL);            
             
             context.setAttribute("collection", coll);
             context.setAttribute("historycoll", hcoll);
@@ -77,38 +103,32 @@ public class AuthenticationServlet extends HttpServlet {
                 final HttpSession session = request.getSession();
                 
                 if (auth.isAuthenticated(user) && (centerId != null)) {                    
-                    final ServletContext context = getServletContext();
-                    final DBCollection coll = 
-                               (DBCollection)context.getAttribute("collection");
-                    final int maxUrls = 
-                               MongoOperations.getCenterUrlsNum(coll, centerId);
-            
                     session.setAttribute("user", username); // Login user.
-                    session.setAttribute("centerId", centerId);
-                    session.setAttribute("maxUrls", maxUrls);
+                    session.setAttribute("centerId", centerId);                    
                     //session.setAttribute("group", 0);
                     response.sendRedirect("list.jsp?group=0"); // Redirect to user home page.
                 } else {
                     session.removeAttribute("user");
                     session.removeAttribute("centerId");
-                    session.removeAttribute("maxUrls");                    
+                    //session.removeAttribute("centerUrls");
                     //session.removeAttribute("group");
                     response.sendRedirect("index.html");
                 }            
             } catch(Exception ex) {
-ex.printStackTrace();
+//ex.printStackTrace();
                 response.sendRedirect("index.html");
             }
         } else {
             final ServletContext context = getServletContext();
             final DBCollection coll = 
                                (DBCollection)context.getAttribute("collection");
-            final int maxUrls = MongoOperations.getCenterUrlsNum(coll, "PE1.1");
+            final List<IdUrl> centerUrls = MongoOperations.getCenterUrls(coll, "PE1.1");
             final HttpSession session = request.getSession();
+            
             session.setAttribute("user", username); // Login user.
             //session.setAttribute("centerId", "BR1.1");
             session.setAttribute("centerId", "PE1.1");
-            session.setAttribute("maxUrls", maxUrls);
+            session.setAttribute("centerUrls", centerUrls);
             //session.setAttribute("group", 0);
             response.sendRedirect("list.jsp?group=0");
             //response.sendRedirect("list.jsp");            

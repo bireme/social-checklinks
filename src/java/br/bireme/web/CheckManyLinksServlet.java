@@ -1,13 +1,34 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/*=========================================================================
+
+    Copyright © 2013 BIREME/PAHO/WHO
+
+    This file is part of SocialCheckLinks.
+
+    SocialCheckLinks is free software: you can redistribute it and/or 
+    modify it under the terms of the GNU Lesser General Public License as 
+    published by the Free Software Foundation, either version 2.1 of 
+    the License, or (at your option) any later version.
+
+    SocialCheckLinks is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public 
+    License along with SocialCheckLinks. If not, see 
+    <http://www.gnu.org/licenses/>.
+
+=========================================================================*/
+
 package br.bireme.web;
 
 import br.bireme.scl.IdUrl;
 import br.bireme.scl.MongoOperations;
 import com.mongodb.DBCollection;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -48,15 +69,8 @@ public class CheckManyLinksServlet extends HttpServlet {
         final String brokenUrl2 = brokenUrl.replaceAll("<<amp;>>", "&");
         final String fixedUrl = (String)request.getParameter("furl");
         final String fixedUrl2 = fixedUrl.replaceAll("<<amp;>>", "&");
-        final String docId = (String)request.getParameter("id");
         final Set<IdUrl> fixed = MongoOperations.fixRelatedUrls(coll, hcoll, 
                                          user, centerId, brokenUrl2, fixedUrl2);
-        
-        /*if (!MongoOperations.updateDocument(coll, hcoll, docId, fixedUrl2, user, 
-                                                                       false)) {
-            throw new IOException("update url failded");
-        }*/
-                                         
         session.setAttribute("url", fixedUrl2);
         session.setAttribute("IdUrls", fixed);
         session.setAttribute("group", 0);

@@ -1,3 +1,25 @@
+/*=========================================================================
+
+    Copyright © 2013 BIREME/PAHO/WHO
+
+    This file is part of SocialCheckLinks.
+
+    SocialCheckLinks is free software: you can redistribute it and/or 
+    modify it under the terms of the GNU Lesser General Public License as 
+    published by the Free Software Foundation, either version 2.1 of 
+    the License, or (at your option) any later version.
+
+    SocialCheckLinks is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public 
+    License along with SocialCheckLinks. If not, see 
+    <http://www.gnu.org/licenses/>.
+
+=========================================================================*/
+
 package br.bireme.scl;
 
 import bruma.BrumaException;
@@ -12,8 +34,9 @@ import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  *
@@ -21,6 +44,7 @@ import java.io.IOException;
  * date 20130625
  */
 public class BrokenLinks {
+    public static final String DEFAULT_ENCODING = "IBM850";   
     public static final String DEFAULT_HOST = "localhost";   
     public static final String MONGO_DB = "CheckLinks";
     public static final String MONGO_COL = "BrokenLinks";
@@ -38,20 +62,24 @@ public class BrokenLinks {
     
     public static final String DEF_FIELD = ID_FIELD;
     
-    public static void createLinks(final String outCheckFile,
+    public static void createLinks(final String outCheckFile,            
                                    final String mstName) throws BrumaException, 
                                                                 IOException {
-        createLinks(outCheckFile, mstName, DEFAULT_HOST, DEFAULT_PORT, false);
+        createLinks(outCheckFile, DEFAULT_ENCODING, mstName, DEFAULT_HOST, 
+                                                           DEFAULT_PORT, true);
     }
     
     public static void createLinks(final String outCheckFile,
+                                   final String outEncoding,
                                    final String mstName,
                                    final String host) throws BrumaException, 
                                                              IOException {
-        createLinks(outCheckFile, mstName, host, DEFAULT_PORT, false);
+        createLinks(outCheckFile, outEncoding, mstName, host, DEFAULT_PORT, 
+                                                                         true);
     }
                                    
     public static void createLinks(final String outCheckFile,
+                                   final String outEncoding,
                                    final String mstName,
                                    final String host,
                                    final int port,
@@ -72,8 +100,8 @@ public class BrokenLinks {
         }
         
         final Master mst = MasterFactory.getInstance(mstName).open();
-        final BufferedReader in = new BufferedReader(
-                                                  new FileReader(outCheckFile));
+        final BufferedReader in = new BufferedReader(new InputStreamReader(
+                               new FileInputStream(outCheckFile), outEncoding));
         final MongoClient mongoClient = new MongoClient(host, port);
         final DB db = mongoClient.getDB(MONGO_DB);
         final DBCollection coll = db.getCollection(MONGO_COL);
@@ -180,7 +208,11 @@ public class BrokenLinks {
         }
         
         createLinks(args[0], args[1], args[2]);*/
-        createLinks("./LILACS_v8broken.txt", "/home/heitor/temp/lilacs", "ts01vm.bireme.br");
-        //createLinks("./um.txt", "/home/heitor/temp/lilacs", "ts01vm.bireme.br");
+        createLinks("./LILACS_v8broken.txt", DEFAULT_ENCODING, 
+                                "/home/heitor/temp/lilacs", "ts01vm.bireme.br");        
+        //createLinks("./teste.txt", DEFAULT_ENCODING,                 
+        //    "/home/heitor/temp/lilacs", "ts01vm.bireme.br", DEFAULT_PORT, true);
+        //createLinks("./um.txt", DEFAULT_ENCODING, "/home/heitor/temp/lilacs", 
+        //                                                  "ts01vm.bireme.br");
     }
 }

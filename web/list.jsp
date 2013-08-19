@@ -1,27 +1,47 @@
+<%--
+
+    Copyright © 2013 BIREME/PAHO/WHO
+
+    This file is part of SocialCheckLinks.
+
+    SocialCheckLinks is free software: you can redistribute it and/or 
+    modify it under the terms of the GNU Lesser General Public License as 
+    published by the Free Software Foundation, either version 2.1 of 
+    the License, or (at your option) any later version.
+
+    SocialCheckLinks is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public 
+    License along with SocialCheckLinks. If not, see 
+    <http://www.gnu.org/licenses/>.
+
+--%>
+
 <%@page language="java"%>
 <%@page session="true" %>
-<%@page import="java.util.List,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
+<%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
 
 <% 
-    if (session.getAttribute("user") == null) {
-        response.sendRedirect("index.html");
-    }
-    
     final String user = (String)session.getAttribute("user");
-    final String centerId = (String)session.getAttribute("centerId");
-    final int maxUrls = (Integer)session.getAttribute("maxUrls");
+    if (user == null) {
+        response.sendRedirect("index.html");
+        return;
+    }
+    final ServletContext context = getServletContext();
+    final DBCollection coll = (DBCollection)context.getAttribute("collection");
+    final String centerId = (String)request.getSession().getAttribute("centerId");    
     final int group = Integer.parseInt(request.getParameter("group"));
     final int groupSize = 15;
+    final List<IdUrl> lst = MongoOperations.getCenterUrls(coll, centerId, 
+                                    (group * groupSize) + 1, groupSize);
+    final int maxUrls = MongoOperations.getCenterUrlsNum(coll, centerId);
     final int lastGroup = (maxUrls / groupSize);
     final int initGroup = (group <= 1) ? 0 : (group >= lastGroup - 2) 
-                                                 ? (lastGroup -5) : (group - 2);
-    final int from = (group * groupSize) + 1;
-    final DBCollection coll = (DBCollection)getServletContext()
-                                                    .getAttribute("collection");
-    final List<IdUrl> lst = MongoOperations.getCenterUrls(coll, centerId, from, 
-                                                                     groupSize);
-    final String firstActive = "enabled";
-    final String lastActive = "enabled";
+                                                ? (lastGroup - 4) : (group - 2);
+    final int from = (group * groupSize);
 %>
 
 <!-- ================================================== -->
@@ -30,18 +50,18 @@
 <html>
 <head>
 	<title>BIREME Social Checklinks</title>
-	<meta charset="utf-8">
+	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta name="HandheldFriendly" content="true">
-	<link href="css/bootstrap.css" rel="stylesheet">
-	<link href="css/bootstrap-responsive.css" rel="stylesheet">
-	<link href="css/styles.css" rel="stylesheet">
+	<meta name="HandheldFriendly" content="true"/>
+	<link href="css/bootstrap.css" rel="stylesheet"/>
+	<link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+	<link href="css/styles.css" rel="stylesheet"/>
 	<style type="text/css">
 		html, body {
 			height: 100%; /* The html and body elements cannot have any padding or margin. */
 			padding-top: 30px;
 		}
-    </style>
+        </style>
 
 	<!--[if (lt IE 9)&(!IEMobile)]>
 	<link rel="stylesheet" type="text/css" href="css/ie.css" />
@@ -94,8 +114,8 @@
 				</thead>
 				<tbody>
                                     <%
-                                        int cur = from;
-                                        for (IdUrl iu: lst) {
+                                        int cur = from + 1;
+                                        for (IdUrl iu : lst) {
                                             final String nurl = iu.url.replace("&","<<amp;>>");
                                     %>                                                                        
 					<tr>
@@ -111,7 +131,7 @@
 			</table>
 			<div class="pagination pagination-centered">
 				<ul>
-					<li class=<%=firstActive%>><a href="?group=0">«</a></li>
+					<li class="enabled"><a href="?group=0">«</a></li>
                                         <%                                        
                                         for (int idx = initGroup; idx < initGroup+5; idx++) {
                                             if (idx == group) {
@@ -129,13 +149,13 @@
                                             }
                                         }    
                                         %>
-					<li class=<%=lastActive%>><a href="?group=<%=lastGroup%>">»</a></li>
+					<li class="enabled"><a href="?group=<%=lastGroup%>">»</a></li>
 				</ul>
 			</div>
 		</div> <!-- /container -->
 		<div id="push"></div>
 	</div>
-	<footer id="footer">
+	<footer id="footer" class="footer">
 		<div class="container">
 			<strong>BIREME Social CheckLinks - V0.1 - 2013</strong><br/>
 			Source code <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>

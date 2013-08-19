@@ -1,3 +1,25 @@
+<%--
+
+    Copyright © 2013 BIREME/PAHO/WHO
+
+    This file is part of SocialCheckLinks.
+
+    SocialCheckLinks is free software: you can redistribute it and/or 
+    modify it under the terms of the GNU Lesser General Public License as 
+    published by the Free Software Foundation, either version 2.1 of 
+    the License, or (at your option) any later version.
+
+    SocialCheckLinks is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public 
+    License along with SocialCheckLinks. If not, see 
+    <http://www.gnu.org/licenses/>.
+
+--%>
+
 <%-- 
     Document   : showFixedUrls
     Created on : 06/08/2013, 11:53:39
@@ -12,6 +34,7 @@
     final String user = (String)session.getAttribute("user");
     if (user == null) {
         response.sendRedirect("index.html");
+        return;
     }
 
     final String url = (String)session.getAttribute("url");
@@ -20,15 +43,7 @@
     final int group = (Integer)session.getAttribute("group");
     final int lastGroup = (fixedUrls / 15);
     final int initGroup = (group <= 1) ? 0 : (group >= lastGroup - 2) 
-                                                 ? (lastGroup -5) : (group - 2);
-    final String firstActive = "enabled";
-    final String lastActive = "enabled";    
-    final DBCollection coll = (DBCollection)getServletContext()
-                                                    .getAttribute("collection");
-    final String centerId = (String)session.getAttribute("centerId");
-    final int mUrls = MongoOperations.getCenterUrlsNum(coll, centerId);
-    
-    session.setAttribute("maxUrls", mUrls);
+                                                ? (lastGroup - 4) : (group - 2);
 %>
 
 <!-- ================================================== -->
@@ -115,7 +130,7 @@
                                                             %>
                                                                 <tr>
 									<td><%=++idxx%></td>
-									<td><a href="<%=idUrl.url%>" title="view document"><%=idUrl.url%></a></td>
+									<td><a href="<%=idUrl.url%>" title="view document" target="_blank"><%=idUrl.url%></a></td>
 								</tr>
                                                             <%    
                                                                 }
@@ -124,7 +139,7 @@
 						</table>
 						<div class="pagination pagination-centered">
                                                     <ul>
-                                                        <li class=<%=firstActive%>><a href="?group=0">«</a></li>
+                                                        <li class="enabled"><a href="?group=0">«</a></li>
                                                         <%                                        
                                                         for (int idx = initGroup; idx < initGroup+5; idx++) {
                                                             if (idx == group) {
@@ -142,7 +157,7 @@
                                                             }
                                                         }    
                                                         %>
-                                                        <li class=<%=lastActive%>><a href="?group=<%=lastGroup%>">»</a></li>
+                                                        <li class="enabled"><a href="?group=<%=lastGroup%>">»</a></li>
                                                     </ul>
 						</div>
 					</div>

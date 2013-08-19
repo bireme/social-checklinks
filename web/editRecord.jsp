@@ -1,3 +1,25 @@
+<%--
+
+    Copyright © 2013 BIREME/PAHO/WHO
+
+    This file is part of SocialCheckLinks.
+
+    SocialCheckLinks is free software: you can redistribute it and/or 
+    modify it under the terms of the GNU Lesser General Public License as 
+    published by the Free Software Foundation, either version 2.1 of 
+    the License, or (at your option) any later version.
+
+    SocialCheckLinks is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public 
+    License along with SocialCheckLinks. If not, see 
+    <http://www.gnu.org/licenses/>.
+
+--%>
+
 <%@page language="java"%>
 <%@page session="true" %>
 <%@page import="java.util.Set,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
@@ -5,6 +27,7 @@
 <% 
     if (session.getAttribute("user") == null) {
         response.sendRedirect("index.html");
+        return;
     }
     
     final int status = Integer.parseInt(request.getParameter("status"));
@@ -149,13 +172,14 @@
                                              %>                                                           							
 
 					</div>
+                                    </div>          
 				</div>				
 			</div>
 		</div> <!-- /container -->
 		<div id="push"></div>
 	</div>
 
-	<footer id="footer">
+	<footer id="footer" class="footer">
 		<div class="container">
 			<strong>BIREME Social CheckLinks - V0.1 - 2013</strong><br/>
 			Source code <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>
