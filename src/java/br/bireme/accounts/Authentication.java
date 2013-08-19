@@ -42,7 +42,7 @@ public class Authentication {
     final static String DEFAULT_HOST = "accounts.teste.bireme.org";
     final static int DEFAULT_PORT = 80;
     final static String DEFAULT_PATH = "/api/auth/login/?format=json";
-    final static String SERVICE_NAME = "DIREVE"; //"SocialChecklinks";
+    final static String SERVICE_NAME = "Social Check Links";
     
     final String host;
     final int port;
