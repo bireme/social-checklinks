@@ -131,7 +131,8 @@
 			</table>
 			<div class="pagination pagination-centered">
 				<ul>
-					<li class="enabled"><a href="?group=0">«</a></li>
+					<!--li class="enabled"><a href="?group=0">«</a></li-->
+                                        <li class="enabled"><a href="?group=0">&laquo;</a></li>
                                         <%                                        
                                         for (int idx = initGroup; idx < initGroup+5; idx++) {
                                             if (idx == group) {
@@ -149,7 +150,8 @@
                                             }
                                         }    
                                         %>
-					<li class="enabled"><a href="?group=<%=lastGroup%>">»</a></li>
+					<!--li class="enabled"><a href="?group=<%=lastGroup%>">»</a></li-->
+                                        <li class="enabled"><a href="?group=<%=lastGroup%>">&raquo;</a></li>
 				</ul>
 			</div>
 		</div> <!-- /container -->
