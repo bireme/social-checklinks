@@ -126,8 +126,8 @@ public class AuthenticationServlet extends HttpServlet {
             final HttpSession session = request.getSession();
             
             session.setAttribute("user", username); // Login user.
-            //session.setAttribute("centerId", "BR1.1");
-            session.setAttribute("centerId", "PE1.1");
+            session.setAttribute("centerId", "BR1.1");
+            //session.setAttribute("centerId", "PE1.1");
             session.setAttribute("centerUrls", centerUrls);
             //session.setAttribute("group", 0);
             response.sendRedirect("list.jsp?group=0");
