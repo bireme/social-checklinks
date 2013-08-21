@@ -44,7 +44,8 @@ import java.io.InputStreamReader;
  * date 20130625
  */
 public class BrokenLinks {
-    public static final String DEFAULT_ENCODING = "IBM850";   
+    public static final String DEFAULT_FILE_ENCODING = "IBM850";
+    public static final String DEFAULT_MST_ENCODING = "IBM850";
     public static final String DEFAULT_HOST = "localhost";   
     public static final String MONGO_DB = "CheckLinks";
     public static final String MONGO_COL = "BrokenLinks";
@@ -65,22 +66,24 @@ public class BrokenLinks {
     public static void createLinks(final String outCheckFile,            
                                    final String mstName) throws BrumaException, 
                                                                 IOException {
-        createLinks(outCheckFile, DEFAULT_ENCODING, mstName, DEFAULT_HOST, 
-                                                           DEFAULT_PORT, true);
+        createLinks(outCheckFile, DEFAULT_FILE_ENCODING, mstName, 
+                    DEFAULT_MST_ENCODING, DEFAULT_HOST, DEFAULT_PORT, true);
     }
     
     public static void createLinks(final String outCheckFile,
                                    final String outEncoding,
                                    final String mstName,
+                                   final String mstEncoding,
                                    final String host) throws BrumaException, 
                                                              IOException {
-        createLinks(outCheckFile, outEncoding, mstName, host, DEFAULT_PORT, 
-                                                                         true);
+        createLinks(outCheckFile, outEncoding, mstName, mstEncoding, host, 
+                                                            DEFAULT_PORT, true);
     }
                                    
     public static void createLinks(final String outCheckFile,
                                    final String outEncoding,
                                    final String mstName,
+                                   final String mstEncoding,
                                    final String host,
                                    final int port,
                                    final boolean clearCol) 
@@ -92,6 +95,9 @@ public class BrokenLinks {
         if (mstName == null){
             throw new NullPointerException("mstName");
         }
+        if (mstEncoding == null){
+            throw new NullPointerException("mstEncoding");
+        }
         if (host == null) {
             throw new NullPointerException("host");
         }
@@ -99,7 +105,8 @@ public class BrokenLinks {
             throw new IllegalArgumentException("port <= 0");
         }
         
-        final Master mst = MasterFactory.getInstance(mstName).open();
+        final Master mst = MasterFactory.getInstance(mstName)
+                                        .setEncoding(mstEncoding).open();
         final BufferedReader in = new BufferedReader(new InputStreamReader(
                                new FileInputStream(outCheckFile), outEncoding));
         final MongoClient mongoClient = new MongoClient(host, port);
@@ -208,11 +215,13 @@ public class BrokenLinks {
         }
         
         createLinks(args[0], args[1], args[2]);*/
-        createLinks("./LILACS_v8broken.txt", DEFAULT_ENCODING, 
-                                "/home/heitor/temp/lilacs", "ts01vm.bireme.br");        
-        //createLinks("./teste.txt", DEFAULT_ENCODING,                 
-        //    "/home/heitor/temp/lilacs", "ts01vm.bireme.br", DEFAULT_PORT, true);
-        //createLinks("./um.txt", DEFAULT_ENCODING, "/home/heitor/temp/lilacs", 
+        createLinks("./LILACS_v8broken.txt", DEFAULT_FILE_ENCODING,
+                    "/home/heitor/temp/lilacs", DEFAULT_MST_ENCODING,
+                    "ts01vm.bireme.br");        
+        //createLinks("./teste.txt", DEFAULT_FILE_ENCODING,
+        //    "/home/heitor/temp/lilacs", DEFAULT_MST_ENCODING, "ts01vm.bireme.br");
+        //createLinks("./um.txt", DEFAULT_FILE_ENCODING, 
+        //            "/home/heitor/temp/lilacs", DEFAULT_MST_ENCODING,
         //                                                  "ts01vm.bireme.br");
     }
 }
