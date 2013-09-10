@@ -1,6 +1,6 @@
 <%--
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    Copyright Â© 2013 BIREME/PAHO/WHO
 
     This file is part of SocialCheckLinks.
 
@@ -23,25 +23,35 @@
 <%@page language="java"%>
 <%@page session="true" %>
 <%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
+<%@page contentType="text/html;charset=UTF-8"%>
 
 <% 
+    final String lang = (String)request.getParameter("lang");
     final String user = (String)session.getAttribute("user");
     if (user == null) {
-        response.sendRedirect("index.html");
+        response.sendRedirect("index.jsp?lang=" + lang);
         return;
     }
+    final String collCenterFilter = 
+                               (String)session.getAttribute("collFilterCenter");
     final ServletContext context = getServletContext();
     final DBCollection coll = (DBCollection)context.getAttribute("collection");
-    final String centerId = (String)request.getSession().getAttribute("centerId");    
+    final Set<String> centerIds = (Set<String>)request.getSession()
+                                                     .getAttribute("centerIds");         
     final int group = Integer.parseInt(request.getParameter("group"));
-    final int groupSize = 15;
-    final List<IdUrl> lst = MongoOperations.getCenterUrls(coll, centerId, 
-                                    (group * groupSize) + 1, groupSize);
-    final int maxUrls = MongoOperations.getCenterUrlsNum(coll, centerId);
-    final int lastGroup = (maxUrls / groupSize);
+    final int groupSize = 17;
+    final List<IdUrl> lst = MongoOperations.getCenterUrls(coll, centerIds, 
+                          collCenterFilter, (group * groupSize) + 1, groupSize);
+    final int maxUrls = MongoOperations.getCentersUrlsNum(coll, centerIds,             
+                                                              collCenterFilter);
+    final int mod = (maxUrls % groupSize);
+    int lastGroup = (maxUrls / groupSize);
+    lastGroup = ((maxUrls > 0) && (mod == 0)) ? lastGroup - 1 : lastGroup;
     final int initGroup = (group <= 1) ? 0 : (group >= lastGroup - 2) 
                                                 ? (lastGroup - 4) : (group - 2);
-    final int from = (group * groupSize);
+    final int from = (group * groupSize);        
+    final boolean showCenters = (centerIds.size() > 1);
+    final ResourceBundle messages = Tools.getMessages(lang);
 %>
 
 <!-- ================================================== -->
@@ -49,7 +59,7 @@
 <!doctype html>
 <html>
 <head>
-	<title>BIREME Social Checklinks</title>
+	<title><%=messages.getString("bireme_social_checklinks")%></title>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="HandheldFriendly" content="true"/>
@@ -68,6 +78,30 @@
 	<![endif]-->
 	<script type="text/javascript" src="js/modernizr.js"></script>
         
+        <script LANGUAGE="JavaScript" TYPE="text/javascript">
+            
+        function postToUrl(path, params) {
+            var form = document.createElement("form");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", path);
+
+            for(var key in params) {
+                if (params.hasOwnProperty(key)) {
+                    var hiddenField = document.createElement("input");
+                    hiddenField.setAttribute("type", "hidden");
+                    hiddenField.setAttribute("name", key);
+                    hiddenField.setAttribute("value", params[key]);
+
+                    form.appendChild(hiddenField);
+                 }
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+        
+        </script>
+        
 </head>
 <body>
 	<div id="wrap">
@@ -79,19 +113,27 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="brand" href="#">BIREME Social CheckLinks</a>
+					<a class="brand" href="#"><%=messages.getString("bireme_social_checklinks")%></a>
 					<div class="nav-collapse collapse">
 						<ul class="nav">
-							<li class="active"><a href="list.jsp?group=0">Home</a></li>
-							<li><a href="#about">About</a></li>
-							<li><a href="http://reddes.bvsalud.org/">Contact</a></li>
+							<li class="active"><a href="javascript:postToUrl('list.jsp', {group:'0',lang:'<%=lang%>});"><%=messages.getString("home")%></a></li>
+							<li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
+							<li><a href="http://reddes.bvsalud.org/" target="_blank"><%=messages.getString("contact")%></a></li>
 						</ul>
 						<ul class="nav pull-right">
+                                                        <li class="dropdown">
+                                                            <a href="http://reddes.bvsalud.org/" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("language")%> <b class="caret"></b></a>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a href="javascript:postToUrl('list.jsp', {group:'<%=group%>',lang:'en'});">English</a></li>
+                                                                <li><a href="javascript:postToUrl('list.jsp', {group:'<%=group%>',lang:'pt'});">PortuguÃªs</a></li>
+                                                                <li><a href="javascript:postToUrl('list.jsp', {group:'<%=group%>',lang:'es'});">EspaÃ±ol</a></li>
+                                                                <!--li><a href="javascript:postToUrl('list.jsp', {group:'<%=group%>',lang:'fr'});">FrancÃ©s</a></li-->
+                                                            </ul>
+                                                        </li>
 							<li class="dropdown">
-
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user icon-white"></i> <%=user %> <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><a href="index.html"><i class="icon-off"></i> Logout</a></li>
+									<li><a href="javascript:postToUrl('index.jsp', {lang:'<%=lang%>'});"><i class="icon-off"></i> <%=messages.getString("logout")%></a></li>
 								</ul>
 							</li>
 						</ul>
@@ -101,15 +143,35 @@
 		</div>
 
 		<div class="container">
-			<h1>Broken Links</h1>
-			<p>The list is composed of broken links.</p>
-			
+			<h1><%=messages.getString("broken_links")%></h1>
+			<p><%=messages.getString("the_list")%></p>
+                        
+                        <% if (showCenters) { %>
+                        <div class="btn-group pull-right">
+                          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <%=messages.getString("show")%> <%=(collCenterFilter == null) ? messages.getString("all") : collCenterFilter%>
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a href="javascript:postToUrl('CenterFilterServlet', {group:'<%=group%>',lang:'<%=lang%>'});">All</a></li>
+                           <%
+                             for (String id : centerIds)  {                               
+                           %>    
+                            <li><a href="javascript:postToUrl('CenterFilterServlet', {group:'<%=group%>',lang:'<%=lang%>',collFilterCenter:'<%=id%>'});"><%=id%></a></li>
+                           <%
+                             } 
+                           %>
+                          </ul>
+                        </div>			       
+                        <%}%>
+                          
 			<table class="table table-condensed">
 				<thead>
 					<tr>
 						<th>#</th>
 						<th>URL</th>
-						<th>Actions</th>
+                                                <%if (showCenters) {%><th>CCs</th><%}%>
+						<th><%=messages.getString("action")%></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -117,11 +179,33 @@
                                         int cur = from + 1;
                                         for (IdUrl iu : lst) {
                                             final String nurl = iu.url.replace("&","<<amp;>>");
-                                    %>                                                                        
-					<tr>
+                                            boolean first = true;
+                                    %>
+                                         <tr>                                    
                                                 <td><%=cur%></td>
-						<td><%=iu.url%></td>
-						<td><a href="editRecord.jsp?id=<%=iu.id%>&url=<%=nurl%>&furl=<%=nurl%>&status=-1" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> Edit</a></td>
+						<td><%=iu.url.trim()%></td>  
+                                    <%
+                                            if (showCenters) {
+                                    %>
+                                                 <td>
+                                    <%
+                                                for (String cc : iu.ccs) {
+                                                    if (centerIds.contains(cc)) {
+                                                        if (first) {
+                                                            first = false;
+                                                        } else {
+                                                            out.print(", ");
+                                                        }
+                                                        out.print(cc);
+                                                    }
+                                                }
+                                    %>             
+                                                </td>
+                                    <%            
+                                            }
+                                    %>
+
+						<td><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="Edit broken url" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td>
 					</tr>
                                     <%
                                             cur++;
@@ -131,27 +215,22 @@
 			</table>
 			<div class="pagination pagination-centered">
 				<ul>
-					<!--li class="enabled"><a href="?group=0">«</a></li-->
-                                        <li class="enabled"><a href="?group=0">&laquo;</a></li>
+					<!--li class="enabled"><a href="?group=0">Â«</a></li-->
+                                        <li class="enabled"><a href="javascript:postToUrl('list.jsp', {group:'0',lang:'<%=lang%>'});">&laquo;</a></li>
                                         <%                                        
                                         for (int idx = initGroup; idx < initGroup+5; idx++) {
                                             if (idx == group) {
                                         %>
-                                            <li class="active"><a href=""><%=idx+1%></a></li>
+                                            <li class="active"><a><%=idx+1%></a></li>
                                         <%
                                             } else if (idx <= lastGroup) {
                                         %>
-                                            <li class="enabled"><a href="?group=<%=idx%>"><%=idx+1%></a></li>
-                                        <%
-                                            } else {
-                                        %>
-                                            <!-- li class="disabled"><a href=""><%=idx+1%></a></li -->
+                                            <li class="enabled"><a href="javascript:postToUrl('list.jsp', {group:'<%=idx%>',lang:'<%=lang%>'});"><%=idx+1%></a></li>
                                         <%
                                             }
                                         }    
                                         %>
-					<!--li class="enabled"><a href="?group=<%=lastGroup%>">»</a></li-->
-                                        <li class="enabled"><a href="?group=<%=lastGroup%>">&raquo;</a></li>
+                                        <li class="enabled"><a href="javascript:postToUrl('list.jsp', {group:'<%=lastGroup%>',lang:'<%=lang%>'});">&raquo;</a></li>
 				</ul>
 			</div>
 		</div> <!-- /container -->
@@ -159,8 +238,8 @@
 	</div>
 	<footer id="footer" class="footer">
 		<div class="container">
-			<strong>BIREME Social CheckLinks - V0.1 - 2013</strong><br/>
-			Source code <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>
+			<strong>BIREME Social CheckLinks - <%= BrokenLinks.VERSION %> - 2013</strong><br/>
+			<%=messages.getString("source_code")%>: <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>
 		</div>
 	</footer>
 	<!-- javascript

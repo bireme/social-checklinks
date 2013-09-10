@@ -26,9 +26,8 @@ import br.bireme.scl.IdUrl;
 import br.bireme.scl.MongoOperations;
 import com.mongodb.DBCollection;
 import java.io.IOException;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -39,9 +38,9 @@ import javax.servlet.http.HttpSession;
 /**
  *
  * @author Heitor Barbieri
- * date: 20130806
+ * date 20130822
  */
-public class CheckManyLinksServlet extends HttpServlet {
+public class UndoFixServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -62,27 +61,23 @@ public class CheckManyLinksServlet extends HttpServlet {
         final DBCollection hcoll =
                               (DBCollection)context.getAttribute("historycoll");
         final HttpSession session = request.getSession();
-        final String user = (String)session.getAttribute("user");
-        final String collCenterFilter = 
-                               (String)session.getAttribute("collFilterCenter");
-        final Set<String> centerIds = (Set<String>)request.getSession()
-                                                     .getAttribute("centerIds");         
-        final String brokenUrl = (String)request.getParameter("url");
-        final String brokenUrl2 = brokenUrl.replaceAll("<<amp;>>", "&");
-        final String fixedUrl = (String)request.getParameter("furl");
-        final String fixedUrl2 = fixedUrl.replaceAll("<<amp;>>", "&");
-        final String lang = (String)request.getParameter("lang");
-        final Set<IdUrl> fixed = MongoOperations.fixRelatedUrls(coll, hcoll,
-                      user, centerIds, collCenterFilter, brokenUrl2, fixedUrl2);
-        final RequestDispatcher dispatcher = context.getRequestDispatcher(
-                                    "/showFixedUrls.jsp?group=0&lang=" + lang);
+        final Set<IdUrl> fixed = (Set<IdUrl>)session.getAttribute("IdUrls");
+        final Set<IdUrl> nfixed = new HashSet<IdUrl>();
+        final String undoUrl = request.getParameter("undoUrl");
+        final String undoUrlF = undoUrl.replace("<<amp;>>", "&");
+        final String lang = request.getParameter("lang");
 
-        session.setAttribute("url", fixedUrl2);
-        session.setAttribute("IdUrls", fixed);
-        //request.("group", "0");
-        //request.setAttribute("lang", lang);
-        dispatcher.forward(request, response);
-        //response.sendRedirect("showFixedUrls.jsp?group=0&lang=" + lang);
+        for (IdUrl iu : fixed) {
+            if (iu.url.equals(undoUrlF)) {
+               if (! MongoOperations.undoUpdateDocument(coll, hcoll, iu.id)) {
+                   throw new IOException("Undo operation failed.");
+               }
+            } else {
+                nfixed.add(iu);
+            }
+        }
+        session.setAttribute("IdUrls", nfixed);
+        response.sendRedirect("showFixedUrls.jsp?group=0&lang=" + lang);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

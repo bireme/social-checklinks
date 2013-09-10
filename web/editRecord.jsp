@@ -1,6 +1,6 @@
 <%--
 
-    Copyright � 2013 BIREME/PAHO/WHO
+    Copyright © 2013 BIREME/PAHO/WHO
 
     This file is part of SocialCheckLinks.
 
@@ -22,14 +22,17 @@
 
 <%@page language="java"%>
 <%@page session="true" %>
-<%@page import="java.util.Set,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
+<%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
+<%@page contentType="text/html;charset=UTF-8"%>
 
 <% 
+    final String lang = (String)request.getParameter("lang");
     if (session.getAttribute("user") == null) {
-        response.sendRedirect("index.html");
+        response.sendRedirect("index.jsp?lang=" + lang);
         return;
     }
     
+    // status = -1 (new), 1 (broken) and 0 (not broken) 
     final int status = Integer.parseInt(request.getParameter("status"));
     final boolean isNew = (status == -1);
     final boolean isBroken = (status == 1);
@@ -40,6 +43,9 @@
     final String brokenUrl = url.replace("<<amp;>>", "&");
     final String furl = (String)request.getParameter("furl");
     final String fixedUrl = furl.replace("<<amp;>>", "&");
+    final String lang2 = lang.equals("null") ? "en" : lang.equals("fr") 
+                                                    ? "en" :lang;
+    final ResourceBundle messages = Tools.getMessages(lang);
 %>
 
 <!-- ================================================== -->
@@ -47,7 +53,7 @@
 <!doctype html>
 <html>
 <head>
-	<title>BIREME Social Checklinks</title>
+	<title><%=messages.getString("bireme_social_checklinks")%></title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="HandheldFriendly" content="true">
@@ -57,6 +63,7 @@
 	<style type="text/css">
 		html, body {
 			height: 100%; /* The html and body elements cannot have any padding or margin. */
+                        padding-top: 30px;
 		}
         </style>
 
@@ -64,32 +71,58 @@
 	<link rel="stylesheet" type="text/css" href="css/ie.css" />
 	<![endif]-->
 	<script type="text/javascript" src="js/modernizr.js"></script>
-        
-        
-        <script LANGUAGE="JavaScript" TYPE="text/javascript">            
+                
+        <script LANGUAGE="JavaScript" TYPE="text/javascript">
+            
+        function postToUrl(path, params) {
+            var form = document.createElement("form");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", path);
+
+            for(var key in params) {
+                if (params.hasOwnProperty(key)) {
+                    var hiddenField = document.createElement("input");
+                    hiddenField.setAttribute("type", "hidden");
+                    hiddenField.setAttribute("name", key);
+                    hiddenField.setAttribute("value", params[key]);
+
+                    form.appendChild(hiddenField);
+                 }
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }    
+            
         function replaceAll(string, token, newtoken) {
             while (string.indexOf(token) !== -1) {
  		string = string.replace(token, newtoken);
             }
             return string;
         }           
-        function callUrl(id, url) {
+        function callUrl(id, url, lang) {
            var nurl = url.replace(/\&/g, '<<amp;>>');
            var nurl2 = document.getElementById('input-1').value
                                                     .replace(/\&/g, '<<amp;>>');
-           var turl = 'CheckOneLinkServlet?id=' + id + '&url=' + nurl + '&furl=' 
-                                                                        + nurl2;
+                                            
+           postToUrl('CheckOneLinkServlet', {id: id, url: nurl, furl: nurl2, 
+                                                                   lang: lang});                                                        
+           //var turl = 'CheckOneLinkServlet?id=' + id + '&url=' + nurl + '&furl=' 
+           //                                           + nurl2 + '&lang=' + lang;
            //alert(turl);
-           window.open(turl,"_self");
+           //window.open(turl,"_self");
         }
-        function callUrl2(id, url) {
+        function callUrl2(id, url, lang) {
            var nurl = url.replace(/\&/g, '<<amp;>>');
            var nurl2 = document.getElementById('input-1').value
                                                     .replace(/\&/g, '<<amp;>>');
-           var turl = 'CheckManyLinksServlet?id=' + id + '&url=' + nurl 
-                                                             + '&furl=' + nurl2;
+           postToUrl('CheckManyLinksServlet', {id: id, url: nurl, furl: nurl2, 
+                                                                   lang: lang});                                                        
+                                            
+          // var turl = 'CheckManyLinksServlet?id=' + id + '&url=' + nurl 
+          //                                 + '&furl=' + nurl2 + '&lang=' + lang;
            //alert(turl);
-           window.open(turl,"_self");
+          // window.open(turl,"_self");
         }
         </script>
                 
@@ -104,19 +137,28 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="brand" href="#">BIREME Social CheckLinks</a>
+					<a class="brand" href="#"><%=messages.getString("bireme_social_checklinks")%></a>
 					<div class="nav-collapse collapse">
 						<ul class="nav">
-							<li class="active"><a href="list.jsp?group=0">Home</a></li>
-							<li><a href="#about">About</a></li>
-							<li><a href="http://reddes.bvsalud.org/">Contact</a></li>
+							<li class="active"><a href="javascript:postToUrl('list.jsp', {group:'0', lang:'<%=lang%>',cc:'All'});"><%=messages.getString("home")%></a></li>
+							<li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
+							<li><a href="http://reddes.bvsalud.org/" target="_blank"><%=messages.getString("contact")%></a></li>
 						</ul>
 						<ul class="nav pull-right">
+                                                    <li class="dropdown">
+                                                            <a href="http://reddes.bvsalud.org/" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("language")%> <b class="caret"></b></a>
+                                                            <ul class="dropdown-menu">                                                                
+								<li><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'en'});">English</a></li>
+                                                                <li><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'pt'});">Português</a></li>
+                                                                <li><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'es'});">Español</a></li>
+                                                                <!--li><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'fr'});">Francés</a></li-->
+                                                            </ul>
+                                                        </li>
 							<li class="dropdown">
 
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user icon-white"></i> <%=user %> <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><a href="index.html"><i class="icon-off"></i> Logout</a></li>
+									<li><a href="javascript:postToUrl('index.jsp', {lang:'<%=lang%>'});"><i class="icon-off"></i> <%=messages.getString("logout")%></a></li>
 								</ul>
 							</li>
 						</ul>
@@ -126,30 +168,28 @@
 		</div>
 
 		<div class="container">
-		    <ul class="breadcrumb">
-			    <li><a href="list.html">Home</a> <span class="divider">/</span></li> 
-			    <li class="active">Edit</li>
-		    </ul>
-			<h1>Edit URL</h1>
+			<h1><%=messages.getString("edit_url")%></h1>
 			<div class="urlEditor">
 				<div class="urlLine">
                                     <div class="seg-q">
                                         <div class="URL-tested"><%=brokenUrl%></div>
-					<input type="url" id="input-1" class="span8" value="<%=fixedUrl%>" /> &nbsp;<a href="http://pesquisa.bvsalud.org/regional/?lang=en&q=++%28id%3A%28LIL-<%=id2%>%29%29" target="_blank">see source</a>
+					<input type="url" id="input-1" class="span8" value="<%=fixedUrl%>" <%= ((!isNew) && (!isBroken)) ? "DISABLED" : ""%>/> &nbsp;
+                                        <!--a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++%28id%3A%28LIL-<%=id2%>%29%29" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a-->
+                                        <a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++(id:(LIL-<%=id2%>))" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a>
                                         <%
                                             if (!isNew) {
                                                 if (isBroken) {
                                          %>
                                                     <div class="alert alert-danger fade in">
-                                                            <button data-dismiss="alert" class="close" type="button">�</button>
-                                                            <strong>Bad news!</strong> The url is broken. Try to edit and save again.
+                                                            <button data-dismiss="alert" class="close" type="button">×</button>
+                                                            <strong><%=messages.getString("bad_news")%></strong> <%=messages.getString("url_is_broken")%>
                                                     </div>
                                          <%
                                                 } else {
                                          %>
                                                     <div class="alert alert-success fade in">
-                                                            <button data-dismiss="alert" class="close" type="button">�</button>
-                                                            <strong>URL fixed!</strong> Press save to store the fixed url.
+                                                            <button data-dismiss="alert" class="close" type="button">×</button>
+                                                            <strong><%=messages.getString("url_fixed")%></strong> <%=messages.getString("press_save")%>
                                                     </div>
                                          <%
                                                 }
@@ -160,13 +200,13 @@
                                             <%
                                                 if (isNew || isBroken) {
                                              %>
-                                                    <a href="javascript:callUrl('<%=id%>','<%=brokenUrl%>');" class="btn btn-mini" title="Test your changes">TEST</a>
-                                                    <a class="btn btn-mini disabled">SAVE</a>
+                                                    <a href="javascript:callUrl('<%=id%>','<%=brokenUrl%>','<%=lang%>');" class="btn btn-mini" title="Test your changes"><%=messages.getString("test")%></a>
+                                                    <a class="btn btn-mini disabled" title=<%=messages.getString("save_your_changes")%>><%=messages.getString("save")%></a>
                                             <%                                                            
                                                 } else {
                                              %>       
-                                                    <a class="btn btn-mini disabled" title="Test your changes">TEST</a>
-                                                    <a href="javascript:callUrl2('<%=id%>','<%=brokenUrl%>');" class="btn btn-mini enabled">SAVE</a>
+                                                    <a class="btn btn-mini disabled" title="<%=messages.getString("test_your_changes")%>"><%=messages.getString("test")%></a>
+                                                    <a href="javascript:callUrl2('<%=id%>','<%=brokenUrl%>','<%=lang%>');" class="btn btn-mini enabled"><%=messages.getString("save")%></a>
                                             <%       
                                                 }
                                              %>                                                           							
@@ -181,8 +221,8 @@
 
 	<footer id="footer" class="footer">
 		<div class="container">
-			<strong>BIREME Social CheckLinks - V0.1 - 2013</strong><br/>
-			Source code <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>
+			<strong><%=messages.getString("bireme_social_checklinks")%> - <%= BrokenLinks.VERSION %> - 2013</strong><br/>
+			<%=messages.getString("source_code")%>: <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>
 		</div>
 	</footer>
 	<!-- javascript

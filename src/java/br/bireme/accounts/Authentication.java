@@ -4,9 +4,9 @@
 
     This file is part of SocialCheckLinks.
 
-    SocialCheckLinks is free software: you can redistribute it and/or 
-    modify it under the terms of the GNU Lesser General Public License as 
-    published by the Free Software Foundation, either version 2.1 of 
+    SocialCheckLinks is free software: you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public License as
+    published by the Free Software Foundation, either version 2.1 of
     the License, or (at your option) any later version.
 
     SocialCheckLinks is distributed in the hope that it will be useful,
@@ -14,8 +14,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public 
-    License along with SocialCheckLinks. If not, see 
+    You should have received a copy of the GNU Lesser General Public
+    License along with SocialCheckLinks. If not, see
     <http://www.gnu.org/licenses/>.
 
 =========================================================================*/
@@ -29,6 +29,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -43,14 +46,14 @@ public class Authentication {
     final static int DEFAULT_PORT = 80;
     final static String DEFAULT_PATH = "/api/auth/login/?format=json";
     final static String SERVICE_NAME = "Social Check Links";
-    
+
     final String host;
     final int port;
-    
+
     public Authentication() {
         this(DEFAULT_HOST, DEFAULT_PORT);
     }
-    
+
     public Authentication(final String host,
                           final int port) {
         if (host == null) {
@@ -62,36 +65,41 @@ public class Authentication {
         this.host = host;
         this.port = port;
     }
-    
-    public boolean isAuthenticated(final JSONObject response) throws IOException, 
-                                                                ParseException {
+
+    public boolean isAuthenticated(final JSONObject response)
+                                           throws IOException, ParseException {
         if (response == null) {
             throw new NullPointerException("response");
         }
-        
+
         return (Boolean)response.get("success");
     }
-    
-    public String getCenterId(final JSONObject response) throws IOException, 
-                                                                ParseException {
+
+    public Set<String> getCenterIds(final JSONObject response) 
+                                            throws IOException, ParseException {
         if (response == null) {
             throw new NullPointerException("response");
         }
-        String id = null;
-                
+        final Set<String> id = new HashSet<String>();
+
         if (isAuthenticated(response)) {
             final JSONObject jobj = (JSONObject)response.get("data");
-            
+
             if (jobj != null) {
-                id = (String)jobj.get("cc");
+                final JSONArray array = (JSONArray)jobj.get("ccs");
+                if (array != null) {                                        
+                    for (int idx = 0; idx < array.size(); idx++) {
+                        id.add((String)array.get(idx));
+                    }
+                }
             }
-        } 
-        
+        }
+
         return id;
     }
-    
+
     public JSONObject getUser(final String user,
-                              final String password) throws IOException, 
+                              final String password) throws IOException,
                                                                 ParseException {
         if (user == null) {
             throw new NullPointerException("user");
@@ -99,36 +107,36 @@ public class Authentication {
         if (password == null) {
             throw new NullPointerException("password");
         }
-        
+
         final JSONObject parameters = new JSONObject();
         parameters.put("username", user);
-        parameters.put("password", password);      
-        parameters.put("service", SERVICE_NAME);  
+        parameters.put("password", password);
+        parameters.put("service", SERVICE_NAME);
         parameters.put("format", "json");
-        
+
         //final URL url = new URL("http", host, port, DEFAULT_PATH);
         final URL url = new URL("http://" + host + DEFAULT_PATH);
-        final HttpURLConnection connection = 
-                                        (HttpURLConnection)url.openConnection(); 
+        final HttpURLConnection connection =
+                                        (HttpURLConnection)url.openConnection();
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setDoInput(true);
         connection.setDoOutput(true);
         connection.connect();
-        
+
         final StringBuilder builder = new StringBuilder();
         final BufferedWriter writer = new BufferedWriter(
-                 new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
-        
+                new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
+
  //final String message = parameters.toJSONString();
  //System.out.println(message);
- 
+
         writer.write(parameters.toJSONString());
-        writer.newLine(); 
+        writer.newLine();
         writer.close();
 
         final boolean respCodeOk = (connection.getResponseCode() == 200);
         final BufferedReader reader;
-        
+
         if (respCodeOk) {
             reader = new BufferedReader(new InputStreamReader(
                                                   connection.getInputStream()));
@@ -145,25 +153,26 @@ public class Authentication {
             builder.append(line);
             builder.append("\n");
         }
-        
+
         reader.close();
-        
+
         if (!respCodeOk) {
             throw new IOException(builder.toString());
         }
-        
+
         return (JSONObject) new JSONParser().parse(builder.toString());
-    }    
-    
-    public static void main(String[] args) throws IOException, ParseException {
+    }
+
+    public static void main(String[] args) throws IOException,
+                                                     ParseException {
         final Authentication aut = new Authentication();
-        
+
         final JSONObject jobj = aut.getUser("barbieri@paho.org", "heitor");
         final boolean isAuthenticated = aut.isAuthenticated(jobj);
-        
+
         System.out.println("isAthenticated=" + isAuthenticated);
         if (isAuthenticated) {
-            System.out.println("centerId=" + aut.getCenterId(jobj));
-        }        
+            System.out.println("centerId=" + aut.getCenterIds(jobj));
+        }
     }
 }

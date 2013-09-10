@@ -19,14 +19,13 @@
     <http://www.gnu.org/licenses/>.
 
 =========================================================================*/
-
 package br.bireme.web;
 
 import br.bireme.scl.IdUrl;
 import br.bireme.scl.MongoOperations;
 import com.mongodb.DBCollection;
 import java.io.IOException;
-import java.util.List;
+import java.io.PrintWriter;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -39,9 +38,9 @@ import javax.servlet.http.HttpSession;
 /**
  *
  * @author Heitor Barbieri
- * date: 20130806
+ * date 20130906
  */
-public class CheckManyLinksServlet extends HttpServlet {
+public class CenterFilterServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -53,36 +52,19 @@ public class CheckManyLinksServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(final HttpServletRequest request,
+    protected void processRequest(final HttpServletRequest request, 
                                   final HttpServletResponse response)
-                                         throws ServletException, IOException {
-        final ServletContext context = getServletContext();
-        final DBCollection coll =
-                               (DBCollection)context.getAttribute("collection");
-        final DBCollection hcoll =
-                              (DBCollection)context.getAttribute("historycoll");
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        
+        final String lang = request.getParameter("lang");
+        final String collFilterCenter = request.getParameter("collFilterCenter");
         final HttpSession session = request.getSession();
-        final String user = (String)session.getAttribute("user");
-        final String collCenterFilter = 
-                               (String)session.getAttribute("collFilterCenter");
-        final Set<String> centerIds = (Set<String>)request.getSession()
-                                                     .getAttribute("centerIds");         
-        final String brokenUrl = (String)request.getParameter("url");
-        final String brokenUrl2 = brokenUrl.replaceAll("<<amp;>>", "&");
-        final String fixedUrl = (String)request.getParameter("furl");
-        final String fixedUrl2 = fixedUrl.replaceAll("<<amp;>>", "&");
-        final String lang = (String)request.getParameter("lang");
-        final Set<IdUrl> fixed = MongoOperations.fixRelatedUrls(coll, hcoll,
-                      user, centerIds, collCenterFilter, brokenUrl2, fixedUrl2);
+        final ServletContext context = getServletContext();
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
-                                    "/showFixedUrls.jsp?group=0&lang=" + lang);
-
-        session.setAttribute("url", fixedUrl2);
-        session.setAttribute("IdUrls", fixed);
-        //request.("group", "0");
-        //request.setAttribute("lang", lang);
+                                              "/list.jsp?group=0&lang=" + lang);
+        session.setAttribute("collFilterCenter", collFilterCenter);
         dispatcher.forward(request, response);
-        //response.sendRedirect("showFixedUrls.jsp?group=0&lang=" + lang);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -96,8 +78,7 @@ public class CheckManyLinksServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doGet(final HttpServletRequest request,
-                          final HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
     }
@@ -112,8 +93,7 @@ public class CheckManyLinksServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(final HttpServletRequest request,
-                           final HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
     }
