@@ -33,9 +33,12 @@
 
 <% 
     final String lang = (String)request.getParameter("lang");
+    final ResourceBundle messages = Tools.getMessages(lang);
     final String user = (String)session.getAttribute("user");
+    
     if (user == null) {
-        response.sendRedirect("index.jsp?lang=" + lang);
+        response.sendRedirect("index.jsp?lang=" + lang
+                                + "&errMsg=" + messages.getString("timed_out"));
         return;
     }
 
@@ -49,8 +52,6 @@
     lastGroup = ((fixedUrls > 0) && (mod == 0)) ? lastGroup - 1 : lastGroup;
     final int initGroup = (group <= 1) ? 0 : (group >= lastGroup - 2) 
                                                 ? (lastGroup - 4) : (group - 2);
-    final ResourceBundle messages = Tools.getMessages(lang);
-    
     final Set<IdUrl> fixedX = new HashSet<IdUrl>();
     int current = 0;
     int begin = group * groupSize;

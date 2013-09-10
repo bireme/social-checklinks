@@ -25,10 +25,13 @@
 <%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
 <%@page contentType="text/html;charset=UTF-8"%>
 
-<% 
+<%     
     final String lang = (String)request.getParameter("lang");
+    final ResourceBundle messages = Tools.getMessages(lang);
+    
     if (session.getAttribute("user") == null) {
-        response.sendRedirect("index.jsp?lang=" + lang);
+        response.sendRedirect("index.jsp?lang=" + lang
+                                + "&errMsg=" + messages.getString("timed_out"));
         return;
     }
     
@@ -44,8 +47,7 @@
     final String furl = (String)request.getParameter("furl");
     final String fixedUrl = furl.replace("<<amp;>>", "&");
     final String lang2 = lang.equals("null") ? "en" : lang.equals("fr") 
-                                                    ? "en" :lang;
-    final ResourceBundle messages = Tools.getMessages(lang);
+                                                    ? "en" :lang;    
 %>
 
 <!-- ================================================== -->

@@ -26,14 +26,14 @@ import br.bireme.accounts.Authentication;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
-import br.bireme.scl.IdUrl;
-import br.bireme.scl.MongoOperations;
+import br.bireme.scl.Tools;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.HashSet;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,7 +64,8 @@ public class AuthenticationServlet extends HttpServlet {
             final DB db = mongoClient.getDB(SOCIAL_CHECK_DB);
             
             if (! user.trim().isEmpty()) {
-                final boolean auth = db.authenticate(user, password.toCharArray());        
+                final boolean auth = 
+                                  db.authenticate(user, password.toCharArray());        
                 if (!auth) {
                     throw new IllegalArgumentException("invalid user/password");
                 }
@@ -99,9 +100,8 @@ public class AuthenticationServlet extends HttpServlet {
         final String password = request.getParameter("password");
         final String lang = request.getParameter("lang");                        
         final ServletContext context = getServletContext();
-        final DBCollection coll = 
-                               (DBCollection)context.getAttribute("collection");
-        final HttpSession session = request.getSession();                                 
+        final HttpSession session = request.getSession();  
+        final ResourceBundle messages = Tools.getMessages(lang);
         
         boolean isAccountsWorking = true;    
         RequestDispatcher dispatcher;
@@ -111,7 +111,8 @@ public class AuthenticationServlet extends HttpServlet {
         if (isAccountsWorking) {
             if ((username == null) || (username.isEmpty()) || 
                 (password == null) || (password.isEmpty())) {
-                response.sendRedirect("index.jsp?lang=" + lang);
+                response.sendRedirect("index.jsp?lang=" + lang 
+                        + "&errMsg=" + messages.getString("login_is_required"));
                 return;
             }                        
             
@@ -129,13 +130,14 @@ public class AuthenticationServlet extends HttpServlet {
                     session.removeAttribute("user");
                     session.removeAttribute("centerIds");
                     dispatcher = context.getRequestDispatcher(
-                                                    "/index.jsp?lang=" + lang);
+                                                  "/index.jsp?lang=" + lang 
+                    + "&errMsg=" + messages.getString("authentication_failed"));
                 }     
                 dispatcher.forward(request, response);
             } catch(Exception ex) {
-//ex.printStackTrace();
                 dispatcher = context.getRequestDispatcher(
-                                                    "/index.jsp?lang=" + lang);                
+                                                    "/index.jsp?lang=" + lang
+                          + "&errMsg=" + messages.getString("exception_found"));                
                 dispatcher.forward(request, response);
             }
         } else {            

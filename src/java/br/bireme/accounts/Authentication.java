@@ -134,7 +134,8 @@ public class Authentication {
         writer.newLine();
         writer.close();
 
-        final boolean respCodeOk = (connection.getResponseCode() == 200);
+        final int respCode = connection.getResponseCode();
+        final boolean respCodeOk = (respCode == 200);
         final BufferedReader reader;
 
         if (respCodeOk) {
@@ -156,7 +157,7 @@ public class Authentication {
 
         reader.close();
 
-        if (!respCodeOk) {
+        if (!respCodeOk && (respCode != 401)) {
             throw new IOException(builder.toString());
         }
 

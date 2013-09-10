@@ -27,11 +27,15 @@
 
 <% 
     final String lang = (String)request.getParameter("lang");
+    final ResourceBundle messages = Tools.getMessages(lang);
     final String user = (String)session.getAttribute("user");
+    
     if (user == null) {
-        response.sendRedirect("index.jsp?lang=" + lang);
+        response.sendRedirect("index.jsp?lang=" + lang
+                                + "&errMsg=" + messages.getString("timed_out"));
         return;
     }
+    
     final String collCenterFilter = 
                                (String)session.getAttribute("collFilterCenter");
     final ServletContext context = getServletContext();
@@ -51,7 +55,6 @@
                                                 ? (lastGroup - 4) : (group - 2);
     final int from = (group * groupSize);        
     final boolean showCenters = (centerIds.size() > 1);
-    final ResourceBundle messages = Tools.getMessages(lang);
 %>
 
 <!-- ================================================== -->
