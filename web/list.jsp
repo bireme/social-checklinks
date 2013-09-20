@@ -127,16 +127,16 @@
                                                         <li class="dropdown">
                                                             <a href="http://reddes.bvsalud.org/" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("language")%> <b class="caret"></b></a>
                                                             <ul class="dropdown-menu">
-                                                                <li><a href="javascript:postToUrl('list.jsp', {group:'<%=group%>',lang:'en'});">English</a></li>
-                                                                <li><a href="javascript:postToUrl('list.jsp', {group:'<%=group%>',lang:'pt'});">Português</a></li>
-                                                                <li><a href="javascript:postToUrl('list.jsp', {group:'<%=group%>',lang:'es'});">Español</a></li>
-                                                                <!--li><a href="javascript:postToUrl('list.jsp', {group:'<%=group%>',lang:'fr'});">Francés</a></li-->
+                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'en'});">English</a></li>
+                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'pt'});">Português</a></li>
+                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'es'});">Español</a></li>
+                                                                <!--li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'fr'});">Francés</a></li-->
                                                             </ul>
                                                         </li>
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user icon-white"></i> <%=user %> <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><a href="javascript:postToUrl('index.jsp', {lang:'<%=lang%>'});"><i class="icon-off"></i> <%=messages.getString("logout")%></a></li>
+									<li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("index.jsp")%>', {lang:'<%=lang%>'});"><i class="icon-off"></i> <%=messages.getString("logout")%></a></li>
 								</ul>
 							</li>
 						</ul>
@@ -156,11 +156,11 @@
                             <span class="caret"></span>
                           </button>
                           <ul class="dropdown-menu">
-                            <li><a href="javascript:postToUrl('CenterFilterServlet', {group:'<%=group%>',lang:'<%=lang%>'});">All</a></li>
+                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {group:'<%=group%>',lang:'<%=lang%>'});">All</a></li>
                            <%
                              for (String id : centerIds)  {                               
                            %>    
-                            <li><a href="javascript:postToUrl('CenterFilterServlet', {group:'<%=group%>',lang:'<%=lang%>',collFilterCenter:'<%=id%>'});"><%=id%></a></li>
+                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {group:'<%=group%>',lang:'<%=lang%>',collFilterCenter:'<%=id%>'});"><%=id%></a></li>
                            <%
                              } 
                            %>
@@ -207,8 +207,8 @@
                                     <%            
                                             }
                                     %>
-
-						<td><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="Edit broken url" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td>
+                                                <td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="Edit broken url" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td>
+                                                <!--td><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="Edit broken url" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td-->
 					</tr>
                                     <%
                                             cur++;
@@ -219,7 +219,7 @@
 			<div class="pagination pagination-centered">
 				<ul>
 					<!--li class="enabled"><a href="?group=0">«</a></li-->
-                                        <li class="enabled"><a href="javascript:postToUrl('list.jsp', {group:'0',lang:'<%=lang%>'});">&laquo;</a></li>
+                                        <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});">&laquo;</a></li>
                                         <%                                        
                                         for (int idx = initGroup; idx < initGroup+5; idx++) {
                                             if (idx == group) {
@@ -228,12 +228,12 @@
                                         <%
                                             } else if (idx <= lastGroup) {
                                         %>
-                                            <li class="enabled"><a href="javascript:postToUrl('list.jsp', {group:'<%=idx%>',lang:'<%=lang%>'});"><%=idx+1%></a></li>
+                                            <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=idx%>',lang:'<%=lang%>'});"><%=idx+1%></a></li>
                                         <%
                                             }
                                         }    
                                         %>
-                                        <li class="enabled"><a href="javascript:postToUrl('list.jsp', {group:'<%=lastGroup%>',lang:'<%=lang%>'});">&raquo;</a></li>
+                                        <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>'});">&raquo;</a></li>
 				</ul>
 			</div>
 		</div> <!-- /container -->

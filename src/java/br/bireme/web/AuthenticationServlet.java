@@ -23,8 +23,8 @@
 package br.bireme.web;
 
 import br.bireme.accounts.Authentication;
-import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
+import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import br.bireme.scl.Tools;
 import com.mongodb.DB;
@@ -107,6 +107,7 @@ public class AuthenticationServlet extends HttpServlet {
         RequestDispatcher dispatcher;
         
         session.removeAttribute("collCenter");
+        session.removeAttribute("user");
         
         if (isAccountsWorking) {
             if ((username == null) || (username.isEmpty()) || 

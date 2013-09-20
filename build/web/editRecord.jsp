@@ -47,7 +47,7 @@
     final String furl = (String)request.getParameter("furl");
     final String fixedUrl = furl.replace("<<amp;>>", "&");
     final String lang2 = lang.equals("null") ? "en" : lang.equals("fr") 
-                                                    ? "en" :lang;    
+                                                    ? "en" :lang;
 %>
 
 <!-- ================================================== -->
@@ -107,7 +107,7 @@
            var nurl2 = document.getElementById('input-1').value
                                                     .replace(/\&/g, '<<amp;>>');
                                             
-           postToUrl('CheckOneLinkServlet', {id: id, url: nurl, furl: nurl2, 
+           postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id: id, url: nurl, furl: nurl2, 
                                                                    lang: lang});                                                        
            //var turl = 'CheckOneLinkServlet?id=' + id + '&url=' + nurl + '&furl=' 
            //                                           + nurl2 + '&lang=' + lang;
@@ -118,7 +118,7 @@
            var nurl = url.replace(/\&/g, '<<amp;>>');
            var nurl2 = document.getElementById('input-1').value
                                                     .replace(/\&/g, '<<amp;>>');
-           postToUrl('CheckManyLinksServlet', {id: id, url: nurl, furl: nurl2, 
+           postToUrl('<%=response.encodeRedirectURL("CheckManyLinksServlet")%>', {id: id, url: nurl, furl: nurl2, 
                                                                    lang: lang});                                                        
                                             
           // var turl = 'CheckManyLinksServlet?id=' + id + '&url=' + nurl 
@@ -142,7 +142,7 @@
 					<a class="brand" href="#"><%=messages.getString("bireme_social_checklinks")%></a>
 					<div class="nav-collapse collapse">
 						<ul class="nav">
-							<li class="active"><a href="javascript:postToUrl('list.jsp', {group:'0', lang:'<%=lang%>',cc:'All'});"><%=messages.getString("home")%></a></li>
+							<li class="active"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>',cc:'All'});"><%=messages.getString("home")%></a></li>
 							<li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
 							<li><a href="http://reddes.bvsalud.org/" target="_blank"><%=messages.getString("contact")%></a></li>
 						</ul>
@@ -150,17 +150,17 @@
                                                     <li class="dropdown">
                                                             <a href="http://reddes.bvsalud.org/" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("language")%> <b class="caret"></b></a>
                                                             <ul class="dropdown-menu">                                                                
-								<li><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'en'});">English</a></li>
-                                                                <li><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'pt'});">Português</a></li>
-                                                                <li><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'es'});">Español</a></li>
-                                                                <!--li><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'fr'});">Francés</a></li-->
+								<li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'en'});">English</a></li>
+                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'pt'});">Português</a></li>
+                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'es'});">Español</a></li>
+                                                                <!--li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url%>',furl:'<%=furl%>',status:'<%=status%>',lang:'fr'});">Francés</a></li-->
                                                             </ul>
                                                         </li>
 							<li class="dropdown">
 
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user icon-white"></i> <%=user %> <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><a href="javascript:postToUrl('index.jsp', {lang:'<%=lang%>'});"><i class="icon-off"></i> <%=messages.getString("logout")%></a></li>
+									<li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("index.jsp")%>', {lang:'<%=lang%>'});"><i class="icon-off"></i> <%=messages.getString("logout")%></a></li>
 								</ul>
 							</li>
 						</ul>

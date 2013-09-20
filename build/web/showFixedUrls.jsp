@@ -130,7 +130,7 @@
 					<a class="brand" href="#"><%=messages.getString("bireme_social_checklinks")%></a>
 					<div class="nav-collapse collapse">
 						<ul class="nav">
-							<li class="active"><a href="javascript:postToUrl('list.jsp', {group:'0', lang:'<%=lang%>',cc:'All'});"><%=messages.getString("home")%></a></li>
+							<li class="active"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>',cc:'All'});"><%=messages.getString("home")%></a></li>
 							<li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
 							<li><a href="http://reddes.bvsalud.org/" target="_blank"><%=messages.getString("contact")%></a></li>
 						</ul>
@@ -138,16 +138,16 @@
                                                         <li class="dropdown">
                                                             <a href="http://reddes.bvsalud.org/" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("language")%> <b class="caret"></b></a>
                                                             <ul class="dropdown-menu">
-                                                                <li><a href="javascript:postToUrl('showFixedUrls.jsp', {group:'<%=group%>',lang:'en'});">English</a></li>
-                                                                <li><a href="javascript:postToUrl('showFixedUrls.jsp', {group:'<%=group%>',lang:'pt'});">Português</a></li>
-                                                                <li><a href="javascript:postToUrl('showFixedUrls.jsp', {group:'<%=group%>',lang:'es'});">Español</a></li>
-                                                                <!--li><a href="javascript:postToUrl('showFixedUrls.jsp', {group:'<%=group%>',lang:'fr'});">Francés</a></li-->
+                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lang:'en'});">English</a></li>
+                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lang:'pt'});">Português</a></li>
+                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lang:'es'});">Español</a></li>
+                                                                <!--li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lang:'fr'});">Francés</a></li-->
                                                             </ul>
                                                         </li>
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user icon-white"></i> <%=user%> <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><a href="javascript:postToUrl('index.jsp', {lang:'<%=lang%>'});"><i class="icon-off"></i> <%=messages.getString("logout")%></a></li>
+									<li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("index.jsp")%>', {lang:'<%=lang%>'});"><i class="icon-off"></i> <%=messages.getString("logout")%></a></li>
 								</ul>
 							</li>
 						</ul>
@@ -191,7 +191,7 @@
 									<td><a href="<%=nurl%>" title="<%=messages.getString("view_document")%>" target="_blank"><%=idUrl.url%></a></td>
                                                                         <!--<td><a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++%28id%3A%28LIL-<%=id2%>%29%29" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a>&nbsp;-->
                                                                             <td><a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++(id:(LIL-<%=id2%>))" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a>&nbsp;
-                                                                            <a href="javascript:postToUrl('UndoFixServlet', {undoUrl:'<%=nurl%>', lang:'<%=lang%>'});" title="<%=messages.getString("undo_last_url")%>" class="btn btn-mini btn-primary"><i class="icon-repeat icon-white"></i> <%=messages.getString("undo")%></a></td>
+                                                                            <a href="javascript:postToUrl('<%=response.encodeRedirectURL("UndoFixServlet")%>', {undoUrl:'<%=nurl%>', lang:'<%=lang%>'});" title="<%=messages.getString("undo_last_url")%>" class="btn btn-mini btn-primary"><i class="icon-repeat icon-white"></i> <%=messages.getString("undo")%></a></td>
 								</tr>
                                                             <%    
                                                                 }
@@ -200,7 +200,7 @@
 						</table>
 						<div class="pagination pagination-centered">
                                                     <ul>
-                                                        <li class="enabled"><a href="javascript:postToUrl('showFixedUrls.jsp', {group:'0','lang:'<%=lang%>'});">&laquo;</a></li>
+                                                        <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'0','lang:'<%=lang%>'});">&laquo;</a></li>
                                                         <%                                        
                                                         for (int idx = initGroup; idx < initGroup+5; idx++) {
                                                             if (idx == group) {
@@ -209,12 +209,12 @@
                                                         <%
                                                             } else if (idx <= lastGroup) {
                                                         %>
-                                                        <li class="enabled"><a href="javascript:postToUrl('showFixedUrls.jsp', {group:'<%=idx%>','lang:'<%=lang%>'});" ><%=idx+1%></a></li>
+                                                        <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=idx%>','lang:'<%=lang%>'});" ><%=idx+1%></a></li>
                                                         <%
                                                             }
                                                         }    
                                                         %>
-                                                        <li class="enabled"><a href="javascript:postToUrl('showFixedUrls.jsp', {group:'<%=lastGroup%>','lang:'<%=lang%>'});">&raquo;</a></li>
+                                                        <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=lastGroup%>','lang:'<%=lang%>'});">&raquo;</a></li>
                                                     </ul>
 						</div>
 					</div>
