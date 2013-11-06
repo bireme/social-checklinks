@@ -28,7 +28,7 @@ import static br.bireme.scl.BrokenLinks.FIXED_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
-import static br.bireme.scl.MongoOperations.DATE_FIELD;
+import static br.bireme.scl.BrokenLinks.DATE_FIELD;
 import static br.bireme.scl.MongoOperations.EXPORTED_FIELD;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
