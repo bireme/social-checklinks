@@ -116,10 +116,10 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="brand" href="#"><%=messages.getString("bireme_social_checklinks")%></a>
+					<a class="brand" href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("bireme_social_checklinks")%></a>
 					<div class="nav-collapse collapse">
 						<ul class="nav">
-							<li class="active"><a href="javascript:postToUrl('list.jsp', {group:'0',lang:'<%=lang%>});"><%=messages.getString("home")%></a></li>
+							<li class="active"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("home")%></a></li>
 							<li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
 							<li><a href="http://reddes.bvsalud.org/" target="_blank"><%=messages.getString("contact")%></a></li>
 						</ul>
@@ -175,6 +175,7 @@
 						<th>URL</th>
                                                 <%if (showCenters) {%><th>CCs</th><%}%>
 						<th><%=messages.getString("action")%></th>
+                                                <th>Since</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -209,6 +210,7 @@
                                     %>
                                                 <td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="Edit broken url" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td>
                                                 <!--td><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="Edit broken url" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td-->
+                                                <td></td>
 					</tr>
                                     <%
                                             cur++;
@@ -235,6 +237,8 @@
                                         %>
                                         <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>'});">&raquo;</a></li>
 				</ul>
+    
+
 			</div>
 		</div> <!-- /container -->
 		<div id="push"></div>

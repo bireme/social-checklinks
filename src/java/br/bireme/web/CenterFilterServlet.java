@@ -21,12 +21,7 @@
 =========================================================================*/
 package br.bireme.web;
 
-import br.bireme.scl.IdUrl;
-import br.bireme.scl.MongoOperations;
-import com.mongodb.DBCollection;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

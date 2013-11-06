@@ -25,6 +25,7 @@ package br.bireme.scl;
 import static br.bireme.scl.BrokenLinks.BROKEN_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.CC_TAGS_FIELD;
 import static br.bireme.scl.BrokenLinks.CENTER_FIELD;
+import static br.bireme.scl.BrokenLinks.DATE_FIELD;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
@@ -58,7 +59,6 @@ import java.util.regex.Pattern;
  */
 public class MongoOperations {
     public static final String FIXED_URL_FIELD = "furl";
-    public static final String DATE_FIELD = "date";
     public static final String USER_FIELD = "user";
     public static final String AUTO_FIX_FIELD = "autofix";
     public static final String EXPORTED_FIELD = "exported";
@@ -120,7 +120,10 @@ public class MongoOperations {
             }
             BasicDBObject in = new BasicDBObject("$in", cclst);
             final BasicDBObject query = new BasicDBObject(CENTER_FIELD, in);
-            final DBCursor cursor = coll.find(query).skip(from - 1).limit(count);            
+            final BasicDBObject sort = new BasicDBObject(DATE_FIELD, 1);
+            //final DBCursor cursor = coll.find(query).skip(from - 1).limit(count);
+            final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
+                                                                  .limit(count);
 
             while (cursor.hasNext()) {
                 final DBObject doc = cursor.next();

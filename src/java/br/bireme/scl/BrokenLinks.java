@@ -77,6 +77,7 @@ public class BrokenLinks {
     public static final String HISTORY_URL_FIELD = "hurl";
     public static final String MSG_FIELD = "msg";
     public static final String DATE_FIELD = "date";
+    public static final String LAST_UPDATE_FIELD = "updated";
     
     /* CC_FIELDS_COL colection fields */
     public static final String MST_FIELD = "mst";
@@ -183,6 +184,8 @@ public class BrokenLinks {
             }
         }
 
+        removeOldDocs(coll);
+        
         if (clearCol) {
             createIndex(coll);
         }
@@ -281,7 +284,7 @@ public class BrokenLinks {
         assert id != null;
         assert url != null;
         assert urlTag > 0;
-        assert err != null;        
+        assert err != null;
         assert ccsFlds != null;
         assert mst != null;
         assert coll != null;
@@ -292,7 +295,9 @@ public class BrokenLinks {
         }
 
         final List<Field> urls = rec.getFieldList(urlTag);        
-        int occ = 0;
+        final Date lastUpdate = new Date();
+        final Date date;
+        int occ = 0;        
 
         while (true) {
             occ = nextOcc(url, urls, occ);
@@ -303,18 +308,29 @@ public class BrokenLinks {
             }
             final BasicDBObject query = new BasicDBObject(ID_FIELD,
                                                                 id + "_" + occ);
-            final DBCursor cursor = coll.find(query);
-            final int size = cursor.size();
-
-            cursor.close();
-            if (size == 0) {
+            final BasicDBObject obj = (BasicDBObject) coll.findOne(query);            
+            if (obj == null) {
+                date = lastUpdate;
                 break;
+            } else {
+                Date auxDate = obj.getDate(LAST_UPDATE_FIELD);
+                if (auxDate == null) {
+                    auxDate = obj.getDate(DATE_FIELD);
+                }
+                if ((lastUpdate.getTime() - auxDate.getTime()) > 60*60*1000) {
+                    final WriteResult wr = coll.remove(obj, WriteConcern.SAFE);
+                    if (!wr.getCachedLastError().ok()) {
+                        //TODO
+                    }
+                    date = obj.getDate(DATE_FIELD);
+                    break;
+                }
             }
         }
 
-        final BasicDBObject doc = new BasicDBObject();
-        
-        doc.put(DATE_FIELD, new Date());
+        final BasicDBObject doc = new BasicDBObject();        
+        doc.put(DATE_FIELD, date);
+        doc.put(LAST_UPDATE_FIELD, lastUpdate);
         doc.put(MST_FIELD, mstName);
         doc.put(ID_FIELD, id + "_" + occ);
         doc.put(BROKEN_URL_FIELD, url);
@@ -378,11 +394,29 @@ public class BrokenLinks {
         return lst;
     }
 
+    private static boolean removeOldDocs(final DBCollection coll) {
+        assert coll != null;
+        
+        final Date now = new Date();
+        final DBCursor cursor = coll.find();
+        boolean ret = true;
+
+        while (cursor.hasNext()) {
+            final BasicDBObject obj = (BasicDBObject)cursor.next();
+            final Date auxDate = obj.getDate(LAST_UPDATE_FIELD);
+            if ((now.getTime() - auxDate.getTime()) > 60*60*1000) {
+                final WriteResult wr = coll.remove(obj, WriteConcern.SAFE);
+                ret = ret && wr.getCachedLastError().ok();
+            }
+        }
+        return ret;
+    }
+    
     private static void usage() {
         System.err.println(
                          "usage: CreateBrokenLinks <outFile> <mstName> <host>"
      + "\n\t\t[-outFileEncoding=<outFileEncod>] [-outMstEncoding=<outMstEncod>]"
-     + "\n\t\t[-port=<port>] [-user=<user> -password=<pswd>] [--append]");
+     + "\n\t\t[-port=<port>] [-user=<user> -password=<pswd>] [--clearColl]");
         System.exit(1);
     }
 
@@ -394,7 +428,7 @@ public class BrokenLinks {
         String mstEncod = DEFAULT_MST_ENCODING;
         String user = null;
         String pswd = null;
-        boolean append = false;
+        boolean clearColl = false;
 
         if (len < 3) {
             usage();
@@ -410,15 +444,15 @@ public class BrokenLinks {
                 user = args[idx].substring(6);
             } else if (args[idx].startsWith("-password=")) {
                 pswd = args[idx].substring(10);
-            } else if (args[idx].equals("--append")) {
-                append = true;
+            } else if (args[idx].equals("--clearColl")) {
+                clearColl = true;
             } else {
                 usage();
             }
         }
 
         createLinks(args[0], fileEncod, args[1], mstEncod, args[2],
-                                                     port, user, pswd, !append);
+                                                   port, user, pswd, clearColl);
 
 
         /*createLinks("/home/heitor/Downloads/LILACS_v8broken.txt", DEFAULT_FILE_ENCODING,

@@ -22,7 +22,7 @@
 
 <%@page language="java"%>
 <%@page session="true" %>
-<%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
+<%@page import="java.util.*,java.net.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
 <%@page contentType="text/html;charset=UTF-8"%>
 
 <%     
@@ -103,10 +103,13 @@
             return string;
         }           
         function callUrl(id, url, lang) {
-           var nurl = url.replace(/\&/g, '<<amp;>>');
-           var nurl2 = document.getElementById('input-1').value
-                                                    .replace(/\&/g, '<<amp;>>');
-                                            
+           //var nurl = url.replace(/\&/g, '<<amp;>>');
+           var nurl = url;
+           alert(nurl);
+           /*var nurl2 = document.getElementById('input-1').value
+                                                    .replace(/\&/g, '<<amp;>>');*/
+           var nurl2 = document.getElementById('input-1').value;
+           alert(nurl2);                                            
            postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id: id, url: nurl, furl: nurl2, 
                                                                    lang: lang});                                                        
            //var turl = 'CheckOneLinkServlet?id=' + id + '&url=' + nurl + '&furl=' 
@@ -115,9 +118,12 @@
            //window.open(turl,"_self");
         }
         function callUrl2(id, url, lang) {
-           var nurl = url.replace(/\&/g, '<<amp;>>');
-           var nurl2 = document.getElementById('input-1').value
-                                                    .replace(/\&/g, '<<amp;>>');
+           //var nurl = url.replace(/\&/g, '<<amp;>>');           
+           //var nurl2 = document.getElementById('input-1').value.replace(/\&/g, '<<amp;>>');
+           
+           var nurl = url;           
+           var nurl2 = document.getElementById('input-1').value;
+                                                               
            postToUrl('<%=response.encodeRedirectURL("CheckManyLinksServlet")%>', {id: id, url: nurl, furl: nurl2, 
                                                                    lang: lang});                                                        
                                             
