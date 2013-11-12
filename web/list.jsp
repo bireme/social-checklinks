@@ -121,7 +121,12 @@
 						<ul class="nav">
 							<li class="active"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("home")%></a></li>
 							<li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
-							<li><a href="http://reddes.bvsalud.org/" target="_blank"><%=messages.getString("contact")%></a></li>
+                                                        <li class="dropdown">
+                                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("contact")%><b class="caret"></b></a>
+                                                            <ul class="dropdown-menu">
+                                                                <li>Serviço de feedback do usuário</li>
+                                                            </ul>
+                                                      </li>
 						</ul>
 						<ul class="nav pull-right">
                                                         <li class="dropdown">
@@ -148,34 +153,35 @@
 		<div class="container">
 			<h1><%=messages.getString("broken_links")%></h1>
 			<p><%=messages.getString("the_list")%></p>
-                        
-                        <% if (showCenters) { %>
-                        <div class="btn-group pull-right">
-                          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                            <%=messages.getString("show")%> <%=(collCenterFilter == null) ? messages.getString("all") : collCenterFilter%>
-                            <span class="caret"></span>
-                          </button>
-                          <ul class="dropdown-menu">
-                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {group:'<%=group%>',lang:'<%=lang%>'});">All</a></li>
-                           <%
-                             for (String id : centerIds)  {                               
-                           %>    
-                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {group:'<%=group%>',lang:'<%=lang%>',collFilterCenter:'<%=id%>'});"><%=id%></a></li>
-                           <%
-                             } 
-                           %>
-                          </ul>
-                        </div>			       
-                        <%}%>
-                          
+                                                  
 			<table class="table table-condensed">
 				<thead>
 					<tr>
-						<th>#</th>
-						<th>URL</th>
-                                                <%if (showCenters) {%><th>CCs</th><%}%>
-						<th><%=messages.getString("action")%></th>
-                                                <th>Since</th>
+                                            <th>#</th>
+                                            <th>ID</th>
+                                            <th>URL</th>                                                
+                                            <% if (showCenters) { %>
+                                              <th><div class="btn-group">
+                                              <button type="button" class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+                                                <%=(collCenterFilter == null) ? messages.getString("all") + " CCs" : collCenterFilter%>
+                                                <span class="caret"></span>
+                                              </button>
+                                              <ul class="dropdown-menu">
+                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {group:'<%=group%>',lang:'<%=lang%>'});">All</a></li>
+                                                <%
+                                                    for (String id : centerIds)  {                               
+                                                %>    
+                                                      <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {group:'<%=group%>',lang:'<%=lang%>',collFilterCenter:'<%=id%>'});"><%=id%></a></li>
+                                                <%
+                                                    } 
+                                                %>
+                                              </ul>
+                                              </div></th>       
+                                            <% } else { %>
+                                            <th>CC</th>
+                                            <% } %>
+                                            <th><%=messages.getString("since")%></th>
+                                            <th><%=messages.getString("action")%></th>                                                
 					</tr>
 				</thead>
 				<tbody>
@@ -183,11 +189,13 @@
                                         int cur = from + 1;
                                         for (IdUrl iu : lst) {
                                             final String nurl = iu.url.replace("&","<<amp;>>");
-                                            boolean first = true;
+                                            final String id = iu.id.substring(0,iu.id.indexOf("_"));
+                                            boolean first = true;                                                                                       
                                     %>
                                          <tr>                                    
                                                 <td><%=cur%></td>
-						<td><%=iu.url.trim()%></td>  
+                                                <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/en/lil-<%=id%>"><%=id%></a></td>
+                                                <td><a target="_blank" href="<%=iu.url%>"><%=iu.url.trim()%></a></td>  
                                     <%
                                             if (showCenters) {
                                     %>
@@ -208,7 +216,9 @@
                                     <%            
                                             }
                                     %>
-                                                <td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="Edit broken url" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td>
+                                                <td><%=iu.since%></td>    
+                                                <!--td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td-->
+                                                <td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"><%=messages.getString("edit")%></a></td>
                                                 <!--td><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="Edit broken url" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td-->
                                                 <td></td>
 					</tr>
@@ -219,6 +229,13 @@
 				</tbody>
 			</table>
 			<div class="pagination pagination-centered">
+                            <div class="pagination pagination-left">                                    
+                                    <li class="enabled">
+                                    <li>    <form class="navbar-form pull-left">
+    <input class="input-small" type="text">
+    <button type="submit" class="btn">#</button>
+    </form></li>
+                                </div>  
 				<ul>
 					<!--li class="enabled"><a href="?group=0">«</a></li-->
                                         <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});">&laquo;</a></li>
@@ -236,13 +253,14 @@
                                         }    
                                         %>
                                         <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>'});">&raquo;</a></li>
-				</ul>
-    
+				</ul>                                  
+			</div>   
 
-			</div>
 		</div> <!-- /container -->
 		<div id="push"></div>
 	</div>
+                                
+                                                                
 	<footer id="footer" class="footer">
 		<div class="container">
 			<strong>BIREME Social CheckLinks - <%= BrokenLinks.VERSION %> - 2013</strong><br/>

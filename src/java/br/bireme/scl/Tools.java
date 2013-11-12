@@ -127,7 +127,7 @@ public class Tools {
         final Set<IdUrl> outSet = new HashSet<IdUrl>();
         for (IdUrl iu : inSet) {
             final String newUrl = iu.url.replaceFirst(oldPattern, newPattern);
-            outSet.add(new IdUrl(iu.id, newUrl, iu.ccs));
+            outSet.add(new IdUrl(iu.id, newUrl, iu.ccs, iu.since));
         }
         return outSet;
     }

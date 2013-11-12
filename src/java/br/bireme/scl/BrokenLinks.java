@@ -53,7 +53,7 @@ import java.util.Set;
  * date 20130625
  */
 public class BrokenLinks {
-    public static final String VERSION = "V0.1";
+    public static final String VERSION = "V0.2";
 
     /* MongoDb settings */
     public static final String DEFAULT_FILE_ENCODING = "IBM850";
@@ -327,7 +327,9 @@ public class BrokenLinks {
                 }
             }
         }
-
+        if (date == null) {
+            throw new IOException("null date. mstName=" + mstName +" id=" + id);
+        }
         final BasicDBObject doc = new BasicDBObject();        
         doc.put(DATE_FIELD, date);
         doc.put(LAST_UPDATE_FIELD, lastUpdate);
@@ -404,7 +406,8 @@ public class BrokenLinks {
         while (cursor.hasNext()) {
             final BasicDBObject obj = (BasicDBObject)cursor.next();
             final Date auxDate = obj.getDate(LAST_UPDATE_FIELD);
-            if ((now.getTime() - auxDate.getTime()) > 60*60*1000) {
+            if ((auxDate == null) || 
+                             (now.getTime() - auxDate.getTime()) > 60*60*1000) {
                 final WriteResult wr = coll.remove(obj, WriteConcern.SAFE);
                 ret = ret && wr.getCachedLastError().ok();
             }

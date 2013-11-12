@@ -23,12 +23,12 @@
 package br.bireme.scl;
 
 import static br.bireme.scl.BrokenLinks.BROKEN_URL_FIELD;
-import static br.bireme.scl.BrokenLinks.CC_TAGS_FIELD;
 import static br.bireme.scl.BrokenLinks.CENTER_FIELD;
 import static br.bireme.scl.BrokenLinks.DATE_FIELD;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
+import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 
 import com.mongodb.BasicDBList;
@@ -41,6 +41,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -110,8 +111,8 @@ public class MongoOperations {
         }
         //final Set<IdUrl> lst = new TreeSet<IdUrl>();
         final List<IdUrl> lst = new ArrayList<IdUrl>();
-        int tot = 0;
-        
+        final SimpleDateFormat format = 
+                                    new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         if (filter == null) {
             final BasicDBList cclst = new BasicDBList();
 
@@ -133,9 +134,13 @@ public class MongoOperations {
                 for (Object cc : ccsLst) {
                     ccs.add((String)cc);
                 }
+if (doc.get(DATE_FIELD) == null) {
+    int x = 0;
+}                
                 final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
-                                              (String)doc.get(BROKEN_URL_FIELD),
-                                              ccs);
+                                           (String)doc.get(BROKEN_URL_FIELD),
+                                           ccs,
+                                    format.format((Date)(doc.get(DATE_FIELD))));
                 lst.add(iu);                 
             }
             cursor.close();
@@ -148,8 +153,9 @@ public class MongoOperations {
                 final Set<String> ccs = new TreeSet<String>();
                 ccs.add(filter);
                 final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
-                                               (String)doc.get(BROKEN_URL_FIELD),
-                                                ccs);
+                                           (String)doc.get(BROKEN_URL_FIELD),
+                                           ccs,
+                                      format.format((Date)doc.get(DATE_FIELD)));
                 lst.add(iu);
                 
             }
@@ -201,7 +207,7 @@ public class MongoOperations {
         for (IdUrl iu : getCenterUrls(coll, centerIds, filter)) {
             mat.reset(iu.url);
             if (mat.find()) {
-                set.add(new IdUrl(iu.id, iu.url, iu.ccs));
+                set.add(new IdUrl(iu.id, iu.url, iu.ccs, iu.since));
             }
         }
         return set;
@@ -244,7 +250,7 @@ public class MongoOperations {
 
         doc.append(FIXED_URL_FIELD, fixedUrl).append(USER_FIELD, user)
            .append(AUTO_FIX_FIELD, automatic).append(EXPORTED_FIELD, false)
-           .append(DATE_FIELD, new Date());
+           .append(LAST_UPDATE_FIELD, new Date());
 
         final boolean ret2 = hcoll.save(doc).getLastError().ok();
 
@@ -279,7 +285,6 @@ public class MongoOperations {
         doc.removeField(FIXED_URL_FIELD);
         doc.removeField(USER_FIELD);
         doc.removeField(AUTO_FIX_FIELD);
-        doc.removeField(DATE_FIELD);
 
         final boolean ret2 = coll.save(doc).getLastError().ok();
 

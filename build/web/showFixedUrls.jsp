@@ -114,6 +114,13 @@
             form.submit();
         }
         
+        function confirmUndo(url) {
+            if (confirm(<%=messages.getString("undo")%>)) {
+                 postToUrl('<%=response.encodeRedirectURL("UndoFixServlet")%>', {undoUrl:url, lang:'<%=lang%>'});
+            } else {
+                // Do nothing!
+            }
+        }
         </script>
         
 </head>
@@ -190,8 +197,10 @@
 									<td><%=++idxx%></td>
 									<td><a href="<%=nurl%>" title="<%=messages.getString("view_document")%>" target="_blank"><%=idUrl.url%></a></td>
                                                                         <!--<td><a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++%28id%3A%28LIL-<%=id2%>%29%29" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a>&nbsp;-->
-                                                                            <td><a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++(id:(LIL-<%=id2%>))" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a>&nbsp;
-                                                                            <a href="javascript:postToUrl('<%=response.encodeRedirectURL("UndoFixServlet")%>', {undoUrl:'<%=nurl%>', lang:'<%=lang%>'});" title="<%=messages.getString("undo_last_url")%>" class="btn btn-mini btn-primary"><i class="icon-repeat icon-white"></i> <%=messages.getString("undo")%></a></td>
+                                                                            <td><a href="http://pesquisa.bvsalud.org/portal/resource/<%=lang2%>/lil-<%=id2%>" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><%=messages.getString("see")%></a>&nbsp;
+                                                                            <!--a href="javascript:postToUrl('<%=response.encodeRedirectURL("UndoFixServlet")%>', {undoUrl:'<%=nurl%>', lang:'<%=lang%>'});" title="<%=messages.getString("undo_last_url")%>" class="btn btn-mini btn-primary"><i class="icon-repeat icon-white"></i> <%=messages.getString("undo")%></a></td-->
+                                                                            <a href="javascript:confirmUndo('<%=nurl%>');" title="<%=messages.getString("undo_last_url")%>" class="btn btn-mini btn-primary"><%=messages.getString("undo")%></a></td>
+                                                                               <!--href="javascript:confirmUndo('<%=nurl%>');"-->
 								</tr>
                                                             <%    
                                                                 }

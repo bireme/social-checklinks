@@ -79,6 +79,9 @@ public class CheckUrl {
         try {
             url = new URL(urlStr);
             final String host = url.getHost();
+            if (host.isEmpty()) {
+                throw new IOException("empty host");
+            }
             final String path = url.getPath();
             final String query = url.getQuery();
             final String mess = "HEAD " + (path.isEmpty() ? "/" : path)

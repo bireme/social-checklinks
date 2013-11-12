@@ -105,11 +105,11 @@
         function callUrl(id, url, lang) {
            //var nurl = url.replace(/\&/g, '<<amp;>>');
            var nurl = url;
-           alert(nurl);
+           //alert(nurl);
            /*var nurl2 = document.getElementById('input-1').value
                                                     .replace(/\&/g, '<<amp;>>');*/
            var nurl2 = document.getElementById('input-1').value;
-           alert(nurl2);                                            
+           //alert(nurl2);
            postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id: id, url: nurl, furl: nurl2, 
                                                                    lang: lang});                                                        
            //var turl = 'CheckOneLinkServlet?id=' + id + '&url=' + nurl + '&furl=' 
@@ -122,7 +122,9 @@
            //var nurl2 = document.getElementById('input-1').value.replace(/\&/g, '<<amp;>>');
            
            var nurl = url;           
+           //alert(nurl);
            var nurl2 = document.getElementById('input-1').value;
+           //alert(nurl2);
                                                                
            postToUrl('<%=response.encodeRedirectURL("CheckManyLinksServlet")%>', {id: id, url: nurl, furl: nurl2, 
                                                                    lang: lang});                                                        
@@ -132,6 +134,21 @@
            //alert(turl);
           // window.open(turl,"_self");
         }
+        
+        function isVisible(elem) {
+            return elem.offsetWidth > 0 || elem.offsetHeight > 0;
+        }
+        function hideSave() {
+            var danger = document.getElementById("alert-danger");            
+           
+            if (danger && isVisible(danger)) {                
+                danger.style.display = 'none';
+            } else {
+                document.getElementById("alert-success").style.display = 'none';
+                document.getElementById("save").style.display = 'none';
+            }
+        }
+        
         </script>
                 
 </head>
@@ -145,7 +162,7 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="brand" href="#"><%=messages.getString("bireme_social_checklinks")%></a>
+					<a class="brand" href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("bireme_social_checklinks")%></a>
 					<div class="nav-collapse collapse">
 						<ul class="nav">
 							<li class="active"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>',cc:'All'});"><%=messages.getString("home")%></a></li>
@@ -180,41 +197,37 @@
 			<div class="urlEditor">
 				<div class="urlLine">
                                     <div class="seg-q">
-                                        <div class="URL-tested"><%=brokenUrl%></div>
-					<input type="url" id="input-1" class="span8" value="<%=fixedUrl%>" <%= ((!isNew) && (!isBroken)) ? "DISABLED" : ""%>/> &nbsp;
+                                        <div class="URL-tested">( <a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/en/lil-<%=id2%>"><%=id2%></a> ) - <a target="_blank" href="<%=brokenUrl%>"><%=brokenUrl%></a></div>
+                                        <div class="URL-tested2">
+                                            <input type="url" id="input-1" class="span8" onfocus="hideSave()" value="<%=fixedUrl%>"/> &nbsp;
+                                            <a href="javascript:callUrl('<%=id%>','<%=brokenUrl%>','<%=lang%>');" class="btn btn-primary" title="Test your changes"><%=messages.getString("test")%></a>
+                                        </div>
+                                        
                                         <!--a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++%28id%3A%28LIL-<%=id2%>%29%29" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a-->
-                                        <a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++(id:(LIL-<%=id2%>))" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a>
                                         <%
-                                            if (!isNew) {
-                                                if (isBroken) {
+                                            if (isBroken) {
                                          %>
-                                                    <div class="alert alert-danger fade in">
-                                                            <button data-dismiss="alert" class="close" type="button">×</button>
-                                                            <strong><%=messages.getString("bad_news")%></strong> <%=messages.getString("url_is_broken")%>
-                                                    </div>
+                                                <div id="alert-danger" class="alert alert-danger fade in">
+                                                        <!--button data-dismiss="alert" class="close" type="button">×</button-->
+                                                        <strong><%=messages.getString("bad_news")%></strong> <%=messages.getString("url_is_broken")%>
+                                                </div>
                                          <%
-                                                } else {
+                                            } else {
                                          %>
-                                                    <div class="alert alert-success fade in">
-                                                            <button data-dismiss="alert" class="close" type="button">×</button>
-                                                            <strong><%=messages.getString("url_fixed")%></strong> <%=messages.getString("press_save")%>
-                                                    </div>
+                                                <div id="alert-success" class="alert alert-success fade in">
+                                                        <!--button data-dismiss="alert" class="close" type="button">×</button-->
+                                                        <strong><%=messages.getString("url_fixed")%></strong> <%=messages.getString("press_save")%>
+                                                </div>
                                          <%
-                                                }
                                             }
                                          %>   
 
                                         <div class="ctrl">
                                             <%
                                                 if (isNew || isBroken) {
-                                             %>
-                                                    <a href="javascript:callUrl('<%=id%>','<%=brokenUrl%>','<%=lang%>');" class="btn btn-mini" title="Test your changes"><%=messages.getString("test")%></a>
-                                                    <a class="btn btn-mini disabled" title=<%=messages.getString("save_your_changes")%>><%=messages.getString("save")%></a>
-                                            <%                                                            
                                                 } else {
                                              %>       
-                                                    <a class="btn btn-mini disabled" title="<%=messages.getString("test_your_changes")%>"><%=messages.getString("test")%></a>
-                                                    <a href="javascript:callUrl2('<%=id%>','<%=brokenUrl%>','<%=lang%>');" class="btn btn-mini enabled"><%=messages.getString("save")%></a>
+                                                    <a id="save" href="javascript:callUrl2('<%=id%>','<%=brokenUrl%>','<%=lang%>');" class="btn btn-primary enabled"><%=messages.getString("save")%></a>
                                             <%       
                                                 }
                                              %>                                                           							
