@@ -18,18 +18,29 @@
 	<script type="text/javascript" src="js/modernizr.js"></script>
 </head>
 <body>
-	<div class="container">
+                <div style="width: auto;" class="container">
+                  <ul class="nav pull-right">
+                    <li class="dropdown" id="fat-menu">
+                      <a data-toggle="dropdown" class="dropdown-toggle" role="button" id="drop3" href="#">Language <b class="caret"></b></a>
+                      <ul aria-labelledby="drop3" role="menu" class="dropdown-menu">
+                        <li role="presentation"><a href="#" tabindex="-1" role="menuitem">English</a></li>
+                        <li role="presentation"><a href="#" tabindex="-1" role="menuitem">Português</a></li>
+                        <li role="presentation"><a href="#" tabindex="-1" role="menuitem">Español</a></li>
+                        <li role="presentation"><a href="#" tabindex="-1" role="menuitem">Francés</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+    
+	<div class="container">            
 		<div class="loginTitle">
 			<img src="img/logo.png" alt="BIREME Logo" />
 			<h1>BIREME Social CheckLinks</h1>
 		</div>
-		<form class="form-signin" action="list.html" method="post">
+		<form class="form-signin" action="authenticate" method="post">
 			<h2 class="form-signin-heading">Please sign in</h2>
-			<input type="email" class="input-block-level" name="email" placeholder="Email address" />
-			<input type="password" class="input-block-level" name="pass" placeholder="Password" />
-			<label class="checkbox">
-				<input type="checkbox" value="remember-me" /> Remember me
-			</label>
+			<input type="email" class="input-block-level" placeholder="Email address" name="email"/>
+			<input type="password" class="input-block-level" placeholder="Password" name="password"/>
 			<button class="btn btn-large btn-primary" type="submit">Sign in</button>
 		</form>
     </div> <!-- /container -->
