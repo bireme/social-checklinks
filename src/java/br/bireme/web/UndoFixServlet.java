@@ -65,20 +65,27 @@ public class UndoFixServlet extends HttpServlet {
         final Set<IdUrl> nfixed = new HashSet<IdUrl>();
         final String undoUrl = request.getParameter("undoUrl");
         final String undoUrlF = undoUrl.replace("<<amp;>>", "&");
+        final String group = request.getParameter("group");
+        final String lgroup = request.getParameter("lgroup");
         final String lang = request.getParameter("lang");
-
+        final String id = request.getParameter("id");
+        final String brokenUrl = request.getParameter("brokenUrl");
+        final String url = request.getParameter("url");
+        
         for (IdUrl iu : fixed) {
             if (iu.url.equals(undoUrlF)) {
-               if (! MongoOperations.undoUpdateDocument(coll, hcoll, iu.id)) {
+                if (! MongoOperations.undoUpdateDocument(coll, hcoll, iu.id)) {
                    throw new IOException("Undo operation failed.");
-               }
+                }
             } else {
                 nfixed.add(iu);
             }
         }
         session.setAttribute("IdUrls", nfixed);
         response.sendRedirect(response.encodeRedirectURL(
-                                     "showFixedUrls.jsp?group=0&lang=" + lang));
+                   "showFixedUrls.jsp?group=" + group + "&lgroup=" + lgroup 
+                  + "&lang=" + lang + "&id=" + id + "&brokenUrl=" + url
+                  + "&url=" + brokenUrl));
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

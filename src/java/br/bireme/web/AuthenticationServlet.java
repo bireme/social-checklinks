@@ -103,7 +103,7 @@ public class AuthenticationServlet extends HttpServlet {
         final HttpSession session = request.getSession();  
         final ResourceBundle messages = Tools.getMessages(lang);
         
-        boolean isAccountsWorking = false; //true;    
+        boolean isAccountsWorking = true;    
         RequestDispatcher dispatcher;
         
         session.removeAttribute("collCenter");
@@ -126,7 +126,7 @@ public class AuthenticationServlet extends HttpServlet {
                     session.setAttribute("user", username); // Login user.
                     session.setAttribute("centerIds", centerIds);   
                     dispatcher = context.getRequestDispatcher(
-                                           "/CenterFilterServlet?lang=" + lang);
+                                   "/CenterFilterServlet?lang=" + lang);
                 } else {
                     session.removeAttribute("user");
                     session.removeAttribute("centerIds");
@@ -146,7 +146,7 @@ public class AuthenticationServlet extends HttpServlet {
             ccs.add("PE1.1");
             ccs.add("BR1.1");
             dispatcher = context.getRequestDispatcher(
-                                   "/CenterFilterServlet?group=0&lang=" + lang);             
+                                   "/CenterFilterServlet?lang=" + lang);             
             session.setAttribute("user", username); // Login user.
             session.setAttribute("centerIds", ccs);
             dispatcher.forward(request, response);

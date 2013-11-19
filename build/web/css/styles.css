@@ -5,7 +5,6 @@
  *  
  */
 
-
 /***** COMMON ELEMENTS *****/
 h1 {font-size: 31.5px; margin-top: 30px;}
 h2 {font-size: 26px;}
@@ -87,4 +86,16 @@ h1, h2, h3 {line-height: 20px;}
 	font-size: 150%;
 	font-weight: bold;
 	color: #4d90fe;
+}
+
+/***** PAGINATION *****/
+.gotoPage {
+	margin:0 0 0 0 !important;
+	width: 72px !important;
+	border-radius:0px !important;
+	float: left;
+	border: 1px solid #dddddd !important;
+	border-left:0px !important;
+	font-size: 12px !important;
+	
 }

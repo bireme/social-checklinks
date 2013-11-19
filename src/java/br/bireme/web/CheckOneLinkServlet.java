@@ -55,6 +55,7 @@ public class CheckOneLinkServlet extends HttpServlet {
         final String url = request.getParameter("url");
         final String furl = request.getParameter("furl");
         final String lang = request.getParameter("lang");
+        final String group = request.getParameter("group");
         final String fixedUrl = furl.replace("<<amp;>>", "&");
         final int errCode = CheckUrl.check(fixedUrl);
         final boolean isBroken = CheckUrl.isBroken(errCode);
@@ -62,7 +63,7 @@ public class CheckOneLinkServlet extends HttpServlet {
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
                                     "/editRecord.jsp?id=" + id + "&url=" + url
                       + "&furl=" + furl + "&status=" + (isBroken ? 1 : 0)
-                      + "&lang=" + lang);
+                      + "&lang=" + lang + "&group=" + group);
         dispatcher.forward(request, response);
     }
 

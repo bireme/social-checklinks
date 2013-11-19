@@ -134,9 +134,6 @@ public class MongoOperations {
                 for (Object cc : ccsLst) {
                     ccs.add((String)cc);
                 }
-if (doc.get(DATE_FIELD) == null) {
-    int x = 0;
-}                
                 final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
                                            (String)doc.get(BROKEN_URL_FIELD),
                                            ccs,
@@ -164,6 +161,40 @@ if (doc.get(DATE_FIELD) == null) {
         return lst;
     }
     
+    public static List<IdUrl> getDocId(final DBCollection coll,
+                                       final Set<String> docId) {
+        if (coll == null) {
+            throw new NullPointerException("coll");
+        }
+        if (docId == null) {
+            throw new NullPointerException("docId");
+        }
+        final List<IdUrl> lst = new ArrayList<IdUrl>();
+        final SimpleDateFormat format = 
+                                    new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        
+        final BasicDBObject query = new BasicDBObject("_id", "/" + docId + "_.+/");
+        final DBCursor cursor = coll.find(query);
+        
+        while (cursor.hasNext()) {
+            final DBObject doc = cursor.next();
+            final BasicDBList ccsLst = (BasicDBList)doc.get(CENTER_FIELD);
+            final Set<String> ccs = new TreeSet<String>();
+
+            for (Object cc : ccsLst) {
+                ccs.add((String)cc);
+            }
+            final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
+                                       (String)doc.get(BROKEN_URL_FIELD),
+                                       ccs,
+                                  format.format((Date)doc.get(DATE_FIELD)));
+            lst.add(iu);
+
+        }
+        cursor.close();
+        return lst;
+    }
+                                            
     public static int getCentersUrlsNum(final DBCollection coll,
                                         final Set<String> centerIds,
                                         final String filter) {

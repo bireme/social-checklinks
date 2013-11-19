@@ -71,12 +71,15 @@ public class CheckManyLinksServlet extends HttpServlet {
         final String fixedUrl = (String)request.getParameter("furl");
         final String fixedUrl2 = fixedUrl.replaceAll("<<amp;>>", "&");
         final String lang = (String)request.getParameter("lang");
+        final String group = (String)request.getParameter("group");
+        final String id = (String)request.getParameter("id");
         final Set<IdUrl> fixed = MongoOperations.fixRelatedUrls(coll, hcoll,
                       user, centerIds, collCenterFilter, brokenUrl2, fixedUrl2);
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
-                                    "/showFixedUrls.jsp?group=0&lang=" + lang);
+                "/showFixedUrls.jsp?group=0&lgroup=" + group + "&lang=" + lang 
+             + "&id=" + id + "&brokenUrl=" + brokenUrl2 + "&url=" + fixedUrl2);
 
-        session.setAttribute("url", fixedUrl2);
+        //session.setAttribute("url", fixedUrl2);
         session.setAttribute("IdUrls", fixed);
         //request.("group", "0");
         //request.setAttribute("lang", lang);
