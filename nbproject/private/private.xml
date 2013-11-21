@@ -3,11 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/scl/BrokenLinks.java</file>
+            <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/scl/Tools.java</file>
             <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/web/editRecord.jsp</file>
+            <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/scl/CheckUrl.java</file>
+            <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/accounts/Authentication.java</file>
             <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/web/list.jsp</file>
-            <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/scl/MongoOperations.java</file>
-            <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/scl/IdUrl.java</file>
             <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/web/showFixedUrls.jsp</file>
         </group>
     </open-files>

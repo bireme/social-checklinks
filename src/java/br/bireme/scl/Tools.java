@@ -22,10 +22,17 @@
 
 package br.bireme.scl;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -167,6 +174,57 @@ public class Tools {
         }
 
         return ResourceBundle.getBundle("i18n.MessagesBundle", currentLocale);
+    }
+    
+    public static Set<String> getTitles(final String surl) throws IOException {
+        if (surl == null) {
+            throw new NullPointerException("surl");
+        }
+        final URL url = new URL(surl);
+        final HttpURLConnection connection =
+                                        (HttpURLConnection)url.openConnection();
+        connection.setDoInput(true);
+        connection.connect();
+
+        final StringBuilder builder = new StringBuilder();
+        final int respCode = connection.getResponseCode();
+        final boolean respCodeOk = (respCode == 200);
+        final BufferedReader reader;
+
+        if (respCodeOk) {
+            reader = new BufferedReader(new InputStreamReader(
+                                                  connection.getInputStream()));
+        } else {
+            reader = new BufferedReader(new InputStreamReader(
+                                                  connection.getErrorStream()));
+        }
+        while (true) {
+            final String line = reader.readLine();
+            if (line == null) {
+                break;
+            }
+            builder.append(line);
+            builder.append("\n");
+        }
+        reader.close();
+
+        if (!respCodeOk) {
+            throw new IOException(builder.toString());
+        }
+        
+        final String pattern = "\\<\\!-- title --\\>\\s+\\<h3\\>(.*?)\\</h3\\>";
+        final Matcher mat = Pattern.compile(pattern).matcher(builder.toString());
+        
+        if (!mat.find()) {
+            throw new IOException("Title not found");
+        }
+        final Set<String> set  = new HashSet<String>();
+        final String[] titles = mat.group(1).split("/");
+        for (String title : titles) {
+            set.add(title.trim());
+        }
+        
+        return set;
     }
 
     public static void main(final String[] args) {

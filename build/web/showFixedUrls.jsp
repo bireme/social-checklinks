@@ -94,7 +94,7 @@
 	<link href="css/styles.css" rel="stylesheet">
 	<style type="text/css">
             html, body {
-                height: 100%; /* The html and body elements cannot have any padding or margin. */
+                height: 98.3%; /* The html and body elements cannot have any padding or margin. */
                 padding-top: 15px;
             }
         </style>

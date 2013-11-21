@@ -42,6 +42,10 @@
         <servlet-name>CenterFilterServlet</servlet-name>
         <servlet-class>br.bireme.web.CenterFilterServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>GoogleSearchServlet</servlet-name>
+        <servlet-class>br.bireme.web.GoogleSearchServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>authenticate</servlet-name>
         <url-pattern>/authenticate</url-pattern>
@@ -61,6 +65,10 @@
     <servlet-mapping>
         <servlet-name>CenterFilterServlet</servlet-name>
         <url-pattern>/CenterFilterServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GoogleSearchServlet</servlet-name>
+        <url-pattern>/GoogleSearchServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

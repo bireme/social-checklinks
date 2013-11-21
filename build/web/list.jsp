@@ -74,7 +74,7 @@
 	<link href="css/styles.css" rel="stylesheet"/>
 	<style type="text/css">
             html, body {
-                height: 100%; /* The html and body elements cannot have any padding or margin. */
+                height: 98.3%; /* The html and body elements cannot have any padding or margin. */
                 padding-top: 15px;
             }
         </style>
@@ -83,7 +83,8 @@
 	<link rel="stylesheet" type="text/css" href="css/ie.css" />
 	<![endif]-->
 	<script type="text/javascript" src="js/modernizr.js"></script>        
-        <script LANGUAGE="JavaScript" TYPE="text/javascript">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script LANGUAGE="JavaScript" TYPE="text/javascript">        
             
         function postToUrl(path, params) {
             var form = document.createElement("form");
@@ -116,7 +117,6 @@
                 postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>'});
             }
         }
-        
         </script>        
     </head>
         <body>
@@ -223,7 +223,7 @@
                                     <th>CC</th>
                                 <% } %>
                                 <th><%=messages.getString("since")%></th>
-                                <th><%=messages.getString("action")%></th>                                                
+                                <th><%=messages.getString("actions")%></th>                                                
                             </tr>
                         </thead>
                         <tbody>
@@ -236,7 +236,7 @@
                             %>
                                 <tr>                                    
                                     <td><%=cur%></td>
-                                    <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>"><%=id%></a></td>
+                                    <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>"><%=id%></a></td>                                    
                                     <td><a target="_blank" href="<%=iu.url%>"><%=iu.url.trim()%></a></td>  
                                     <td>
                                     <%
@@ -253,9 +253,9 @@
                                     %>             
                                     </td>
                                     <td><%=iu.since%></td>    
-                                    <!--td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td-->
-                                    <td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',lang:'<%=lang%>',group:'<%=group%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"> &nbsp;<%=messages.getString("edit")%>&nbsp; </a></td>
-                                    <!--td><a href="javascript:postToUrl('editRecord.jsp', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',status:'-1',lang:'<%=lang%>'});" title="Edit broken url" class="btn btn-mini btn-primary"><i class="icon-pencil icon-white"></i> <%=messages.getString("edit")%></a></td-->
+                                    <td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',lang:'<%=lang%>',group:'<%=group%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"> &nbsp;<%=messages.getString("edit")%></a>&nbsp;&nbsp;
+                                        <!--a href="javascript:postToUrl('<%=response.encodeRedirectURL("GoogleSearchServlet")%>', {url:'http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary" target="_blank">Google</a></td-->
+                                    <a href="GoogleSearchServlet?url=http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary" target="_blank">Google</a></td>
                                     <td></td>
                                 </tr>
                             <%
