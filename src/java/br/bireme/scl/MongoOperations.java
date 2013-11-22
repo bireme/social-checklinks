@@ -162,7 +162,7 @@ public class MongoOperations {
     }
     
     public static List<IdUrl> getDocId(final DBCollection coll,
-                                       final Set<String> docId) {
+                                       final String docId) {
         if (coll == null) {
             throw new NullPointerException("coll");
         }
@@ -174,6 +174,40 @@ public class MongoOperations {
                                     new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         
         final BasicDBObject query = new BasicDBObject("_id", "/" + docId + "_.+/");
+        final DBCursor cursor = coll.find(query);
+        
+        while (cursor.hasNext()) {
+            final DBObject doc = cursor.next();
+            final BasicDBList ccsLst = (BasicDBList)doc.get(CENTER_FIELD);
+            final Set<String> ccs = new TreeSet<String>();
+
+            for (Object cc : ccsLst) {
+                ccs.add((String)cc);
+            }
+            final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
+                                       (String)doc.get(BROKEN_URL_FIELD),
+                                       ccs,
+                                  format.format((Date)doc.get(DATE_FIELD)));
+            lst.add(iu);
+
+        }
+        cursor.close();
+        return lst;
+    }
+    
+    public static List<IdUrl> getDocUrl(final DBCollection coll,
+                                        final String docUrl) {
+        if (coll == null) {
+            throw new NullPointerException("coll");
+        }
+        if (docUrl == null) {
+            throw new NullPointerException("docUrl");
+        }
+        final List<IdUrl> lst = new ArrayList<IdUrl>();
+        final SimpleDateFormat format = 
+                                    new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        
+        final BasicDBObject query = new BasicDBObject("burl", docUrl);
         final DBCursor cursor = coll.find(query);
         
         while (cursor.hasNext()) {

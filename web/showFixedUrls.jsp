@@ -151,9 +151,9 @@
                         <a class="brand" href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("bireme_social_checklinks")%></a>
                         <div class="nav-collapse collapse">
                             <ul class="nav">
-                                <li class="active"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>'});"><%=messages.getString("home")%></a></li>
+                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>'});"><%=messages.getString("home")%></a></li>
                                 <li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
-                                <li><a href="http://reddes.bvsalud.org/" target="_blank"><%=messages.getString("contact")%></a></li>
+                                <li><a href="http://feedback.bireme.org/feedback/?application=socialchecklinks&version=<%=BrokenLinks.VERSION%>&lang=<%=lang%>" target="_blank"><%=messages.getString("contact")%></a></li>
                             </ul>
                             <ul class="nav pull-right">
                                 <li class="dropdown">
@@ -269,7 +269,7 @@
 	</div>
 	<footer id="footer">
             <div class="container">
-                <strong><%=messages.getString("bireme_social_checklinks")%> - <%= BrokenLinks.VERSION %> - 2013</strong><br/>
+                <strong><%=messages.getString("bireme_social_checklinks")%> - V<%= BrokenLinks.VERSION %> - 2013</strong><br/>
                 <%=messages.getString("source_code")%>: <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>
             </div>
 	</footer>

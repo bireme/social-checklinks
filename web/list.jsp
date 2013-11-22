@@ -45,12 +45,25 @@
     final DBCollection coll = (DBCollection)context.getAttribute("collection");
     final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");
+    final String idFilter = request.getParameter("idFilter");
+    final String urlFilter = request.getParameter("urlFilter");
     final int group = Integer.parseInt(request.getParameter("group"));
     final int groupSize = 17;
-    final List<IdUrl> lst = MongoOperations.getCenterUrls(coll, centerIds, 
+    final List<IdUrl> lst;
+    final int maxUrls;
+    
+    if (idFilter != null) {
+        lst = MongoOperations.getDocId(coll, idFilter);
+        maxUrls = lst.size();
+    } else if (urlFilter != null) {
+        lst = null;
+        maxUrls = 0;
+    } else {
+        lst = MongoOperations.getCenterUrls(coll, centerIds, 
                           collCenterFilter, (group * groupSize) + 1, groupSize);
-    final int maxUrls = MongoOperations.getCentersUrlsNum(coll, centerIds,             
+        maxUrls = MongoOperations.getCentersUrlsNum(coll, centerIds,             
                                                               collCenterFilter);
+    }
     final int mod = (maxUrls % groupSize);
     int lastGroup = (maxUrls / groupSize);
     lastGroup = ((maxUrls > 0) && (mod == 0)) ? lastGroup - 1 : lastGroup;
@@ -132,14 +145,9 @@
                             <a class="brand" href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("bireme_social_checklinks")%></a>
                             <div class="nav-collapse collapse">
                                 <ul class="nav">
-                                    <li class="active"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("home")%></a></li>
+                                    <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("home")%></a></li>
                                     <li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("contact")%><b class="caret"></b></a>
-                                        <ul class="dropdown-menu">
-                                            <li>Serviço de feedback do usuário</li>
-                                        </ul>
-                                    </li>
+                                    <li><a href="http://feedback.bireme.org/feedback/?application=socialchecklinks&version=<%=BrokenLinks.VERSION%>&lang=<%=lang%>" target="_blank"><%=messages.getString("contact")%></a></li>
                                 </ul>
                                 <ul class="nav pull-right">
                                     <li class="dropdown">
@@ -179,11 +187,23 @@
                                 <th>
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+                                            <%=messages.getString("database")%>
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#">LILACS</a></li>
+                                            <li><input type="text" class="search-query" placeholder="Search"></li>
+                                        </ul>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
                                             ID
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu">
-                                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {group:'<%=group%>',lang:'<%=lang%>'});">All</a></li>
+                                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>'});">All</a></li>
                                             <li><input type="text" class="search-query" placeholder="Search"></li>
                                         </ul>
                                     </div>
@@ -195,7 +215,7 @@
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu">
-                                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {group:'<%=group%>',lang:'<%=lang%>'});">All</a></li>
+                                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>'});">All</a></li>
                                             <li><input type="text" class="search-query" placeholder="Search"></li>
                                         </ul>
                                     </div>                                
@@ -208,11 +228,11 @@
                                                 <span class="caret"></span>
                                             </button>
                                             <ul class="dropdown-menu">
-                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {group:'<%=group%>',lang:'<%=lang%>'});">All</a></li>
+                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>'});">All</a></li>
                                                 <%
                                                 for (String id : centerIds)  {                               
                                                 %>    
-                                                    <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {group:'<%=group%>',lang:'<%=lang%>',collFilterCenter:'<%=id%>'});"><%=id%></a></li>
+                                                    <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>',collFilterCenter:'<%=id%>'});"><%=id%></a></li>
                                                 <%
                                                 } 
                                                 %>
@@ -236,6 +256,7 @@
                             %>
                                 <tr>                                    
                                     <td><%=cur%></td>
+                                    <td>LILACS</td>
                                     <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>"><%=id%></a></td>                                    
                                     <td><a target="_blank" href="<%=iu.url%>"><%=iu.url.trim()%></a></td>  
                                     <td>
@@ -253,10 +274,9 @@
                                     %>             
                                     </td>
                                     <td><%=iu.since%></td>    
-                                    <td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',lang:'<%=lang%>',group:'<%=group%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"> &nbsp;<%=messages.getString("edit")%></a>&nbsp;&nbsp;
+                                    <td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',lang:'<%=lang%>',group:'<%=group%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"> &nbsp;<%=messages.getString("edit")%>&nbsp;</a>&nbsp;&nbsp;
                                         <!--a href="javascript:postToUrl('<%=response.encodeRedirectURL("GoogleSearchServlet")%>', {url:'http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary" target="_blank">Google</a></td-->
-                                    <a href="GoogleSearchServlet?url=http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary" target="_blank">Google</a></td>
-                                    <td></td>
+                                    <a href="GoogleSearchServlet?url=http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>" title="<%=messages.getString("look_for_document")%>" class="btn btn-mini btn-primary" target="_blank">Google</a></td>
                                 </tr>
                             <%
                                 cur++;
@@ -291,7 +311,7 @@
                                                                                                 
 	<footer id="footer" class="footer">
             <div class="container">
-                <strong>BIREME Social CheckLinks - <%= BrokenLinks.VERSION %> - 2013</strong><br/>
+                <strong>BIREME Social CheckLinks - V<%= BrokenLinks.VERSION %> - 2013</strong><br/>
                 <%=messages.getString("source_code")%>: <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>
             </div>
 	</footer>
