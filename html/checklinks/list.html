@@ -58,12 +58,29 @@
 		<div class="container">
 			<h1>Broken Links</h1>
 			<p>The list is composed of broken links or set of broken links that have the same structure.</p>
-			
 			<table class="table table-condensed">
 				<thead>
 					<tr>
 						<th>#</th>
-						<th>URL</th>
+						<th>
+							<div class="nav-collapse">
+								<ul style="list-style: none; padding: 0px; margin: 0px;">
+									<li class="dropdown">
+									<a class="dropdown-toggle" href="#" data-toggle="dropdown">ID <strong class="caret"></strong></a>
+									<div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+										<ul style="list-style: none; padding: 0px; margin: 0px;">
+											<li style="margin-bottom: 8px;"><a href="javascript:postToUrl('CenterFilterServlet;jsessionid=5A5A2E3F549C25F65FE0F05AB2BDB65D', {group:'0',lang:'en'});">All</a></li>
+	                                    <li>
+											<form action="[YOUR ACTION]" method="post" >
+												<input type="text" style="margin-bottom: 15px;" placeholder="Search an ID" />
+											</form>
+	                                    </li>
+										</ul>
+									</div>
+									</li>
+								</ul>
+							</div>
+						</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
