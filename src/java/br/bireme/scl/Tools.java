@@ -134,7 +134,7 @@ public class Tools {
         final Set<IdUrl> outSet = new HashSet<IdUrl>();
         for (IdUrl iu : inSet) {
             final String newUrl = iu.url.replaceFirst(oldPattern, newPattern);
-            outSet.add(new IdUrl(iu.id, newUrl, iu.ccs, iu.since));
+            outSet.add(new IdUrl(iu.id, newUrl, iu.ccs, iu.since, iu.mst));
         }
         return outSet;
     }
@@ -227,6 +227,25 @@ public class Tools {
         return set;
     }
 
+    public static String limitString(final String in,
+                                     final int len) {
+        if (in == null) {
+            throw new NullPointerException("in");
+        }
+        if (len <= 0) {
+            throw new IllegalArgumentException("len[" + len + "] <= 0");
+        }
+        final int strLen = in.length();
+        final String out;
+        
+        if (strLen <= len) {
+            out = in;
+        } else {
+            out = in.substring(0, len) + "...";
+        }
+        return out;
+    }
+    
     public static void main(final String[] args) {
         String[] result;
 

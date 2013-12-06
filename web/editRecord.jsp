@@ -205,7 +205,8 @@
                 <div class="urlEditor">
                     <div class="urlLine">
                         <div class="seg-q">
-                            <div class="URL-tested">ID: <a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id2%>"><%=id2%></a>  &nbsp;&nbsp;URL: <a target="_blank" href="<%=brokenUrl%>"><%=brokenUrl%></a> &#8594; ?</div>
+                            <div class="URL-tested">ID: <a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id2%>"><%=id2%></a></div>
+                            <div class="URL-tested">URL: <a target="_blank" href="<%=brokenUrl%>"><%=brokenUrl%></a> &#8594; ?</div>
                             <div class="URL-tested2">
                                 <input type="url" id="input-1" class="span8" onfocus="hideSave()" value="<%=fixedUrl%>"/> &nbsp;
                                 <a href="javascript:callUrl('<%=id%>','<%=brokenUrl%>','<%=lang%>');" class="btn btn-primary" title="Test your changes"><%=messages.getString("test")%></a>

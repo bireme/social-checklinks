@@ -103,7 +103,7 @@ public class AuthenticationServlet extends HttpServlet {
         final HttpSession session = request.getSession();  
         final ResourceBundle messages = Tools.getMessages(lang);
         
-        boolean isAccountsWorking = false; //true;    
+        boolean isAccountsWorking = true;    
         RequestDispatcher dispatcher;
         
         session.removeAttribute("collCenter");

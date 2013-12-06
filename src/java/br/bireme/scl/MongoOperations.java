@@ -63,6 +63,7 @@ public class MongoOperations {
     public static final String USER_FIELD = "user";
     public static final String AUTO_FIX_FIELD = "autofix";
     public static final String EXPORTED_FIELD = "exported";
+    public static final String MST_FIELD = "mst";
 
     public static Set<String> getCenters(final DBCollection coll) {
         if (coll == null) {
@@ -137,7 +138,8 @@ public class MongoOperations {
                 final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
                                            (String)doc.get(BROKEN_URL_FIELD),
                                            ccs,
-                                    format.format((Date)(doc.get(DATE_FIELD))));
+                                    format.format((Date)(doc.get(DATE_FIELD))),
+                                           (String)doc.get(MST_FIELD));
                 lst.add(iu);                 
             }
             cursor.close();
@@ -152,12 +154,57 @@ public class MongoOperations {
                 final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
                                            (String)doc.get(BROKEN_URL_FIELD),
                                            ccs,
-                                      format.format((Date)doc.get(DATE_FIELD)));
+                                      format.format((Date)doc.get(DATE_FIELD)),
+                                           (String)doc.get(MST_FIELD));
                 lst.add(iu);
                 
             }
             cursor.close();
         }
+        return lst;
+    }
+    
+    public static List<IdUrl> getDocMaster(final DBCollection coll,
+                                           final String docMast,
+                                           final int from,
+                                           final int count) {
+        if (coll == null) {
+            throw new NullPointerException("coll");
+        }
+        if (docMast == null) {
+            throw new NullPointerException("docMast");
+        }
+        if (from < 1) {
+            throw new IllegalArgumentException("from[" + from + "] < 1");
+        }
+        if (count < 1) {
+            throw new IllegalArgumentException("count[" + count + "] < 1");
+        }
+        
+        final List<IdUrl> lst = new ArrayList<IdUrl>();
+        final SimpleDateFormat format = 
+                                    new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        
+        final BasicDBObject query = new BasicDBObject("mst", docMast);
+        final DBCursor cursor = coll.find(query).skip(from - 1).limit(count);
+        
+        while (cursor.hasNext()) {
+            final DBObject doc = cursor.next();
+            final BasicDBList ccsLst = (BasicDBList)doc.get(CENTER_FIELD);
+            final Set<String> ccs = new TreeSet<String>();
+
+            for (Object cc : ccsLst) {
+                ccs.add((String)cc);
+            }
+            final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
+                                       (String)doc.get(BROKEN_URL_FIELD),
+                                       ccs,
+                                  format.format((Date)doc.get(DATE_FIELD)),
+                                       (String)doc.get(MST_FIELD));
+            lst.add(iu);
+
+        }
+        cursor.close();
         return lst;
     }
     
@@ -172,8 +219,8 @@ public class MongoOperations {
         final List<IdUrl> lst = new ArrayList<IdUrl>();
         final SimpleDateFormat format = 
                                     new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        
-        final BasicDBObject query = new BasicDBObject("_id", "/" + docId + "_.+/");
+        final Pattern pat = Pattern.compile(docId.trim() + "_\\d+");
+        final BasicDBObject query = new BasicDBObject("_id", pat);
         final DBCursor cursor = coll.find(query);
         
         while (cursor.hasNext()) {
@@ -187,9 +234,9 @@ public class MongoOperations {
             final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
                                        (String)doc.get(BROKEN_URL_FIELD),
                                        ccs,
-                                  format.format((Date)doc.get(DATE_FIELD)));
+                                  format.format((Date)doc.get(DATE_FIELD)),
+                                       (String)doc.get(MST_FIELD));
             lst.add(iu);
-
         }
         cursor.close();
         return lst;
@@ -221,7 +268,8 @@ public class MongoOperations {
             final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
                                        (String)doc.get(BROKEN_URL_FIELD),
                                        ccs,
-                                  format.format((Date)doc.get(DATE_FIELD)));
+                                  format.format((Date)doc.get(DATE_FIELD)),
+                                       (String)doc.get(MST_FIELD));
             lst.add(iu);
 
         }
@@ -229,6 +277,24 @@ public class MongoOperations {
         return lst;
     }
                                             
+    public static int getDocMasterNum(final DBCollection coll,
+                                      final String docMast) {
+        if (coll == null) {
+            throw new NullPointerException("coll");
+        }
+        if (docMast == null) {
+            throw new NullPointerException("docMast");
+        }
+        int num;
+        final BasicDBObject query = new BasicDBObject("mst", docMast);
+        final DBCursor cursor = coll.find(query);
+        
+        num = cursor.size();
+        cursor.close();
+        
+        return num;
+    }
+    
     public static int getCentersUrlsNum(final DBCollection coll,
                                         final Set<String> centerIds,
                                         final String filter) {
@@ -272,7 +338,7 @@ public class MongoOperations {
         for (IdUrl iu : getCenterUrls(coll, centerIds, filter)) {
             mat.reset(iu.url);
             if (mat.find()) {
-                set.add(new IdUrl(iu.id, iu.url, iu.ccs, iu.since));
+                set.add(new IdUrl(iu.id, iu.url, iu.ccs, iu.since, iu.mst));
             }
         }
         return set;

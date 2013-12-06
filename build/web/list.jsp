@@ -45,19 +45,24 @@
     final DBCollection coll = (DBCollection)context.getAttribute("collection");
     final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");
+    final String dbFilter = request.getParameter("dbFilter");
     final String idFilter = request.getParameter("idFilter");
     final String urlFilter = request.getParameter("urlFilter");
     final int group = Integer.parseInt(request.getParameter("group"));
     final int groupSize = 17;
     final List<IdUrl> lst;
     final int maxUrls;
-    
-    if (idFilter != null) {
+
+    if (dbFilter != null) {
+        lst = MongoOperations.getDocMaster(coll, dbFilter,
+                                           (group * groupSize) + 1, groupSize);
+        maxUrls = MongoOperations.getDocMasterNum(coll, dbFilter);
+    } else if (idFilter != null) {
         lst = MongoOperations.getDocId(coll, idFilter);
         maxUrls = lst.size();
     } else if (urlFilter != null) {
-        lst = null;
-        maxUrls = 0;
+        lst = MongoOperations.getDocUrl(coll, urlFilter);
+        maxUrls = lst.size();
     } else {
         lst = MongoOperations.getCenterUrls(coll, centerIds, 
                           collCenterFilter, (group * groupSize) + 1, groupSize);
@@ -121,8 +126,8 @@
         function isNumber(n) {
             return !isNaN(parseFloat(n)) && isFinite(n);
         }
-        function gotoPage() {
-            var goto = document.getElementById('gotoPage').value;
+        function gotoPage(elemId) {
+            var goto = document.getElementById(elemId).value;
             
             if (goto && isNumber(goto)) {
                 postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:(goto - 1),lang:'<%=lang%>'});
@@ -184,60 +189,88 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
-                                            <%=messages.getString("database")%>
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="#">LILACS</a></li>
-                                            <li><input type="text" class="search-query" placeholder="Search"></li>
+                                <th>                                    
+                                    <div class="nav-collapse">
+                                        <ul style="list-style: none; padding: 0px; margin: 0px;">
+                                            <li class="dropdown">
+                                                <a class="dropdown-toggle" href="#" data-toggle="dropdown"><%=messages.getString("database")%><strong class="caret"></strong></a>
+                                                <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                                                    <ul style="list-style: none; padding: 0px; margin: 0px;">
+                                                        <li style="margin-bottom: 8px;">
+                                                            <li style="margin-bottom: 8px;">
+                                                                <a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {lang:'<%=lang%>',group:'0'});"><%=messages.getString("all")%></a>
+                                                            </li>
+                                                        </li>
+                                                        <li>
+                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0")%>' method="post" >
+                                                                <input name="dbFilter" type="text" style="margin-bottom: 15px;" placeholder="<%=messages.getString("search_database")%>" />
+                                                            </form>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </li>
                                         </ul>
-                                    </div>
+                                    </div>                                    
+                                </th>
+                                <th>                                    
+                                    <div class="nav-collapse">
+                                        <ul style="list-style: none; padding: 0px; margin: 0px;">
+                                            <li class="dropdown">
+                                                <a class="dropdown-toggle" href="#" data-toggle="dropdown">ID<strong class="caret"></strong></a>
+                                                <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                                                    <ul style="list-style: none; padding: 0px; margin: 0px;">
+                                                        <li style="margin-bottom: 8px;"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {lang:'<%=lang%>',group:'0'});"><%=messages.getString("all")%></a></li>
+                                                        <li>
+                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0")%>' method="post" >
+                                                                <input name="idFilter" type="text" style="margin-bottom: 15px;" placeholder="<%=messages.getString("search_id")%>" />
+                                                            </form>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>                                                                                                                                                                                   
                                 </th>
                                 <th>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
-                                            ID
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>'});">All</a></li>
-                                            <li><input type="text" class="search-query" placeholder="Search"></li>
+                                    <div class="nav-collapse">
+                                        <ul style="list-style: none; padding: 0px; margin: 0px;">
+                                            <li class="dropdown">
+                                                <a class="dropdown-toggle" href="#" data-toggle="dropdown">URL<strong class="caret"></strong></a>
+                                                <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                                                    <ul style="list-style: none; padding: 0px; margin: 0px;">
+                                                        <li style="margin-bottom: 8px;"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {lang:'<%=lang%>', group:'0'});"><%=messages.getString("all")%></a></li>
+                                                        <li>
+                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0")%>' method="post" >
+                                                                <input name="urlFilter" type="text" style="margin-bottom: 15px;" placeholder="<%=messages.getString("search_url")%>" />
+                                                            </form>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </li>
                                         </ul>
-                                    </div>
-                                </th>
-                                <th>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
-                                            URL
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>'});">All</a></li>
-                                            <li><input type="text" class="search-query" placeholder="Search"></li>
-                                        </ul>
-                                    </div>                                
+                                    </div>                                                                                                                                                                                                                                                                                                                                                                      
                                 </th>                                                
                                 <% if (showCenters) { %>
                                     <th>
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
-                                                <%=(collCenterFilter == null) ? messages.getString("all") + " CCs" : collCenterFilter%>
-                                                <span class="caret"></span>
-                                            </button>
-                                            <ul class="dropdown-menu">
-                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>'});">All</a></li>
-                                                <%
-                                                for (String id : centerIds)  {                               
-                                                %>    
-                                                    <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>',collFilterCenter:'<%=id%>'});"><%=id%></a></li>
-                                                <%
-                                                } 
-                                                %>
+                                        <div class="nav-collapse">
+                                            <ul style="list-style: none; padding: 0px; margin: 0px;">
+                                                <li class="dropdown">
+                                                    <a class="dropdown-toggle" href="#" data-toggle="dropdown">CC<strong class="caret"></strong></a>
+                                                    <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                                                        <ul style="list-style: none; padding: 0px; margin: 0px;">
+                                                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>', group:'0'});"><%=messages.getString("all")%></a></li>
+                                                            <%
+                                                            for (String id : centerIds)  {                               
+                                                            %>    
+                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>',collFilterCenter:'<%=id%>'});"><%=id%></a></li>
+                                                            <%
+                                                            } 
+                                                            %>
+                                                        </ul>
+                                                    </div>
+                                                </li>
                                             </ul>
-                                        </div>
+                                        </div>        
                                     </th>       
                                 <% } else { %>
                                     <th>CC</th>
@@ -256,9 +289,9 @@
                             %>
                                 <tr>                                    
                                     <td><%=cur%></td>
-                                    <td>LILACS</td>
+                                    <td><%=iu.mst%></td>
                                     <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>"><%=id%></a></td>                                    
-                                    <td><a target="_blank" href="<%=iu.url%>"><%=iu.url.trim()%></a></td>  
+                                    <td><a target="_blank" href="<%=iu.url%>"><%=Tools.limitString(iu.url.trim(),77)%></a></td>  
                                     <td>
                                     <%
                                     for (String cc : iu.ccs) {
@@ -300,8 +333,8 @@
                                 }
                             }    
                             %>
-                            <li><input class="gotoPage" id="gotoPage" type="text" placeholder='<%=messages.getString("goto_page")%>' value="" onkeydown="if (event.keyCode == 13) gotoPage()"  /></li>
-                            <li class="enabled"><a href="javascript:gotoPage();">&raquo;</a></li>
+                            <li><input class="gotoPage" id="gotoPage" type="text" placeholder='<%=messages.getString("goto_page")%>' value="" onkeydown="if (event.keyCode == 13) gotoPage('gotoPage')"  /></li>
+                            <li class="enabled"><a href="javascript:gotoPage('gotoPage');">&raquo;</a></li>
                             <!--li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>'});">&raquo;</a></li-->
                         </ul>
                     </div>   
