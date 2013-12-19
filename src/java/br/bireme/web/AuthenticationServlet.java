@@ -76,6 +76,7 @@ public class AuthenticationServlet extends HttpServlet {
             
             context.setAttribute("collection", coll);
             context.setAttribute("historycoll", hcoll);
+            context.setAttribute("readOnlyMode", false);
         } catch (UnknownHostException ex) {
             Logger.getLogger(AuthenticationServlet.class.getName())
                                                    .log(Level.SEVERE, null, ex);

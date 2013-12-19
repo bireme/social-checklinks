@@ -83,7 +83,8 @@ public class MongoOperations {
     public static List<IdUrl> getCenterUrls(final DBCollection coll,
                                             final Set<String> centerIds,
                                             final String filter) {
-        return getCenterUrls(coll, centerIds, filter, 1, Integer.MAX_VALUE);
+        return getCenterUrls(coll, centerIds, filter, 1, Integer.MAX_VALUE, 
+                                                                         true);
     }
     
     /**
@@ -97,7 +98,8 @@ public class MongoOperations {
                                             final Set<String> centerIds,
                                             final String filter,
                                             final int from,
-                                            final int count) {
+                                            final int count,
+                                            final boolean ascendingOrder) {
         if (coll == null) {
             throw new NullPointerException("coll");
         }
@@ -114,6 +116,9 @@ public class MongoOperations {
         final List<IdUrl> lst = new ArrayList<IdUrl>();
         final SimpleDateFormat format = 
                                     new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        final BasicDBObject sort = new BasicDBObject(DATE_FIELD, 
+                                                       ascendingOrder ? 1 : -1);
+
         if (filter == null) {
             final BasicDBList cclst = new BasicDBList();
 
@@ -122,11 +127,9 @@ public class MongoOperations {
             }
             BasicDBObject in = new BasicDBObject("$in", cclst);
             final BasicDBObject query = new BasicDBObject(CENTER_FIELD, in);
-            final BasicDBObject sort = new BasicDBObject(DATE_FIELD, 1);
             //final DBCursor cursor = coll.find(query).skip(from - 1).limit(count);
             final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
                                                                   .limit(count);
-
             while (cursor.hasNext()) {
                 final DBObject doc = cursor.next();
                 final BasicDBList ccsLst = (BasicDBList)doc.get(CENTER_FIELD);
@@ -145,7 +148,8 @@ public class MongoOperations {
             cursor.close();
         } else {
             final BasicDBObject query = new BasicDBObject(CENTER_FIELD, filter);
-            final DBCursor cursor = coll.find(query).skip(from - 1).limit(count);
+            final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
+                                                                  .limit(count);
             
             while (cursor.hasNext()) {
                 final DBObject doc = cursor.next();

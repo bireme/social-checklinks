@@ -38,10 +38,11 @@
                                 + "&errMsg=" + messages.getString("timed_out"));
         return;
     }
-    
+        
     final String collCenterFilter = 
                                (String)session.getAttribute("collFilterCenter");
     final ServletContext context = getServletContext();
+    final boolean readOnlyMode = (Boolean)context.getAttribute("readOnlyMode");
     final DBCollection coll = (DBCollection)context.getAttribute("collection");
     final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");
@@ -52,6 +53,9 @@
     final int groupSize = 17;
     final List<IdUrl> lst;
     final int maxUrls;
+    
+    String order = request.getParameter("order");
+    order = (order == null) ? "descending" : order;
 
     if (dbFilter != null) {
         lst = MongoOperations.getDocMaster(coll, dbFilter,
@@ -65,7 +69,8 @@
         maxUrls = lst.size();
     } else {
         lst = MongoOperations.getCenterUrls(coll, centerIds, 
-                          collCenterFilter, (group * groupSize) + 1, groupSize);
+               collCenterFilter, (group * groupSize) + 1, groupSize,
+               order.equals("ascending"));
         maxUrls = MongoOperations.getCentersUrlsNum(coll, centerIds,             
                                                               collCenterFilter);
     }
@@ -130,9 +135,9 @@
             var goto = document.getElementById(elemId).value;
             
             if (goto && isNumber(goto)) {
-                postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:(goto - 1),lang:'<%=lang%>'});
+                postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:(goto - 1),lang:'<%=lang%>',order:'<%=order%>'});
             } else {
-                postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>'});
+                postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>',order:'<%=order%>'});
             }
         }
         </script>        
@@ -147,10 +152,10 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
                             </button>
-                            <a class="brand" href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("bireme_social_checklinks")%></a>
+                            <a class="brand" href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',order:'<%=order%>'});"><%=messages.getString("bireme_social_checklinks")%></a>
                             <div class="nav-collapse collapse">
                                 <ul class="nav">
-                                    <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("home")%></a></li>
+                                    <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',order:'<%=order%>'});"><%=messages.getString("home")%></a></li>
                                     <li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
                                     <li><a href="http://feedback.bireme.org/feedback/?application=socialchecklinks&version=<%=BrokenLinks.VERSION%>&lang=<%=lang%>" target="_blank"><%=messages.getString("contact")%></a></li>
                                 </ul>
@@ -158,10 +163,10 @@
                                     <li class="dropdown">
                                         <a href="http://reddes.bvsalud.org/" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("language")%> <b class="caret"></b></a>
                                         <ul class="dropdown-menu">
-                                            <li <%if(lang.equals("en")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'en'});">English</a></li>
-                                            <li <%if(lang.equals("pt")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'pt'});">Português</a></li>
-                                            <li <%if(lang.equals("es")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'es'});">Español</a></li>
-                                            <!--li<%if(lang.equals("fr")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'fr'});">Francés</a></li-->
+                                            <li <%if(lang.equals("en")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'en',order:'<%=order%>'});">English</a></li>
+                                            <li <%if(lang.equals("pt")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'pt',order:'<%=order%>'});">Português</a></li>
+                                            <li <%if(lang.equals("es")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'es',order:'<%=order%>'});">Español</a></li>
+                                            <!--li<%if(lang.equals("fr")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'fr',order:'<%=order%>'});">Francés</a></li-->
                                         </ul>
                                     </li>
                                     <li class="dropdown">
@@ -177,14 +182,19 @@
 		</div>
 
 		<div class="container">
-                    <div class="breadcrumb"
+                    <div class="breadcrumb">
                         <ul class="breadcrumb">
                             <li class="active"><%=messages.getString("list")%></li>
                         </ul>     
                     </div>
                     <h1><%=messages.getString("broken_links")%></h1>
                     <p><%=messages.getString("the_list")%></p>
-                                                  
+                    <% if(readOnlyMode) { %>
+                        <div class="alert alert-danger fade in">
+                            <button data-dismiss="alert" class="close" type="button">×</button>
+                            <strong>Base de dados em manutenção</strong> Edição das URLs temporariamente indisponível.
+                        </div>                  
+                    <% } %>
                     <table class="table table-condensed">
                         <thead>
                             <tr>
@@ -198,11 +208,11 @@
                                                     <ul style="list-style: none; padding: 0px; margin: 0px;">
                                                         <li style="margin-bottom: 8px;">
                                                             <li style="margin-bottom: 8px;">
-                                                                <a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {lang:'<%=lang%>',group:'0'});"><%=messages.getString("all")%></a>
-                                                            </li>
+                                                                <a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {lang:'<%=lang%>',group:'0',order:'<%=order%>'});"><%=messages.getString("all")%></a>                                                                
+                                                            </li>                                                            
                                                         </li>
                                                         <li>
-                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0")%>' method="post" >
+                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0&order="+ order)%>' method="post" >
                                                                 <input name="dbFilter" type="text" style="margin-bottom: 15px;" placeholder="<%=messages.getString("search_database")%>" />
                                                             </form>
                                                         </li>
@@ -221,7 +231,7 @@
                                                     <ul style="list-style: none; padding: 0px; margin: 0px;">
                                                         <li style="margin-bottom: 8px;"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {lang:'<%=lang%>',group:'0'});"><%=messages.getString("all")%></a></li>
                                                         <li>
-                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0")%>' method="post" >
+                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0$order=" + order)%>' method="post" >
                                                                 <input name="idFilter" type="text" style="margin-bottom: 15px;" placeholder="<%=messages.getString("search_id")%>" />
                                                             </form>
                                                         </li>
@@ -238,9 +248,9 @@
                                                 <a class="dropdown-toggle" href="#" data-toggle="dropdown">URL<strong class="caret"></strong></a>
                                                 <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
                                                     <ul style="list-style: none; padding: 0px; margin: 0px;">
-                                                        <li style="margin-bottom: 8px;"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {lang:'<%=lang%>', group:'0'});"><%=messages.getString("all")%></a></li>
+                                                        <li style="margin-bottom: 8px;"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {lang:'<%=lang%>', group:'0',order:'<%=order%>'});"><%=messages.getString("all")%></a></li>
                                                         <li>
-                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0")%>' method="post" >
+                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0&prder=" + order)%>' method="post" >
                                                                 <input name="urlFilter" type="text" style="margin-bottom: 15px;" placeholder="<%=messages.getString("search_url")%>" />
                                                             </form>
                                                         </li>
@@ -258,11 +268,11 @@
                                                     <a class="dropdown-toggle" href="#" data-toggle="dropdown">CC<strong class="caret"></strong></a>
                                                     <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
                                                         <ul style="list-style: none; padding: 0px; margin: 0px;">
-                                                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>', group:'0'});"><%=messages.getString("all")%></a></li>
+                                                            <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>', group:'0',order:'<%=order%>'});"><%=messages.getString("all")%></a></li>
                                                             <%
                                                             for (String id : centerIds)  {                               
                                                             %>    
-                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>',collFilterCenter:'<%=id%>'});"><%=id%></a></li>
+                                                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>',collFilterCenter:'<%=id%>',order:'<%=order%>'});"><%=id%></a></li>
                                                             <%
                                                             } 
                                                             %>
@@ -275,7 +285,21 @@
                                 <% } else { %>
                                     <th>CC</th>
                                 <% } %>
-                                <th><%=messages.getString("since")%></th>
+                                <th>
+                                    <div class="nav-collapse">
+                                        <ul style="list-style: none; padding: 0px; margin: 0px;">
+                                            <li class="dropdown">
+                                                <a class="dropdown-toggle" href="#" data-toggle="dropdown"><%=messages.getString("since")%><strong class="caret"></strong></a>
+                                                <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                                                    <ul style="list-style: none; padding: 0px; margin: 0px;">                                                        
+                                                        <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>',collFilterCenter:0,order:'ascending'});"><%=messages.getString("ascending_order")%></a></li>
+                                                        <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CenterFilterServlet")%>', {lang:'<%=lang%>',collFilterCenter:0,order:'descending'});"><%=messages.getString("descending_order")%></a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </th>
                                 <th><%=messages.getString("actions")%></th>                                                
                             </tr>
                         </thead>
@@ -285,7 +309,7 @@
                             for (IdUrl iu : lst) {
                                 final String nurl = iu.url.replace("&","<<amp;>>");
                                 final String id = iu.id.substring(0,iu.id.indexOf("_"));
-                                boolean first = true;                                                                                       
+                                boolean first = true;                                                                                    
                             %>
                                 <tr>                                    
                                     <td><%=cur%></td>
@@ -307,9 +331,13 @@
                                     %>             
                                     </td>
                                     <td><%=iu.since%></td>    
-                                    <td><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',lang:'<%=lang%>',group:'<%=group%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"> &nbsp;<%=messages.getString("edit")%>&nbsp;</a>&nbsp;&nbsp;
-                                        <!--a href="javascript:postToUrl('<%=response.encodeRedirectURL("GoogleSearchServlet")%>', {url:'http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary" target="_blank">Google</a></td-->
-                                    <a href="GoogleSearchServlet?url=http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>" title="<%=messages.getString("look_for_document")%>" class="btn btn-mini btn-primary" target="_blank">Google</a></td>
+                                    <td>
+                                        <% if(!readOnlyMode) { %>
+                                            <a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',lang:'<%=lang%>',group:'<%=group%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"> &nbsp;<%=messages.getString("edit")%>&nbsp;</a>&nbsp;&nbsp;
+                                            <!--a href="javascript:postToUrl('<%=response.encodeRedirectURL("GoogleSearchServlet")%>', {url:'http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary" target="_blank">Google</a></td-->
+                                        <% } %>
+                                        <a href="GoogleSearchServlet?url=http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>" title="<%=messages.getString("look_for_document")%>" class="btn btn-mini btn-primary" target="_blank">Google</a>
+                                    </td>
                                 </tr>
                             <%
                                 cur++;
@@ -319,7 +347,7 @@
                     </table>
                     <div class="pagination pagination-centered">                               
                         <ul>
-                            <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});">&laquo;</a></li>
+                            <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',order:'<%=order%>'});">&laquo;</a></li>
                                     <%                                        
                             for (int idx = initGroup; idx < initGroup+5; idx++) {
                                 if (idx == group) {
@@ -328,14 +356,14 @@
                             <%
                                 } else if (idx <= lastGroup) {
                             %>
-                                    <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=idx%>',lang:'<%=lang%>'});"><%=idx+1%></a></li>
+                                    <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=idx%>',lang:'<%=lang%>',order:'<%=order%>'});"><%=idx+1%></a></li>
                             <%
                                 }
                             }    
                             %>
                             <li><input class="gotoPage" id="gotoPage" type="text" placeholder='<%=messages.getString("goto_page")%>' value="" onkeydown="if (event.keyCode == 13) gotoPage('gotoPage')"  /></li>
                             <li class="enabled"><a href="javascript:gotoPage('gotoPage');">&raquo;</a></li>
-                            <!--li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>'});">&raquo;</a></li-->
+                            <!--li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>',order:'<%=order%>'});">&raquo;</a></li-->
                         </ul>
                     </div>   
                 </div> <!-- /container -->
