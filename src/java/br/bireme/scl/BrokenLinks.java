@@ -83,6 +83,9 @@ public class BrokenLinks {
     public static final String MST_FIELD = "mst";
     public static final String URL_TAG_FIELD = "urlTag";
     public static final String CC_TAGS_FIELD = "ccTags";
+    
+    /* HistoryBrokenLinks collection fields */
+    public static final String ELEM_LST_FIELD = "elems";
 
     public static final String DEF_FIELD = ID_FIELD;
 

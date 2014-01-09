@@ -22,14 +22,16 @@
 
 package br.bireme.scl;
 
+import static br.bireme.scl.BrokenLinks.HISTORY_COL;
+import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
 import static br.bireme.scl.BrokenLinks.BROKEN_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.CENTER_FIELD;
 import static br.bireme.scl.BrokenLinks.DATE_FIELD;
-import static br.bireme.scl.BrokenLinks.ID_FIELD;
-import static br.bireme.scl.BrokenLinks.HISTORY_COL;
-import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
-import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
+import static br.bireme.scl.BrokenLinks.ELEM_LST_FIELD;
+import static br.bireme.scl.BrokenLinks.ID_FIELD;
+import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
+import static br.bireme.scl.BrokenLinks.MSG_FIELD;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -372,22 +374,40 @@ public class MongoOperations {
         }
 
         final BasicDBObject query = new BasicDBObject(ID_FIELD, docId);
-        final DBCursor cursor = coll.find(query);
+        final BasicDBObject doc = (BasicDBObject)coll.findOne(query);
 
-        if (!cursor.hasNext()) {
+        if (doc == null) {
             throw new IOException("document not found id[" + docId + "]");
         }
-        final BasicDBObject doc = (BasicDBObject)cursor.next();
-        cursor.close();
-
+        
+        final BasicDBList lsthdoc;
+        BasicDBObject hdoc = (BasicDBObject)hcoll.findOne(query);
+        if (hdoc == null) {
+            hdoc = new BasicDBObject();
+            hdoc.append(ID_FIELD, docId);
+            hdoc.append(MST_FIELD, (String)doc.get(MST_FIELD));
+            hdoc.append(DATE_FIELD, (Date)doc.get(DATE_FIELD));
+            lsthdoc = new BasicDBList();
+            hdoc.append(ELEM_LST_FIELD, lsthdoc);
+        } else {
+            lsthdoc = (BasicDBList)hdoc.get(ELEM_LST_FIELD);
+        }
+        
+        final BasicDBObject hcurdoc = new BasicDBObject();
+        hcurdoc.append(BROKEN_URL_FIELD, (String)doc.get(BROKEN_URL_FIELD))
+               .append(FIXED_URL_FIELD, fixedUrl)
+               .append(MSG_FIELD, (String)doc.get(MSG_FIELD))
+               .append(CENTER_FIELD, (BasicDBList)doc.get(CENTER_FIELD))               
+               .append(AUTO_FIX_FIELD, automatic)
+               .append(EXPORTED_FIELD, false)
+               .append(LAST_UPDATE_FIELD, new Date())
+               .append(USER_FIELD, user);
+                              
+        lsthdoc.add(0, hcurdoc);
+        
         final boolean ret1 = coll.remove(doc, WriteConcern.SAFE)
                                                            .getLastError().ok();
-
-        doc.append(FIXED_URL_FIELD, fixedUrl).append(USER_FIELD, user)
-           .append(AUTO_FIX_FIELD, automatic).append(EXPORTED_FIELD, false)
-           .append(LAST_UPDATE_FIELD, new Date());
-
-        final boolean ret2 = hcoll.save(doc).getLastError().ok();
+        final boolean ret2 = hcoll.save(hdoc).getLastError().ok();
 
         return ret1 && ret2;
     }
@@ -407,21 +427,34 @@ public class MongoOperations {
         }
 
         final BasicDBObject query = new BasicDBObject(ID_FIELD, docId);
-        final DBCursor cursor = hcoll.find(query);
+        final BasicDBObject hdoc = (BasicDBObject)hcoll.findOne(query);
 
-        if (!cursor.hasNext()) {
+        if (hdoc == null) {
             throw new IOException("document not found id[" + docId + "]");
         }
-        final BasicDBObject doc = (BasicDBObject)cursor.next();
-        cursor.close();
-
-        final boolean ret1 = hcoll.remove(doc, WriteConcern.SAFE)
-                                                           .getLastError().ok();
-        doc.removeField(FIXED_URL_FIELD);
-        doc.removeField(USER_FIELD);
-        doc.removeField(AUTO_FIX_FIELD);
-
-        final boolean ret2 = coll.save(doc).getLastError().ok();
+        final BasicDBList lst = (BasicDBList)hdoc.get(ELEM_LST_FIELD);
+        final BasicDBObject hcurdoc = (BasicDBObject)lst.remove(0);
+        if (hcurdoc == null) {
+            throw new IOException("document last element found. Id[" + docId 
+                                                                         + "]");
+        }
+        final BasicDBObject doc = new BasicDBObject();        
+        doc.put(DATE_FIELD, (Date)hdoc.get(DATE_FIELD));
+        doc.put(LAST_UPDATE_FIELD, (Date)hcurdoc.get(LAST_UPDATE_FIELD));
+        doc.put(MST_FIELD, (String)hdoc.get(MST_FIELD));
+        doc.put(ID_FIELD, docId);
+        doc.put(BROKEN_URL_FIELD, (String)hcurdoc.get(BROKEN_URL_FIELD));
+        doc.put(MSG_FIELD, (String)hcurdoc.get(MSG_FIELD));
+        doc.put(CENTER_FIELD, (BasicDBList)hcurdoc.get(CENTER_FIELD));    
+        
+        final boolean ret1 = coll.save(doc).getLastError().ok();
+        final boolean ret2;
+        
+        if (lst.isEmpty()) {
+            ret2 = hcoll.remove(hdoc, WriteConcern.SAFE).getLastError().ok();
+        } else {
+            ret2 = hcoll.save(hdoc, WriteConcern.SAFE).getLastError().ok();
+        }       
 
         return ret1 && ret2;
     }

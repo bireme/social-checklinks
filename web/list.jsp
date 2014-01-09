@@ -231,7 +231,7 @@
                                                     <ul style="list-style: none; padding: 0px; margin: 0px;">
                                                         <li style="margin-bottom: 8px;"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {lang:'<%=lang%>',group:'0'});"><%=messages.getString("all")%></a></li>
                                                         <li>
-                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0$order=" + order)%>' method="post" >
+                                                            <form action='<%=response.encodeRedirectURL("list.jsp?lang="+ lang + "&group=0&order=" + order)%>' method="post" >
                                                                 <input name="idFilter" type="text" style="margin-bottom: 15px;" placeholder="<%=messages.getString("search_id")%>" />
                                                             </form>
                                                         </li>

@@ -28,8 +28,9 @@ import static br.bireme.scl.BrokenLinks.FIXED_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
-import static br.bireme.scl.BrokenLinks.DATE_FIELD;
+import static br.bireme.scl.BrokenLinks.ELEM_LST_FIELD;
 import static br.bireme.scl.MongoOperations.EXPORTED_FIELD;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -41,9 +42,8 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -63,7 +63,7 @@ public class Gizmo {
         }
     }
 
-    Map<String,Elem>loadRecords(final String host,
+    Collection<Elem>loadRecords(final String host,
                                 final int port,
                                 final String user,
                                 final String password) throws IOException {
@@ -81,52 +81,53 @@ public class Gizmo {
         }
 
         final DBCollection coll = db.getCollection(HISTORY_COL);
-        final BasicDBObject query = new BasicDBObject(EXPORTED_FIELD, false);
+        final String fldName = ELEM_LST_FIELD + ".0." + EXPORTED_FIELD;
+        final BasicDBObject query = new BasicDBObject(fldName, false);
         final DBCursor cursor = coll.find(query);
-        final Map<String, Elem> map = getLastElements(coll, cursor);
+        final Collection<Elem> col = getNotExportedElements(coll, cursor);
 
         cursor.close();
 
-        return map;
+        return col;
     }
 
-    Map<String,Elem> getLastElements(final DBCollection coll,
-                                     final DBCursor cursor)
+    Collection<Elem> getNotExportedElements(final DBCollection coll,
+                                            final DBCursor cursor)
                                                            throws IOException {
         assert coll != null;
         assert cursor != null;
 
-        final Map<String,Elem> map = new HashMap<String,Elem>();
+        final Collection<Elem> col = new ArrayList<Elem>();
 
         while (cursor.hasNext()) {
             final BasicDBObject obj = (BasicDBObject)cursor.next();
-            final String field = obj.getString(ID_FIELD);
-            final long time = obj.getDate(DATE_FIELD).getTime();
-
-            Elem elem = map.get(field);
-            if (elem == null) {
-                elem = new Elem(field);
-                elem.burl = obj.getString(BROKEN_URL_FIELD);
-                elem.furl = obj.getString(FIXED_URL_FIELD);
-                elem.date = time;
-                map.put(field, elem);
-            } else {
-                if (time > elem.date) {
-                    elem.burl = obj.getString(BROKEN_URL_FIELD);
-                    elem.furl = obj.getString(FIXED_URL_FIELD);
-                    elem.date = time;
-                }
+            final String id = obj.getString(ID_FIELD);
+            final BasicDBList lst = (BasicDBList)obj.get(ELEM_LST_FIELD);            
+            if (lst == null) {
+                throw new NullPointerException("Elem list espected");
             }
-            obj.put(EXPORTED_FIELD, true);
-            final WriteResult res = coll.save(obj, WriteConcern.SAFE);
+            final BasicDBObject lelem = (BasicDBObject)lst.get(0);
+            if (lelem == null) {
+                throw new NullPointerException("Elem element espected");
+            }
+            if (!lelem.getBoolean(EXPORTED_FIELD)) {
+                final Elem elem = new Elem(id);
+                elem.burl = lelem.getString(BROKEN_URL_FIELD);
+                elem.furl = lelem.getString(FIXED_URL_FIELD);
+                elem.date = 0;
+                col.add(elem);
+                
+                lelem.put(EXPORTED_FIELD, true);
+                final WriteResult res = coll.save(obj, WriteConcern.SAFE);
 
-            if (!res.getCachedLastError().ok()) {
-                throw new IOException("write doc[" + obj.getString(ID_FIELD)
+                if (!res.getCachedLastError().ok()) {
+                    throw new IOException("write doc[" + obj.getString(ID_FIELD)
                                                                   + "] failed");
+                }
             }
         }
 
-        return map;
+        return col;
     }
 
     public void createGizmo(final String host,
@@ -148,11 +149,9 @@ public class Gizmo {
             throw new NullPointerException("encoding");
         }
 
-        final Map<String,Elem> map = loadRecords(host, port, user, password);
+        final Collection<Elem> elems = loadRecords(host, port, user, password);
         final BufferedWriter out = new BufferedWriter(new OutputStreamWriter
                                     (new FileOutputStream(gizFile), encoding));
-
-        final Collection<Elem> elems = map.values();
 
         for (Elem elem : elems) {
             final String[] split = elem.id.split("_", 2);
