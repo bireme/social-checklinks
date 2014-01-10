@@ -3,8 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/web/AuthenticationServlet.java</file>
             <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/scl/BrokenLinks.java</file>
+            <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/accounts/Authentication.java</file>
             <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/scl/MongoOperations.java</file>
+            <file>file:/home/heitor/Projetos/SocialChecklinks/social-checklinks/src/java/br/bireme/scl/Gizmo.java</file>
         </group>
     </open-files>
 </project-private>

@@ -30,6 +30,7 @@ import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import static br.bireme.scl.BrokenLinks.ELEM_LST_FIELD;
 import static br.bireme.scl.MongoOperations.EXPORTED_FIELD;
+import static br.bireme.scl.MongoOperations.MST_FIELD;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -55,7 +56,7 @@ public class Gizmo {
         String id;
         String burl;
         String furl;
-        long date;
+        String dbase;
 
         Elem(String id) {
             assert id != null;
@@ -114,7 +115,7 @@ public class Gizmo {
                 final Elem elem = new Elem(id);
                 elem.burl = lelem.getString(BROKEN_URL_FIELD);
                 elem.furl = lelem.getString(FIXED_URL_FIELD);
-                elem.date = 0;
+                elem.dbase = obj.getString(MST_FIELD);
                 col.add(elem);
                 
                 lelem.put(EXPORTED_FIELD, true);
@@ -155,7 +156,7 @@ public class Gizmo {
 
         for (Elem elem : elems) {
             final String[] split = elem.id.split("_", 2);
-            out.append(split[0] + "|" + "|" + split[1] + "|" + 
+            out.append(elem.dbase + "|" + split[0] + "|" + split[1] + "|" + 
                                             elem.burl + "|" + elem.furl + "\n");
         }
 

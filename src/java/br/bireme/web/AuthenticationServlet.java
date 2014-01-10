@@ -56,13 +56,13 @@ public class AuthenticationServlet extends HttpServlet {
     public void init() {
         try {
             final ServletContext context = getServletContext();
-            final String host = context.getInitParameter("host"); 
+            final String host = context.getInitParameter("host");
             final int port = Integer.parseInt(context.getInitParameter("port")); 
             final String user = context.getInitParameter("username"); 
             final String password = context.getInitParameter("password"); 
             final MongoClient mongoClient = new MongoClient(host, port);
             final DB db = mongoClient.getDB(SOCIAL_CHECK_DB);
-            
+                                    
             if (! user.trim().isEmpty()) {
                 final boolean auth = 
                                   db.authenticate(user, password.toCharArray());        
@@ -119,7 +119,8 @@ public class AuthenticationServlet extends HttpServlet {
             }                        
             
             try {            
-                final Authentication auth = new Authentication();
+                final Authentication auth = new Authentication(
+                                     context.getInitParameter("accounts_host"));
                 final JSONObject user = auth.getUser(username, password);
                 final Set<String> centerIds = auth.getCenterIds(user);
                                 

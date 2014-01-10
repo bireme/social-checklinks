@@ -257,8 +257,8 @@ public class BrokenLinks {
         final BasicDBObject doc = (BasicDBObject)coll.findOne(query);
 
         if (doc == null) {
-            throw new IOException("Missing collection: " + coll.getName() +
-                                                    " or document:" + mstName);
+            throw new IOException("Missing fields: collection[" + coll.getName() 
+                    + "] or master name[" + mstName + "]");
         }
 
         return doc.getInt(URL_TAG_FIELD);

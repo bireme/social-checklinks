@@ -54,6 +54,10 @@ public class Authentication {
         this(DEFAULT_HOST, DEFAULT_PORT);
     }
 
+    public Authentication(final String host) {
+        this(host, DEFAULT_PORT);
+    }
+    
     public Authentication(final String host,
                           final int port) {
         if (host == null) {

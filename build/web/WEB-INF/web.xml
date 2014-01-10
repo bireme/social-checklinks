@@ -4,7 +4,7 @@
     <context-param>
         <description>MongoDb host</description>
         <param-name>host</param-name>
-        <param-value>ts01vm.bireme.br</param-value>
+        <param-value>hm02vm.bireme.br</param-value>
         <!--param-value>localhost</param-value-->
     </context-param>
     <context-param>
@@ -21,6 +21,11 @@
         <description>MongoDb database user password</description>
         <param-name>password</param-name>
         <param-value> </param-value>
+    </context-param>
+    <context-param>
+        <description>Bireme Accounts host</description>
+        <param-name>accounts_host</param-name>
+        <param-value>accounts.bireme.org</param-value>
     </context-param>
     <servlet>
         <servlet-name>authenticate</servlet-name>
