@@ -372,7 +372,7 @@
                                                                                                 
 	<footer id="footer" class="footer">
             <div class="container">
-                <strong>BIREME Social CheckLinks - V<%= BrokenLinks.VERSION %> - 2013</strong><br/>
+                <strong><%=messages.getString("bireme_social_checklinks")%> - V<%= BrokenLinks.VERSION %> - 2013</strong><br/>
                 <%=messages.getString("source_code")%>: <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>
             </div>
 	</footer>
