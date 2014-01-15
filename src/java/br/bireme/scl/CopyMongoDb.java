@@ -69,6 +69,10 @@ public class CopyMongoDb {
         final Set<String> colls = fromDb.getCollectionNames();
 
         for (String cname : colls) {
+            if (cname.equals("system.indexes")) {
+                continue;
+            }
+            
             final DBCollection fromColl = fromDb.getCollection(cname);
             final DBCollection toColl = toDb.getCollection(cname);
             
