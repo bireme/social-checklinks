@@ -156,8 +156,8 @@ public class Gizmo {
 
         for (Elem elem : elems) {
             final String[] split = elem.id.split("_", 2);
-            out.append(elem.dbase + "|" + split[0] + "|" + split[1] + "|" + 
-                                            elem.burl + "|" + elem.furl + "\n");
+            out.append(elem.burl + "|" + elem.furl + "|" + elem.dbase + "|" 
+                                       + split[0] + "|" + split[1] + "\n");
         }
 
         out.close();
