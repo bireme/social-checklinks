@@ -211,7 +211,7 @@ public class BrokenLinks {
         lst.add(1);
         lst.add(920);
         lst.add(930);
-        doc.put(MST_FIELD, "lilacs");
+        doc.put(MST_FIELD, "LILACS");
         doc.put(URL_TAG_FIELD, 8);
         doc.put(CC_TAGS_FIELD, lst);
 

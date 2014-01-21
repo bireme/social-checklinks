@@ -64,7 +64,7 @@ public class UndoFixServlet extends HttpServlet {
         final Set<IdUrl> fixed = (Set<IdUrl>)session.getAttribute("IdUrls");
         final Set<IdUrl> nfixed = new HashSet<IdUrl>();
         final String undoUrl = request.getParameter("undoUrl");
-        final String undoUrlF = undoUrl.replace("<<amp;>>", "&");
+        final String undoUrlF = undoUrl.replaceAll("<<amp;>>", "&");
         final String lang = request.getParameter("lang");
 
         for (IdUrl iu : fixed) {

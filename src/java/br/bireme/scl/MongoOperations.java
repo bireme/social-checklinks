@@ -451,7 +451,7 @@ public class MongoOperations {
         final boolean ret2;
         
         if (lst.isEmpty()) {
-            ret2 = hcoll.remove(hdoc, WriteConcern.SAFE).getLastError().ok();
+            ret2 = hcoll.remove(query, WriteConcern.SAFE).getLastError().ok();
         } else {
             ret2 = hcoll.save(hdoc, WriteConcern.SAFE).getLastError().ok();
         }       

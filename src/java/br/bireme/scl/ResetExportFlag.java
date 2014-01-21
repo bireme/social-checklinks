@@ -22,7 +22,10 @@
 
 package br.bireme.scl;
 
+import static br.bireme.scl.BrokenLinks.ELEM_LST_FIELD;
+import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
 import static br.bireme.scl.MongoOperations.EXPORTED_FIELD;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -53,26 +56,30 @@ public class ResetExportFlag {
         final MongoClient client = new MongoClient(host, port); 
         final DB db = client.getDB(database);
         final DBCollection coll = db.getCollection(collection);
-        
+        final String prefix = ELEM_LST_FIELD + ".0.";
+        final BasicDBObject query;
         final DBCursor cursor;
         
-        if (sdate == null) {
-            cursor = coll.find();
-        } else {
+        if (sdate == null) {            
+            query = new BasicDBObject(prefix + EXPORTED_FIELD, true);            
+        } else {            
             final SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
-            final Date date = simple.parse(sdate);
-            final BasicDBObject query = new BasicDBObject("date", date);            
-            cursor = coll.find(query);
+            final Date date = simple.parse(sdate);            
+
+            final BasicDBList list = new BasicDBList();        
+            list.add(new BasicDBObject(prefix + EXPORTED_FIELD, true));
+            list.add(new BasicDBObject(prefix + LAST_UPDATE_FIELD, 
+                                              new BasicDBObject("$gte", date)));
+            query = new BasicDBObject("$and", list);                        
         }
+        cursor = coll.find(query);
         
         while (cursor.hasNext()) {
             final BasicDBObject doc = (BasicDBObject)cursor.next();
-            final boolean exported = (Boolean)doc.get(EXPORTED_FIELD);
-            
-            if (exported) {
-                doc.put(EXPORTED_FIELD, false);
-                coll.save(doc);
-            }
+            final BasicDBList list = (BasicDBList)doc.get(ELEM_LST_FIELD);
+            final BasicDBObject elem = (BasicDBObject)list.get(0);
+            elem.put(EXPORTED_FIELD, false);
+            coll.save(doc);
         }
         cursor.close();
     }
@@ -91,7 +98,7 @@ public class ResetExportFlag {
         String date = null;
         int port = BrokenLinks.DEFAULT_PORT;
         
-        for (int idx = 1; idx < args.length; idx++) {
+        for (int idx = 3; idx < args.length; idx++) {
             if (args[idx].startsWith("-init_date=")) {
                 date = args[idx].substring(11);
             } else if (args[idx].startsWith("-mongo_port=")) {
