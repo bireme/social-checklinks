@@ -26,6 +26,7 @@ import br.bireme.scl.IdUrl;
 import br.bireme.scl.MongoOperations;
 import com.mongodb.DBCollection;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -41,6 +42,7 @@ import javax.servlet.http.HttpSession;
  * date: 20130806
  */
 public class CheckManyLinksServlet extends HttpServlet {
+    private static final String CODEC = "UTF-8";
 
     /**
      * Processes requests for both HTTP
@@ -66,25 +68,21 @@ public class CheckManyLinksServlet extends HttpServlet {
                                (String)session.getAttribute("collFilterCenter");
         final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");         
-        final String brokenUrl = (String)request.getParameter("url");
-        final String brokenUrl2 = brokenUrl.replaceAll("<<amp;>>", "&");
-        final String fixedUrl = (String)request.getParameter("furl");
-        final String fixedUrl2 = fixedUrl.replaceAll("<<amp;>>", "&");
+        final String brokenUrl_D = (String)request.getParameter("url");
+        final String brokenUrl_E = URLEncoder.encode(brokenUrl_D, CODEC);
+        final String fixedUrl_D = (String)request.getParameter("furl");
+        final String fixedUrl_E = URLEncoder.encode(fixedUrl_D, CODEC);
         final String lang = (String)request.getParameter("lang");
         final String group = (String)request.getParameter("group");
         final String id = (String)request.getParameter("id");
         final Set<IdUrl> fixed = MongoOperations.fixRelatedUrls(coll, hcoll,
-                      user, centerIds, collCenterFilter, brokenUrl2, fixedUrl2);
+                    user, centerIds, collCenterFilter, brokenUrl_D, fixedUrl_D);
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
                 "/showFixedUrls.jsp?group=0&lgroup=" + group + "&lang=" + lang 
-             + "&id=" + id + "&brokenUrl=" + brokenUrl2 + "&url=" + fixedUrl2);
+            + "&id=" + id + "&brokenUrl=" + brokenUrl_E + "&url=" + fixedUrl_E);
 
-        //session.setAttribute("url", fixedUrl2);
         session.setAttribute("IdUrls", fixed);
-        //request.("group", "0");
-        //request.setAttribute("lang", lang);
         dispatcher.forward(request, response);
-        //response.sendRedirect("showFixedUrls.jsp?group=0&lang=" + lang);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

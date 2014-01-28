@@ -28,14 +28,15 @@
 
 <%@page language="java"%>
 <%@page session="true" %>
-<%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*" %>
+<%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*,java.net.* " %>
 <%@page contentType="text/html;charset=UTF-8" %>
 
 <% 
+    final String CODEC = "UTF-8";
     String lang = (String)request.getParameter("lang");
     if (lang == null) {
         lang = "en";
-    }
+    }    
     final ResourceBundle messages = Tools.getMessages(lang);
     final String user = (String)session.getAttribute("user");
     
@@ -47,8 +48,10 @@
 
     //final String url = (String)session.getAttribute("url");
     final Set<IdUrl> fixed = (Set<IdUrl>)session.getAttribute("IdUrls");
-    final String url = (String)request.getParameter("url");
+    final String url_D = (String)request.getParameter("url");
+    final String url_E = URLEncoder.encode(url_D, CODEC);
     final String brokenUrl = request.getParameter("brokenUrl");
+    final String brokenUrl_D = URLDecoder.decode(brokenUrl, CODEC);
     final int fixedUrls = fixed.size();
     final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");
@@ -128,10 +131,11 @@
         
         function confirmUndo(url) {
             if (confirm('<%=messages.getString("undo_confirm")%>')) {
+                var xurl = encodeURIComponent(url);
                  postToUrl('<%=response.encodeRedirectURL("UndoFixServlet")%>', 
-                 {undoUrl:url, group:'<%=group%>', lgroup:'<%=lgroup%>', 
+                 {undoUrl:xurl, group:'<%=group%>', lgroup:'<%=lgroup%>', 
                   lang:'<%=lang%>', id:'<%=id%>', brokenUrl:'<%=brokenUrl%>',
-                  url:'<%=url%>'});
+                  url:'<%=url_D%>'});
             } else {
                 // Do nothing!
             }
@@ -159,10 +163,10 @@
                                 <li class="dropdown">
                                     <a href="http://reddes.bvsalud.org/" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("language")%> <b class="caret"></b></a>
                                     <ul class="dropdown-menu">
-                                        <li <%if(lang.equals("en")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lgroup:'<%=lgroup%>',lang:'en',id:'<%=id%>',brokenUrl:'<%=brokenUrl%>',url:'<%=url%>'});">English</a></li>
-                                        <li <%if(lang.equals("pt")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lgroup:'<%=lgroup%>',lang:'pt',id:'<%=id%>',brokenUrl:'<%=brokenUrl%>',url:'<%=url%>'});">Português</a></li>
-                                        <li <%if(lang.equals("es")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lgroup:'<%=lgroup%>',lang:'es',id:'<%=id%>',brokenUrl:'<%=brokenUrl%>',url:'<%=url%>'});">Español</a></li>
-                                        <!--li <%if(lang.equals("fr")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lgroup:'<%=lgroup%>',lang:'fr',id:'<%=id%>',brokenUrl:'<%=brokenUrl%>',url:'<%=url%>'});">Francés</a></li-->
+                                        <li <%if(lang.equals("en")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lgroup:'<%=lgroup%>',lang:'en',id:'<%=id%>',brokenUrl:'<%=brokenUrl%>',url:'<%=url_D%>'});">English</a></li>
+                                        <li <%if(lang.equals("pt")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lgroup:'<%=lgroup%>',lang:'pt',id:'<%=id%>',brokenUrl:'<%=brokenUrl%>',url:'<%=url_D%>'});">Português</a></li>
+                                        <li <%if(lang.equals("es")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lgroup:'<%=lgroup%>',lang:'es',id:'<%=id%>',brokenUrl:'<%=brokenUrl%>',url:'<%=url_D%>'});">Español</a></li>
+                                        <!--li <%if(lang.equals("fr")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=group%>',lgroup:'<%=lgroup%>',lang:'fr',id:'<%=id%>',brokenUrl:'<%=brokenUrl%>',url:'<%=url_D%>'});">Francés</a></li-->
                                     </ul>
                                 </li>
                                 <li class="dropdown">
@@ -181,7 +185,7 @@
                 <div class="breadcrumb"
                     <ul class="breadcrumb">
                         <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lgroup%>',lang:'<%=lang%>'});"><%=messages.getString("list")%></a> <span class="divider">/</span></li>
-                        <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=id%>',url:'<%=url%>',furl:'<%=url%>',lang:'<%=lang%>',group:'<%=lgroup%>'});"><%=messages.getString("edit")%></a> <span class="divider">/</span></li>
+                        <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=url_E%>',lang:'<%=lang%>',group:'<%=lgroup%>'});"><%=messages.getString("edit")%></a> <span class="divider">/</span></li>
                         <li class="active"><%=messages.getString("show_changed")%></li>
                     </ul>     
                 </div>
@@ -190,7 +194,7 @@
                     <div class="urlLine">
                         <div class="seg-q">
                             <div class="URL-tested">ID: <a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id2%>"><%=id2%></a></div>
-                            <div class="URL-tested">URL: <a target="_blank" href="<%=brokenUrl%>"><%=brokenUrl%></a>  &#8594; <a target="_blank" href="<%=url%>"><%=url%></a></div>
+                            <div class="URL-tested">URL: <a target="_blank" href="<%=brokenUrl%>"><%=brokenUrl_D%></a>  &#8594; <a target="_blank" href="<%=url_D%>"><%=url_D%></a></div>
                         </div>
                     </div>
                     <p><%=fixedUrls%> <%=messages.getString("urls_were_affected")%></p>
@@ -211,7 +215,7 @@
                                 <%
                                 int cur = from + 1;
                                 for (IdUrl iu : fixedX) {
-                                    final String nurl = iu.url.replace("&","<<amp;>>");
+                                    final String nurl_E = URLEncoder.encode(iu.url, CODEC);
                                     final String xid = iu.id.substring(0,iu.id.indexOf("_"));
                                     boolean first = true;                                                                                       
                                 %>
@@ -235,7 +239,7 @@
                                         %>             
                                         </td>
                                         <td><%=iu.since%></td>
-                                        <td><a href="javascript:confirmUndo('<%=nurl%>');" title="<%=messages.getString("undo_last_url")%>" class="btn btn-mini btn-primary"><%=messages.getString("undo")%></a></td>
+                                        <td><a href="javascript:confirmUndo('<%=nurl_E%>');" title="<%=messages.getString("undo_last_url")%>" class="btn btn-mini btn-primary"><%=messages.getString("undo")%></a></td>
                                         <!--td><a href="http://www.bireme.br" title="<%=messages.getString("undo_last_url")%>" class="btn btn-mini btn-primary"><%=messages.getString("undo")%></a></td-->
                                     </tr>
                                 <%

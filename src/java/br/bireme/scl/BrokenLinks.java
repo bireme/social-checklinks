@@ -304,10 +304,9 @@ public class BrokenLinks {
 
         while (true) {
             occ = nextOcc(url, urls, occ);
-            if (occ == -1) {
-                //System.out.println("url[" + url + "] not found."); break;
-                throw new BrumaException("url[" + url + "] not found. Mfn=" 
-                                                                          + id);
+            if (occ == -1) {                
+                System.err.println("url[" + url + "] not found. mfn=" + id);
+                return false;
             }
             final BasicDBObject query = new BasicDBObject(ID_FIELD,
                                                                 id + "_" + occ);

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+################################################################################
+# Prerequisitos:
+# - ter a base de dados Isis - LILACS no diretório $HOME
+# - ter a base de dados MongoDb - SocialCheckLinks com a coleção HistoryBrokenLinks
+################################################################################
+
+
 SERVER=homolog    # test homolog production
 HOME=/home/javaapps/SocialCheckLinks/social-checklinks
 
@@ -8,7 +15,6 @@ $HOME/sh/$SERVER/setReadOnlyMode.sh > out
 grep -o "<h1>Read Only Mode = true</h1>" out > gout
 if [ ! -s gout ] 
 then
-    #envia email
      sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Bloqueia escrita na interface web do Social Check Links" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
     rm out gout    
     exit 1
@@ -26,16 +32,14 @@ fi
 echo "Gera gizmo a partir do Social Check Links"
 $HOME/sh/$SERVER/gizmoLilacs.sh
 if [ $? -ne 0 ]; then    	
-    #envia email
-     sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Gera gizmo a partir do Social Check Links" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
+    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Gera gizmo a partir do Social Check Links" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
     exit 1
 fi
 
 echo "Transfere gizmo para serverabd2"
 scp $HOME/Gv8broken.giz $TRANSFER@serverabd2.bireme.br:/home/lilacs/www/bases/lildbi/dbcertif/lilacs/SocialCheckLinks
 if [ $? -ne 0 ]; then
-    #envia email
-     sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere gizmo para serverabd2" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
+    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere gizmo para serverabd2" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
     exit 1
 fi
 
@@ -45,14 +49,12 @@ ssh $TRANSFER@serverabd2.bireme.br /home/lilacs/www/bases/lildbi/dbcertif/lilacs
 echo "Transfere a LILACS do serverABD para serverOFI$"
 scp $TRANSFER@serverabd2.bireme.br:/home/lilacs/www/bases/lildbi/dbcertif/lilacs/LILACS.mst $HOME
 if [ $? -ne 0 ]; then
-    #envia email
-     sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a LILACS do serverABD para serverOFI$" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
+    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a LILACS do serverABD para serverOFI$" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
     exit 1
 fi
 scp $TRANSFER@serverabd2.bireme.br:/home/lilacs/www/bases/lildbi/dbcertif/lilacs/LILACS.xrf $HOME
 if [ $? -ne 0 ]; then
-    #envia email
-     sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a LILACS do serverABD para serverOFI$" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
+    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a LILACS do serverABD para serverOFI$" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
     exit 1
 fi
 
@@ -62,8 +64,7 @@ echo "Inicia pocesso de checagem de links"
 echo "Alimenta os links quebrados no Social Check Links"
 $HOME/sh/$SERVER/loadLilacsBrokenLinks.sh
 if [ $? -ne 0 ]; then
-    #envia email
-     sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Alimenta os links quebrados no Social Check Links" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
+    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Alimenta os links quebrados no Social Check Links" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
     exit 1
 fi
 
@@ -72,8 +73,7 @@ $HOME/sh/$SERVER/resetReadOnlyMode.sh > out
 grep -o "<h1>Read Only Mode = false</h1>" out > gout
 if [ ! -s gout ]
 then
-    #envia email
-     sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Desbloqueia escrita na interface web do Social Check Links" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
+    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Desbloqueia escrita na interface web do Social Check Links" -t lilacsdb@bireme.org -cc marcelo.bottura@bireme.org fabio.brito@bireme.org -s esmeralda.bireme.br
     rm out gout
     exit 1
 fi

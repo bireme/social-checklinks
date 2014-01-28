@@ -55,8 +55,8 @@ public class CenterFilterServlet extends HttpServlet {
         final String lang = request.getParameter("lang");
         final String order = request.getParameter("order");
         final HttpSession session = request.getSession();
-        final String collFilterCenter = (String)
-                                       session.getAttribute("collFilterCenter");        
+        /*final String collFilterCenter = (String)
+                                     session.getAttribute("collFilterCenter");*/
         final ServletContext context = getServletContext();
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
            "/list.jsp?group=0&lang=" + lang + "&order=" + order);

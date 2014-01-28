@@ -26,6 +26,8 @@ import br.bireme.scl.IdUrl;
 import br.bireme.scl.MongoOperations;
 import com.mongodb.DBCollection;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.ServletContext;
@@ -41,7 +43,8 @@ import javax.servlet.http.HttpSession;
  * date 20130822
  */
 public class UndoFixServlet extends HttpServlet {
-
+    private static final String CODEC = "UTF-8";
+    
     /**
      * Processes requests for both HTTP
      * <code>GET</code> and
@@ -64,16 +67,18 @@ public class UndoFixServlet extends HttpServlet {
         final Set<IdUrl> fixed = (Set<IdUrl>)session.getAttribute("IdUrls");
         final Set<IdUrl> nfixed = new HashSet<IdUrl>();
         final String undoUrl = request.getParameter("undoUrl");
-        final String undoUrlF = undoUrl.replaceAll("<<amp;>>", "&");
+        final String undoUrl_D = URLDecoder.decode(undoUrl, CODEC);
         final String group = request.getParameter("group");
         final String lgroup = request.getParameter("lgroup");
         final String lang = request.getParameter("lang");
         final String id = request.getParameter("id");
         final String brokenUrl = request.getParameter("brokenUrl");
+        final String brokenUrl_E = URLEncoder.encode(brokenUrl, CODEC);
         final String url = request.getParameter("url");
+        final String url_E = URLEncoder.encode(url, CODEC);
         
         for (IdUrl iu : fixed) {
-            if (iu.url.equals(undoUrlF)) {
+            if (iu.url.equals(undoUrl_D)) {
                 if (! MongoOperations.undoUpdateDocument(coll, hcoll, iu.id)) {
                    throw new IOException("Undo operation failed.");
                 }
@@ -84,8 +89,8 @@ public class UndoFixServlet extends HttpServlet {
         session.setAttribute("IdUrls", nfixed);
         response.sendRedirect(response.encodeRedirectURL(
                    "showFixedUrls.jsp?group=" + group + "&lgroup=" + lgroup 
-                  + "&lang=" + lang + "&id=" + id + "&brokenUrl=" + url
-                  + "&url=" + brokenUrl));
+                  + "&lang=" + lang + "&id=" + id + "&brokenUrl=" + url_E
+                  + "&url=" + brokenUrl_E));
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

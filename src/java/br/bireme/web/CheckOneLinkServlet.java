@@ -24,6 +24,7 @@ package br.bireme.web;
 
 import br.bireme.scl.CheckUrl;
 import java.io.IOException;
+import java.net.URLEncoder;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -37,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
  * 20130719
  */
 public class CheckOneLinkServlet extends HttpServlet {
+    private static final String CODEC = "UTF-8";
 
     /**
      * Processes requests for both HTTP
@@ -53,16 +55,17 @@ public class CheckOneLinkServlet extends HttpServlet {
                                          throws ServletException, IOException {
         final String id = request.getParameter("id");
         final String url = request.getParameter("url");
+        final String url_E = URLEncoder.encode(url, CODEC);
         final String furl = request.getParameter("furl");
+        final String furl_E = URLEncoder.encode(furl, CODEC);
         final String lang = request.getParameter("lang");
         final String group = request.getParameter("group");
-        final String fixedUrl = furl.replaceAll("<<amp;>>", "&");
-        final int errCode = CheckUrl.check(fixedUrl);
+        final int errCode = CheckUrl.check(furl);
         final boolean isBroken = CheckUrl.isBroken(errCode);
         final ServletContext context = getServletContext();
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
-                                    "/editRecord.jsp?id=" + id + "&url=" + url
-                      + "&furl=" + furl + "&status=" + (isBroken ? 1 : 0)
+                                    "/editRecord.jsp?id=" + id + "&url=" + url_E
+                      + "&furl=" + furl_E + "&status=" + (isBroken ? 1 : 0)
                       + "&lang=" + lang + "&group=" + group);
         dispatcher.forward(request, response);
     }

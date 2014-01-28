@@ -90,11 +90,14 @@ public class MongoOperations {
     }
     
     /**
-     *
-     * @param coll
-     * @param centerIds
-     * @param from indice inicial a ser recuperado. Começa de 1.
-     * @return
+     * Obtem uma lista com objetos IdUrl obtidos da base de dados MongoDb
+     * @param coll coleção onde estão as urls
+     * @param centerIds filtro dos centros colaboradores desejados. Nunca é nulo
+     * @param filter se não nulo filtra as urls com um cc específico
+     * @param from indice inicial da lista a ser recuperado. Começa de 1.
+     * @param count numero de elementos a serem devolvidos
+     * @param ascendingOrder se retorna por ordem de data ascendente ou descendente
+     * @return lista de objetos IdUrl
      */
     public static List<IdUrl> getCenterUrls(final DBCollection coll,
                                             final Set<String> centerIds,
@@ -486,25 +489,28 @@ public class MongoOperations {
             throw new NullPointerException("fixedUrl");
         }
         final Set<IdUrl> ret = new HashSet<IdUrl>();
-
-        if (brokenUrl.equals(fixedUrl)) {
+        final String[] patterns = Tools.getPatterns(brokenUrl, fixedUrl);
+        
+        if ((brokenUrl.equals(fixedUrl)) || (patterns[0].equals("^"))) {
             if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl))) {
                 final Set<IdUrl> docs = 
-                                 getDocsWith(coll, centerIds, filter, fixedUrl);
+                        getDocsWith(coll, centerIds, filter, 
+                                                  Tools.escapeChars(brokenUrl));
                 for (IdUrl iu : docs) {
-                    if (iu.url.equals(fixedUrl)) {
-                        ret.add(iu);
-                        if (!updateDocument(coll, hcoll, iu.id, iu.url, user,
-                                                !fixedUrl.equals(iu.url))) {
+                    if (iu.url.equals(brokenUrl)) {
+                        IdUrl iu2 = new IdUrl(iu.id, fixedUrl, iu.ccs, iu.since, 
+                                                                        iu.mst); 
+                        ret.add(iu2);
+                        if (!updateDocument(coll, hcoll, iu2.id, iu2.url, user,
+                                                                       false)) {
                           throw new IOException("could not update document id="
-                                                                   + iu.id);
+                                                                   + iu2.id);
                         }
                         break;
                     }
                 }
             }
         } else {
-            final String[] patterns = Tools.getPatterns(brokenUrl, fixedUrl);
             final Set<IdUrl> docs = getDocsWith(coll, centerIds, null, 
                                                                    patterns[0]);
             final Set<IdUrl> converted = Tools.getConvertedUrls(docs,
@@ -523,9 +529,9 @@ public class MongoOperations {
                     final IdUrl iu = map.get(inurls[idx]);
                     ret.add(iu);
                     if (!updateDocument(coll, hcoll, iu.id, iu.url, user,
-                                                   !fixedUrl.equals(iu.url))) {
-                        throw new IOException("could not update document id="
-                                                                       + iu.id);
+                                                !fixedUrl.equals(iu.url))) {
+                        throw new IOException(
+                                       "could not update document id=" + iu.id);
                     }
                 }
             }

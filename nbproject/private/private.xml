@@ -3,12 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/CheckUrl.java</file>
             <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/web/list.jsp</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/web/AuthenticationServlet.java</file>
+            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/IdUrl.java</file>
             <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/web/editRecord.jsp</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/web/CheckOneLinkServlet.java</file>
+            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/Tools.java</file>
             <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/BrokenLinks.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/Gizmo.java</file>
+            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/MongoOperations.java</file>
+            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/web/CheckManyLinksServlet.java</file>
         </group>
     </open-files>
 </project-private>

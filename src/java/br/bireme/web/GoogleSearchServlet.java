@@ -25,8 +25,6 @@ package br.bireme.web;
 import br.bireme.scl.Tools;
 import java.io.IOException;
 import java.util.Set;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -73,10 +71,6 @@ public class GoogleSearchServlet extends HttpServlet {
                 //"https://www.google.com.br/?ei=8PyNUoWpOMyNkAel9IDIAg#q=" +
                 "https://www.google.com/search?q=" + 
                 builder.toString();
-        /*final ServletContext context = getServletContext();
-        final RequestDispatcher dispatcher = context.getRequestDispatcher(gurl);
-
-        dispatcher.forward(request, response);*/
         response.sendRedirect(gurl);
     }
 

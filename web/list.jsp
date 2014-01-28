@@ -22,7 +22,7 @@
 
 <%@page language="java"%>
 <%@page session="true" %>
-<%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
+<%@page import="java.util.*,java.net.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
 <%@page contentType="text/html;charset=UTF-8"%>
 
 <% 
@@ -307,7 +307,8 @@
                             <%
                             int cur = from + 1;
                             for (IdUrl iu : lst) {
-                                final String nurl = iu.url.replace("&","<<amp;>>");
+                                final String CODEC = "UTF-8";
+                                final String nurl_E = URLEncoder.encode(iu.url, CODEC);
                                 final String id = iu.id.substring(0,iu.id.indexOf("_"));
                                 boolean first = true;                                                                                    
                             %>
@@ -333,7 +334,7 @@
                                     <td><%=iu.since%></td>    
                                     <td>
                                         <% if(!readOnlyMode) { %>
-                                            <a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',lang:'<%=lang%>',group:'<%=group%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"> &nbsp;<%=messages.getString("edit")%>&nbsp;</a>&nbsp;&nbsp;
+                                            <a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=iu.id%>',url:'<%=nurl_E%>',furl:'<%=nurl_E%>',lang:'<%=lang%>',group:'<%=group%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"> &nbsp;<%=messages.getString("edit")%>&nbsp;</a>&nbsp;&nbsp;
                                             <!--a href="javascript:postToUrl('<%=response.encodeRedirectURL("GoogleSearchServlet")%>', {url:'http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary" target="_blank">Google</a></td-->
                                         <% } %>
                                         <a href="GoogleSearchServlet?url=http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>" title="<%=messages.getString("look_for_document")%>" class="btn btn-mini btn-primary" target="_blank">Google</a>

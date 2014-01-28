@@ -85,6 +85,13 @@ public class Tools {
         return out;
     }
 
+    /**
+     * Gera padroes para substituicao de strings nas urls
+     * @param brokenUrl ulr quebrada
+     * @param fixedUrl  url boa
+     * @return retorna o padrao a ser procurado nas urls e o padrao a ser 
+     *         substituido.
+     */
     static String[] getPatterns(final String brokenUrl,
                                 final String fixedUrl) {
         assert brokenUrl != null;
