@@ -4,7 +4,9 @@
     <context-param>
         <description>MongoDb host</description>
         <param-name>host</param-name>
-        <param-value>hm02vm.bireme.br</param-value>
+        <!--param-value>ts01vm.bireme.br</param-value-->
+        <!--param-value>hm02vm.bireme.br</param-value-->
+        <param-value>mongodb.bireme.br</param-value>
         <!--param-value>localhost</param-value-->
     </context-param>
     <context-param>
