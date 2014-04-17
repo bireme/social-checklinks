@@ -312,13 +312,10 @@ public class BrokenLinks {
             curOcc = 0;
         }
         final int occ = nextOcc(url, urls, curOcc, occMap);
-/*if (occ > 2) {        
-System.out.println("occ=" + occ + " id=" + id + " url=" + url);
-}*/
         if (occ == -1) {                
             //System.err.println("url[" + url + "] not found. mfn=" + id);
-throw new IOException("url[" + url + "] not found. mfn=" + id);                
-            //return false;
+            //throw new IOException("url[" + url + "] not found. mfn=" + id);                
+            return false;
         }
 
         final BasicDBObject query = new BasicDBObject(ID_FIELD,
