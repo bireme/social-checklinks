@@ -43,8 +43,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -141,6 +143,7 @@ public class BrokenLinks {
                               new FileInputStream(outCheckFile), outEncoding));
         final MongoClient mongoClient = new MongoClient(host, port);
         final DB db = mongoClient.getDB(SOCIAL_CHECK_DB);
+        final Map<String,Integer> occMap = new HashMap<String,Integer>();
 
         final boolean checkPassword = false;
         if (checkPassword) {
@@ -177,10 +180,11 @@ public class BrokenLinks {
             }
             final String lineT = line.trim();
             if (!lineT.isEmpty()) {
+//System.out.println("line[" + lineT + "]");                
                 final String[] split = lineT.split(" *\\| *", 3);
 
                 saveRecord(mName, split[0], split[1], 
-                                             split[2], urlTag, tags, mst, coll);
+                                     split[2], urlTag, tags, mst, coll, occMap);
                 if (++tell % 5000 == 0) {
                     System.out.println("++" + tell);
                 }
@@ -280,7 +284,8 @@ public class BrokenLinks {
                                       final int urlTag,
                                       final List<Integer> ccsFlds,                                      
                                       final Master mst,
-                                      final DBCollection coll)
+                                      final DBCollection coll,
+                                      final Map<String,Integer> occMap)
                                                          throws BrumaException,
                                                                 IOException {
         assert mstName != null;
@@ -291,6 +296,7 @@ public class BrokenLinks {
         assert ccsFlds != null;
         assert mst != null;
         assert coll != null;
+        assert occMap != null;
 
         final Record rec = mst.getRecord(Integer.parseInt(id));
         if (!rec.isActive()) {
@@ -298,43 +304,43 @@ public class BrokenLinks {
         }
 
         final List<Field> urls = rec.getFieldList(urlTag);        
-        final Date lastUpdate = new Date();
-        final Date date;
-        int occ = 0;        
-
-        while (true) {
-            occ = nextOcc(url, urls, occ);
-            if (occ == -1) {                
-                System.err.println("url[" + url + "] not found. mfn=" + id);
-                return false;
-            }
-            final BasicDBObject query = new BasicDBObject(ID_FIELD,
-                                                                id + "_" + occ);
-            final BasicDBObject obj = (BasicDBObject) coll.findOne(query);            
-            if (obj == null) {
-                date = lastUpdate;
-                break;
-            } else {
-                Date auxDate = obj.getDate(LAST_UPDATE_FIELD);
-                if (auxDate == null) {
-                    auxDate = obj.getDate(DATE_FIELD);
-                }
-                if ((lastUpdate.getTime() - auxDate.getTime()) > 60*60*1000) {
-                    final WriteResult wr = coll.remove(obj, WriteConcern.SAFE);
-                    if (!wr.getCachedLastError().ok()) {
-                        //TODO
-                    }
-                    date = obj.getDate(DATE_FIELD);
-                    break;
-                }
-            }
+        final Date now = new Date();
+        Date date;
+        
+        Integer curOcc = occMap.get(id);
+        if (curOcc == null) {
+            curOcc = 0;
         }
-        if (date == null) {
-            throw new IOException("null date. mstName=" + mstName +" id=" + id);
+        final int occ = nextOcc(url, urls, curOcc, occMap);
+/*if (occ > 2) {        
+System.out.println("occ=" + occ + " id=" + id + " url=" + url);
+}*/
+        if (occ == -1) {                
+            //System.err.println("url[" + url + "] not found. mfn=" + id);
+throw new IOException("url[" + url + "] not found. mfn=" + id);                
+            //return false;
+        }
+
+        final BasicDBObject query = new BasicDBObject(ID_FIELD,
+                                                            id + "_" + occ);
+        final BasicDBObject obj = (BasicDBObject) coll.findOne(query);            
+        if (obj == null) {
+            date = now;
+        } else {
+            date = obj.getDate(LAST_UPDATE_FIELD);
+            if (date == null) {
+                date = obj.getDate(DATE_FIELD);
+            } else {
+                final WriteResult wr = coll.remove(obj, WriteConcern.SAFE);
+                if (!wr.getCachedLastError().ok()) {
+                    //TODO
+                }
+                date = obj.getDate(DATE_FIELD);
+            }
         }
         final BasicDBObject doc = new BasicDBObject();        
         doc.put(DATE_FIELD, date);
-        doc.put(LAST_UPDATE_FIELD, lastUpdate);
+        doc.put(LAST_UPDATE_FIELD, now);
         doc.put(MST_FIELD, mstName);
         doc.put(ID_FIELD, id + "_" + occ);
         doc.put(BROKEN_URL_FIELD, url);
@@ -348,26 +354,36 @@ public class BrokenLinks {
 
     private static int nextOcc(final String url,
                                final List<Field> urls,
-                               final int prevOcc) throws BrumaException {
+                               final int code,
+                               final Map<String,Integer> occMap) 
+                                                         throws BrumaException {
         assert url != null;
         assert urls != null;
-        assert prevOcc > 0;
+        assert code >= 0;
+        assert occMap != null;
 
-        int cocc = 1;
-        boolean found = false;
-
+        int code2 = code;
+        int val = 1;
+        int ret = 1;
+        
         outter : for (Field fld : urls) {
-            if (cocc > prevOcc) {
-                for (Subfield sub : fld.getSubfields()) {
-                    if (url.trim().equals(sub.getContent().trim())) {
-                        found = true;
+            for (Subfield sub : fld.getSubfields()) {
+                if (url.trim().equals(sub.getContent().trim())) {
+                    if ((code2 & val) == 0) { // occurrence not used
+                        code2 |= val;
+                        occMap.put(url, code2);
                         break outter;
                     }
-                }
+                }    
             }
-            cocc++;
-        }
-        return found ? cocc : -1;
+            if (val > Integer.MAX_VALUE/2) {
+                ret = -1;
+                break;
+            }
+            val *= 2;
+            ret++;
+        }        
+        return ret;
     }
     
     private static BasicDBList getCCS(final Record rec, 
@@ -456,6 +472,10 @@ public class BrokenLinks {
             }
         }
 
+        System.out.println("outFileEncoding=" + fileEncod);
+        System.out.println("outMstEncoding=" + mstEncod);
+        System.out.println();
+        
         createLinks(args[0], fileEncod, args[1], mstEncod, args[2],
                                                    port, user, pswd, clearColl);
 
