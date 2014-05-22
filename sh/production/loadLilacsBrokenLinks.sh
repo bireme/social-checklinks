@@ -2,4 +2,4 @@
 
 HOME=/home/javaapps/SocialCheckLinks/social-checklinks
 
-java -cp $HOME/build/web/WEB-INF/classes:$HOME/lib/mongo-java-driver-2.11.2.jar:$HOME/lib/Bruma.jar br.bireme.scl.BrokenLinks /usr/local/bireme/java/FisChecker/output/LILACS_out/bases/LILACS_v8broken.txt $HOME/LILACS mongodb.bireme.br -outFileEncoding=IBM850 -outMstEncoding=IBM850 
+java -cp $HOME/build/web/WEB-INF/classes:$HOME/lib/mongo-java-driver-2.12.1.jar:$HOME/lib/Bruma.jar br.bireme.scl.BrokenLinks /usr/local/bireme/java/FisChecker/output/LILACS_out/bases/LILACS_v8broken.txt $HOME/LILACS mongodb.bireme.br -outFileEncoding=IBM850 -outMstEncoding=IBM850 

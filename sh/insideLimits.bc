@@ -1,0 +1,26 @@
+/* bc, for basic calculator, is "an arbitrary precision calculator language" */
+
+/* Calcuala o valor absoluto */
+define abs(i) {
+    if (i < 0) return (-i)
+    return (i)
+}
+
+/* Calcula se o novo valor (now) e' menor 
+ que limit% (por cento) do valor antigo (before)*/
+
+define limit(before,now,limit) {
+ auto dif, frac 
+ dif = abs(before-now)
+ scale=2 
+ frac = (dif*100)/before
+
+ if (frac <= limit) {
+   return (1)
+ } 
+ return (0)
+}
+
+/* Verifica se a diferenca de  dois valores do stdin
+ é menor que 10% */ 
+limit(read(),read(),10)

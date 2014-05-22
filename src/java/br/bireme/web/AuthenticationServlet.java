@@ -2,20 +2,20 @@
 
     Copyright © 2013 BIREME/PAHO/WHO
 
-    This file is part of SocialCheckLinks.
+    This file is part of Social Check Links.
 
-    SocialCheckLinks is free software: you can redistribute it and/or 
+    Social Check Links is free software: you can redistribute it and/or 
     modify it under the terms of the GNU Lesser General Public License as 
     published by the Free Software Foundation, either version 2.1 of 
     the License, or (at your option) any later version.
 
-    SocialCheckLinks is distributed in the hope that it will be useful,
+    Social Check Links is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
     You should have received a copy of the GNU Lesser General Public 
-    License along with SocialCheckLinks. If not, see 
+    License along with Social Check Links. If not, see 
     <http://www.gnu.org/licenses/>.
 
 =========================================================================*/
@@ -122,9 +122,15 @@ public class AuthenticationServlet extends HttpServlet {
                 final Authentication auth = new Authentication(
                                      context.getInitParameter("accounts_host"));
                 final JSONObject user = auth.getUser(username, password);
-                final Set<String> centerIds = auth.getCenterIds(user);
+                Set<String> centerIds = auth.getCenterIds(user);
                                 
-                if (auth.isAuthenticated(user) && (centerIds != null)) {
+                //if (auth.isAuthenticated(user) && (centerIds != null)) {
+                if (auth.isAuthenticated(user)) {
+                    if (centerIds == null) {
+                        centerIds = new HashSet<String>();
+                    }
+                    centerIds.add(auth.getColCenter(user)); // cc may not belong to a net (it not appear in centerIds)
+                    
                     session.setAttribute("user", username); // Login user.
                     session.setAttribute("centerIds", centerIds);   
                     dispatcher = context.getRequestDispatcher(
@@ -138,9 +144,12 @@ public class AuthenticationServlet extends HttpServlet {
                 }     
                 dispatcher.forward(request, response);
             } catch(Exception ex) {
+                final String eMess = ex.getMessage();
                 dispatcher = context.getRequestDispatcher(
                                                     "/index.jsp?lang=" + lang
-                          + "&errMsg=" + messages.getString("exception_found"));                
+                          + "&errMsg=" + messages.getString("exception_found")
+                          + "<br/><br/>" + (eMess == null ? ex.toString() 
+                                                          : eMess));
                 dispatcher.forward(request, response);
             }
         } else {            

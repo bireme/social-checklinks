@@ -2,20 +2,20 @@
 
     Copyright © 2013 BIREME/PAHO/WHO
 
-    This file is part of SocialCheckLinks.
+    This file is part of Social Check Links.
 
-    SocialCheckLinks is free software: you can redistribute it and/or
+    Social Check Links is free software: you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public License as
     published by the Free Software Foundation, either version 2.1 of
     the License, or (at your option) any later version.
 
-    SocialCheckLinks is distributed in the hope that it will be useful,
+    Social Check Links is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
     You should have received a copy of the GNU Lesser General Public
-    License along with SocialCheckLinks. If not, see
+    License along with Social Check Links. If not, see
     <http://www.gnu.org/licenses/>.
 
 =========================================================================*/
@@ -42,6 +42,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,7 +56,7 @@ import java.util.Set;
  * date 20130625
  */
 public class BrokenLinks {
-    public static final String VERSION = "0.3";
+    public static final String VERSION = "0.4";
 
     /* MongoDb settings */
     public static final String DEFAULT_FILE_ENCODING = "IBM850";
@@ -90,13 +91,36 @@ public class BrokenLinks {
     public static final String ELEM_LST_FIELD = "elems";
 
     public static final String DEF_FIELD = ID_FIELD;
+    
+    /* CheckLinks - HTTP error messages */
+    public static String[] ALL_MESS = { "OK", "CONNECTION_REFUSED", 
+        "CONNECTION_TIMED_OUT", "UNKNOWN_HOST_EXCEPTION", "MALFORMED_URL", 
+        "SSL_EXCEPTION", "NO_ROUTE_TO_HOST_EXCEPTION", "SOCKET_EXCEPTION", 
+        "FILE_NOT_FOUND_EXCEPTION", "IO_EXCEPTION", "CONNECTION_RESET_BY_PEER", 
+        "ILLEGAL_URL", "BIND_EXCEPTION", "PORT_UNREACHABLE_EXCEPTION", 
+        "UNKNOWN", "Continue", "Switching Protocols", "OK", "Created", 
+        "Accepted", "Non-Authoritative Information", "No Content", 
+        "Reset Content", "Partial Content", "Multiple Choice", 
+        "Moved Permanently", "Found", "See Other", "Not Modified", "Use Proxy", 
+        "(Unused)", "Temporary Redirect", "Bad Request", "Unauthorized", 
+        "Payment Required", "Forbidden", "Not found", "Method Not Allowed", 
+        "Not Acceptable", "Proxy Authentication Required", "Request Timeout", 
+        "Conflict", "Gone", "Length Required", "Precondition Failed", 
+        "Request Entity Too Large", "Request-URI Too Long)", 
+        "Unsupported Media Type", "Requested Range Not Satisfiable", 
+        "Expectation Failed", "Internal Error", "Not implemented", 
+        "Bad Gateway", "Service Unavailable", "Gateway Timeout", 
+        "HTTP Version Not Supported", "HTTP Exception" };
 
+    public static String[] DEFAULT_ALLOWED_MESS = {"MALFORMED_URL", "Not found",
+                                                   "UNKNOWN_HOST_EXCEPTION" };
     
     public static void createLinks(final String outCheckFile,
                                    final String mstName) throws BrumaException,
                                                                 IOException {
         createLinks(outCheckFile, DEFAULT_FILE_ENCODING, mstName,
-            DEFAULT_MST_ENCODING, DEFAULT_HOST, DEFAULT_PORT, null, null, true);
+            DEFAULT_MST_ENCODING, DEFAULT_HOST, DEFAULT_PORT, null, null, true,
+            DEFAULT_ALLOWED_MESS);
     }
 
     public static void createLinks(final String outCheckFile,
@@ -106,7 +130,8 @@ public class BrokenLinks {
                                    final String host) throws BrumaException,
                                                              IOException {
         createLinks(outCheckFile, outEncoding, mstName, mstEncoding, host,
-                                        DEFAULT_PORT, null, null, true);
+                                  DEFAULT_PORT, null, null, true,
+                                  DEFAULT_ALLOWED_MESS);
     }
 
     public static void createLinks(final String outCheckFile,
@@ -117,16 +142,17 @@ public class BrokenLinks {
                                    final int port,
                                    final String user,
                                    final String password,
-                                   final boolean clearCol)
+                                   final boolean clearCol,
+                                   final String[] allowedMessages)
                                                           throws BrumaException,
                                                                  IOException {
         if (outCheckFile == null) {
             throw new NullPointerException("outCheckFile");
         }
-        if (mstName == null){
+        if (mstName == null) {
             throw new NullPointerException("mstName");
         }
-        if (mstEncoding == null){
+        if (mstEncoding == null) {
             throw new NullPointerException("mstEncoding");
         }
         if (host == null) {
@@ -135,7 +161,10 @@ public class BrokenLinks {
         if (port <= 0) {
             throw new IllegalArgumentException("port <= 0");
         }
-
+        if (allowedMessages == null) {
+            throw new NullPointerException("allowedMessages");
+        }
+        
         final Master mst = MasterFactory.getInstance(mstName)
                                         .setEncoding(mstEncoding).open();
         final String mName = new File(mst.getMasterName()).getName();
@@ -166,7 +195,8 @@ public class BrokenLinks {
             throw new IOException("Missing Isis url fields");
         }
         final List<Integer> tags = getIsisCcFields(mName, ccColl);
-        
+        final Set<String> allowedMess = new HashSet<String>(
+                                                Arrays.asList(allowedMessages));
         int tell = 0;
 
         if (clearCol) {
@@ -180,11 +210,15 @@ public class BrokenLinks {
             }
             final String lineT = line.trim();
             if (!lineT.isEmpty()) {
-//System.out.println("line[" + lineT + "]");                
                 final String[] split = lineT.split(" *\\| *", 3);
+                final int openPos = split[2].indexOf('('); // cut extra data               
+                final String prefix = (openPos > 0) 
+                                    ? split[2].substring(0, openPos) : split[2];
 
-                saveRecord(mName, split[0], split[1], 
+                if (allowedMess.contains(prefix.trim())) {
+                    saveRecord(mName, split[0], split[1], 
                                      split[2], urlTag, tags, mst, coll, occMap);
+                }
                 if (++tell % 5000 == 0) {
                     System.out.println("++" + tell);
                 }
@@ -474,24 +508,6 @@ public class BrokenLinks {
         System.out.println();
         
         createLinks(args[0], fileEncod, args[1], mstEncod, args[2],
-                                                   port, user, pswd, clearColl);
-
-
-        /*createLinks("/home/heitor/Downloads/LILACS_v8broken.txt", DEFAULT_FILE_ENCODING,
-                    "/home/heitor/Downloads/lilacs", DEFAULT_MST_ENCODING,
-                    DEFAULT_HOST); */
-        
-        /*createLinks("/home/heitor/Downloads/LILACS_v8broken.txt", DEFAULT_FILE_ENCODING,
-                    "/home/heitor/Downloads/lilacs", DEFAULT_MST_ENCODING,
-                    "ts01vm.bireme.br");*/
-
-        /*createLinks("./LILACS_v8broken.txt", DEFAULT_FILE_ENCODING,
-                    "/home/heitor/temp/lilacs", DEFAULT_MST_ENCODING,
-                    "ts01vm.bireme.br");        */
-        //createLinks("./teste.txt", DEFAULT_FILE_ENCODING,
-        //    "/home/heitor/temp/lilacs", DEFAULT_MST_ENCODING, "ts01vm.bireme.br");
-        //createLinks("./um.txt", DEFAULT_FILE_ENCODING,
-        //            "/home/heitor/temp/lilacs", DEFAULT_MST_ENCODING,
-        //                                                  "ts01vm.bireme.br");
+                    port, user, pswd, clearColl, DEFAULT_ALLOWED_MESS);
     }
 }
