@@ -2,20 +2,20 @@
 
     Copyright © 2013 BIREME/PAHO/WHO
 
-    This file is part of SocialCheckLinks.
+    This file is part of Social Check Links.
 
-    SocialCheckLinks is free software: you can redistribute it and/or 
+    Social Check Links is free software: you can redistribute it and/or 
     modify it under the terms of the GNU Lesser General Public License as 
     published by the Free Software Foundation, either version 2.1 of 
     the License, or (at your option) any later version.
 
-    SocialCheckLinks is distributed in the hope that it will be useful,
+    Social Check Links is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
     You should have received a copy of the GNU Lesser General Public 
-    License along with SocialCheckLinks. If not, see 
+    License along with Social Check Links. If not, see 
     <http://www.gnu.org/licenses/>.
 
 --%>
@@ -59,7 +59,7 @@
 	<div class="container">
             <div class="loginTitle">
                 <img src="img/logo.png" alt="BIREME Logo" />
-                <h1><%=messages.getString("bireme_social_checklinks")%></h1>
+                <h1>- <%=messages.getString("bireme_social_checklinks")%> -</h1>
             </div>
             <form class="form-signin" action="authenticate?lang=<%=lang%>" method="post">
                 <h2 class="form-signin-heading"><%=messages.getString("please_sign_in")%></h2>
@@ -71,7 +71,7 @@
             if (errMsg != null) {
             %>                     
                 <div class="alert alert-danger fade in">
-                    <strong><%=messages.getString("bad_news")%></strong> <%=errMsg%>
+                    <strong><%=messages.getString("bad_news")%></strong> <%=errMsg.replace("\n", "<br/>")%>
                 </div>
             <%
             }       

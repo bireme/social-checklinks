@@ -77,11 +77,20 @@ public class CheckManyLinksServlet extends HttpServlet {
         final String id = (String)request.getParameter("id");
         final Set<IdUrl> fixed = MongoOperations.fixRelatedUrls(coll, hcoll,
                     user, centerIds, collCenterFilter, brokenUrl_D, fixedUrl_D);
-        final RequestDispatcher dispatcher = context.getRequestDispatcher(
+        final RequestDispatcher dispatcher;
+        
+        if (fixed.isEmpty()) {
+            dispatcher = context.getRequestDispatcher(
+                        "/editRecord.jsp?id=" + id + "&url=" + brokenUrl_D
+                      + "&furl=" + fixedUrl_D + "&status=2" 
+                      + "&lang=" + lang + "&group=" + group);
+        } else {
+            dispatcher = context.getRequestDispatcher(
                 "/showFixedUrls.jsp?group=0&lgroup=" + group + "&lang=" + lang 
             + "&id=" + id + "&brokenUrl=" + brokenUrl_E + "&url=" + fixedUrl_E);
 
-        session.setAttribute("IdUrls", fixed);
+            session.setAttribute("IdUrls", fixed);
+        }
         dispatcher.forward(request, response);
     }
 

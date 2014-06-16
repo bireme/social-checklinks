@@ -157,7 +157,7 @@ public class CheckUrl {
         boolean ret = true;
 
         if ((code == 200) || (code == 401) ||
-            (code == 402) || (code == 407)) {
+            (code == 402) || (code == 406) || (code == 407)) {
             ret = false;
         }
 

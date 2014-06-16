@@ -42,10 +42,10 @@ import org.json.simple.parser.ParseException;
  * date: 20130731
  */
 public class Authentication {
-    final static String DEFAULT_HOST = "accounts.bireme.org";
-    final static int DEFAULT_PORT = 80;
+    public static final String DEFAULT_HOST = "accounts.bireme.org";
+    public static final int DEFAULT_PORT = 80;    
+    public static final String SERVICE_NAME = "Social Check Links";
     final static String DEFAULT_PATH = "/api/auth/login/?format=json";
-    final static String SERVICE_NAME = "Social Check Links";
 
     final String host;
     final int port;

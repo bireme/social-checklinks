@@ -59,7 +59,7 @@
 	<div class="container">
             <div class="loginTitle">
                 <img src="img/logo.png" alt="BIREME Logo" />
-                <h1><%=messages.getString("bireme_social_checklinks")%></h1>
+                <h1>- <%=messages.getString("bireme_social_checklinks")%> -</h1>
             </div>
             <form class="form-signin" action="authenticate?lang=<%=lang%>" method="post">
                 <h2 class="form-signin-heading"><%=messages.getString("please_sign_in")%></h2>
@@ -71,7 +71,7 @@
             if (errMsg != null) {
             %>                     
                 <div class="alert alert-danger fade in">
-                    <strong><%=messages.getString("bad_news")%></strong> <%=errMsg%>
+                    <strong><%=messages.getString("bad_news")%></strong> <%=errMsg.replace("\n", "<br/>")%>
                 </div>
             <%
             }       

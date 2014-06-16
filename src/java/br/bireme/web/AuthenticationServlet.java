@@ -26,6 +26,7 @@ import br.bireme.accounts.Authentication;
 import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
+import br.bireme.scl.MongoOperations;
 import br.bireme.scl.Tools;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -52,6 +53,8 @@ import org.json.simple.JSONObject;
  * date: 20130731
  */
 public class AuthenticationServlet extends HttpServlet {
+    private boolean ok = false;
+    
     @Override
     public void init() {
         try {
@@ -77,9 +80,11 @@ public class AuthenticationServlet extends HttpServlet {
             context.setAttribute("collection", coll);
             context.setAttribute("historycoll", hcoll);
             context.setAttribute("readOnlyMode", false);
+            ok = true;
         } catch (UnknownHostException ex) {
             Logger.getLogger(AuthenticationServlet.class.getName())
                                                    .log(Level.SEVERE, null, ex);
+            ok = false;
         }
     }
 
@@ -96,6 +101,10 @@ public class AuthenticationServlet extends HttpServlet {
     protected void processRequest(final HttpServletRequest request, 
                                   final HttpServletResponse response)
                                           throws ServletException, IOException {
+        
+        if (!ok) {
+            throw new IOException("Connection to the MongoDb server failed");
+        }
         
         final String username = request.getParameter("email");
         final String password = request.getParameter("password");
@@ -131,8 +140,12 @@ public class AuthenticationServlet extends HttpServlet {
                     }
                     centerIds.add(auth.getColCenter(user)); // cc may not belong to a net (it not appear in centerIds)
                     
+                    final DBCollection coll = 
+                               (DBCollection)context.getAttribute("collection");
+                    final Set<String> filteredCenterIds = 
+                               MongoOperations.filterCenterIds(coll, centerIds);
                     session.setAttribute("user", username); // Login user.
-                    session.setAttribute("centerIds", centerIds);   
+                    session.setAttribute("centerIds", filteredCenterIds);   
                     dispatcher = context.getRequestDispatcher(
                                    "/CenterFilterServlet?lang=" + lang);
                 } else {

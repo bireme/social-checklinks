@@ -28,7 +28,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -54,12 +53,13 @@ public class CenterFilterServlet extends HttpServlet {
         
         final String lang = request.getParameter("lang");
         final String order = request.getParameter("order");
-        final HttpSession session = request.getSession();
-        /*final String collFilterCenter = (String)
-                                     session.getAttribute("collFilterCenter");*/
+        final String collFilterCenter = request.getParameter("collFilterCenter");
         final ServletContext context = getServletContext();
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
-           "/list.jsp?group=0&lang=" + lang + "&order=" + order);
+           "/list.jsp?group=0&lang=" + lang 
+               + ((order == null) ? "" : "&order=" + order) 
+               + ((collFilterCenter == null) ? "" 
+                                    : "&collFilterCenter=" + collFilterCenter));
         dispatcher.forward(request, response);
     }
 

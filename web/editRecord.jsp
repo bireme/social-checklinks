@@ -38,10 +38,11 @@
         return;
     }
     
-    // status = -1 (new), 1 (broken) and 0 (not broken) 
+    // status = -1 (new), 2 (broken), 1 (not ecode 200) and 0 (not broken) 
     final int status = Integer.parseInt(request.getParameter("status"));    
     final boolean isNew = (status == -1);
-    final boolean isBroken = (status == 1);
+    final boolean isBroken = (status == 2);
+    final boolean is200 = (status == 0);
     final String CODEC = "UTF-8";
     final String user = (String)session.getAttribute("user");
     final String id = (String)request.getParameter("id");
@@ -206,9 +207,16 @@
                                     <strong><%=messages.getString("bad_news")%></strong> <%=messages.getString("url_is_broken")%>
                                 </div>
                             <%
-                            } else {
+                            } else if (is200) {
                             %>
                                 <div id="alert-success" class="alert alert-success fade in">
+                                    <!--button data-dismiss="alert" class="close" type="button">×</button-->
+                                    <strong><%=messages.getString("url_fixed")%></strong> <%=messages.getString("press_save_200")%>
+                                </div>                            
+                            <%
+                            } else {
+                            %>
+                                <div id="alert-warning" class="alert alert-warning fade in">
                                     <!--button data-dismiss="alert" class="close" type="button">×</button-->
                                     <strong><%=messages.getString("url_fixed")%></strong> <%=messages.getString("press_save")%>
                                 </div>
@@ -219,6 +227,7 @@
                             <div class="ctrl">
                                 <%
                                 if (isNew || isBroken) {
+                                    // Do not save
                                 } else {
                                 %>       
                                     <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>');" class="btn btn-primary enabled"><%=messages.getString("save")%></a>
