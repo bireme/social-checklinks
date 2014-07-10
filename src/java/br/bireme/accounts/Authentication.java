@@ -108,7 +108,8 @@ public class Authentication {
             final JSONObject jobj = (JSONObject)response.get("data");
 
             if (jobj != null) {
-                final JSONArray array = (JSONArray)jobj.get("ccs");
+                final JSONArray array = (JSONArray)jobj.get(
+                                                    "ccs_networks_responsible");
                 if (array != null) {                                        
                     for (Object array1 : array) {
                         id.add((String) array1);
@@ -134,6 +135,8 @@ public class Authentication {
         parameters.put("username", user);
         parameters.put("password", password);
         parameters.put("service", SERVICE_NAME);
+        parameters.put("list_responsible", true);
+        parameters.put("list_network_ccs", false);
         parameters.put("format", "json");
 
         //final URL url = new URL("http", host, port, DEFAULT_PATH);

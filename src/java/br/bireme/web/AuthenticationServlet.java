@@ -28,11 +28,11 @@ import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import br.bireme.scl.MongoOperations;
 import br.bireme.scl.Tools;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -75,13 +75,24 @@ public class AuthenticationServlet extends HttpServlet {
             }
             
             final DBCollection coll = db.getCollection(BROKEN_LINKS_COL);
+            if (coll == null) {
+                throw new NullPointerException("collection[" + BROKEN_LINKS_COL
+                                                                 + "] is null");
+            }
+            final BasicDBObject doc = (BasicDBObject)coll.findOne();
+            
             final DBCollection hcoll = db.getCollection(HISTORY_COL);            
+            if (hcoll == null) {
+                throw new NullPointerException("collection[" + HISTORY_COL
+                                                                 + "] is null");
+            }
+            final BasicDBObject hdoc = (BasicDBObject)hcoll.findOne();
             
             context.setAttribute("collection", coll);
             context.setAttribute("historycoll", hcoll);
             context.setAttribute("readOnlyMode", false);
             ok = true;
-        } catch (UnknownHostException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(AuthenticationServlet.class.getName())
                                                    .log(Level.SEVERE, null, ex);
             ok = false;
