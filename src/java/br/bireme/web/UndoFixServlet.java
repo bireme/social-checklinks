@@ -26,7 +26,6 @@ import br.bireme.scl.IdUrl;
 import br.bireme.scl.MongoOperations;
 import com.mongodb.DBCollection;
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,6 +57,8 @@ public class UndoFixServlet extends HttpServlet {
     protected void processRequest(final HttpServletRequest request,
                                   final HttpServletResponse response)
                                          throws ServletException, IOException {
+        request.setCharacterEncoding(CODEC);
+        
         final ServletContext context = getServletContext();
         final DBCollection coll =
                                (DBCollection)context.getAttribute("collection");
@@ -67,7 +68,6 @@ public class UndoFixServlet extends HttpServlet {
         final Set<IdUrl> fixed = (Set<IdUrl>)session.getAttribute("IdUrls");
         final Set<IdUrl> nfixed = new HashSet<IdUrl>();
         final String undoUrl = request.getParameter("undoUrl");
-        final String undoUrl_D = URLDecoder.decode(undoUrl, CODEC);
         final String group = request.getParameter("group");
         final String lgroup = request.getParameter("lgroup");
         final String lang = request.getParameter("lang");
@@ -78,7 +78,7 @@ public class UndoFixServlet extends HttpServlet {
         final String url_E = URLEncoder.encode(url, CODEC);
         
         for (IdUrl iu : fixed) {
-            if (iu.url.equals(undoUrl_D)) {
+            if (iu.url.equals(undoUrl)) {
                 if (! MongoOperations.undoUpdateDocument(coll, hcoll, iu.id)) {
                    throw new IOException("Undo operation failed.");
                 }

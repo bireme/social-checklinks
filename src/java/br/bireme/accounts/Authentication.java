@@ -42,10 +42,10 @@ import org.json.simple.parser.ParseException;
  * date: 20130731
  */
 public class Authentication {
-    public static final String DEFAULT_HOST = "accounts.bireme.org";
-    public static final int DEFAULT_PORT = 80;    
-    public static final String SERVICE_NAME = "Social Check Links";
+    final static String DEFAULT_HOST = "accounts.bireme.org";
+    final static int DEFAULT_PORT = 80;
     final static String DEFAULT_PATH = "/api/auth/login/?format=json";
+    final static String SERVICE_NAME = "Social Check Links";
 
     final String host;
     final int port;
@@ -108,8 +108,7 @@ public class Authentication {
             final JSONObject jobj = (JSONObject)response.get("data");
 
             if (jobj != null) {
-                final JSONArray array = (JSONArray)jobj.get(
-                                                    "ccs_networks_responsible");
+                final JSONArray array = (JSONArray)jobj.get("ccs");
                 if (array != null) {                                        
                     for (Object array1 : array) {
                         id.add((String) array1);
@@ -135,8 +134,6 @@ public class Authentication {
         parameters.put("username", user);
         parameters.put("password", password);
         parameters.put("service", SERVICE_NAME);
-        parameters.put("list_responsible", true);
-        parameters.put("list_network_ccs", false);
         parameters.put("format", "json");
 
         //final URL url = new URL("http", host, port, DEFAULT_PATH);

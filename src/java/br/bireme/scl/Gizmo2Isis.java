@@ -66,20 +66,18 @@ class GizmoElem {
 
 public class Gizmo2Isis {    
     public static void apply(final String gizmoFile,
-                             final String ciparFile,
+                             final String confFile,
                              final String outputDir) throws IOException, 
                                                             BrumaException {
         if (gizmoFile == null) {
             throw new NullPointerException("gizmoFile");
         }
-        if (ciparFile == null) {
-            throw new NullPointerException("ciparFile");
-        }
         if (outputDir == null) {
             throw new NullPointerException("outputDir");
         }
         final List<GizmoElem> giz = readGizmo(gizmoFile);
-        final Map<String, String> cipar = readCipar(ciparFile);
+        final Map<String, String> cipar = (confFile == null) ? null 
+                                                       : readConfFile(confFile);
         final Map<String, Master> inmap = new HashMap<String, Master>();
         final Map<String, Master> outmap = new HashMap<String, Master>();
         
@@ -101,13 +99,13 @@ public class Gizmo2Isis {
                                    final String outDir) throws BrumaException, 
                                                                    IOException {
         assert elem != null;
-        assert cipar != null;
         assert inmap != null;
         assert outmap != null;
         assert outDir != null;
         
         final String from = elem.from;
-        final String path = cipar.get(elem.mst);
+        final String path = (cipar == null) ? "./" + elem.mst 
+                                            : cipar.get(elem.mst);
         if ((path == null) || (path.isEmpty())) {
             throw new IllegalArgumentException("master path");
         }
@@ -200,6 +198,35 @@ public class Gizmo2Isis {
         return lst;
     }
     
+    private static Map<String,String> readConfFile(final String confFile) 
+                                                            throws IOException {
+        assert confFile != null;
+        
+        final Map<String,String> map = new HashMap<String,String>();
+        BufferedReader reader = null;
+        
+        try {
+            reader = new BufferedReader(new FileReader(confFile));
+            while (true) {
+                final String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                final String[] split = line.trim().split("\\|", 5);
+                if (split.length != 5) {
+                    throw new IOException("Wrong line format: " + line);
+                }
+                map.put(split[0], split[3] + "/" + split[0]);
+            }
+        } finally {
+            if (reader != null) {
+                 reader.close();
+            }
+        }
+        
+        return map;
+    }
+    
     private static Map<String,String> readCipar(final String ciparFile) 
                                                             throws IOException {
         assert ciparFile != null;
@@ -246,19 +273,19 @@ public class Gizmo2Isis {
     
     private static void usage() {
         System.err.println(
-                         "usage: Gizmo2Isis <gizmoFile> <ciparFile> <outDir>");
+                         "usage: Gizmo2Isis <gizmoFile> <outDir> [<confFile>]");
         System.exit(1);
     }
     
     public static void main(final String[] args) throws IOException, 
                                                         BrumaException {
 
-        if (args.length != 3) {
+        if (args.length < 2) {
             usage();
         }
+        final String confFile = (args.length > 2) ? args[2] : null;
+        apply(args[0], confFile, args[1]);
         
-        apply(args[0], args[1], args[2]);
-        
-        //apply("Gv8broken.giz", "cipar.par", "other");
+        //apply("Gv8broken.giz", "config.txt", "other");
     }
 }

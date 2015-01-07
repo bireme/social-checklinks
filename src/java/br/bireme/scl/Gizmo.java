@@ -29,6 +29,7 @@ import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import static br.bireme.scl.BrokenLinks.ELEM_LST_FIELD;
+import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
 import static br.bireme.scl.MongoOperations.EXPORTED_FIELD;
 import static br.bireme.scl.MongoOperations.MST_FIELD;
 import com.mongodb.BasicDBList;
@@ -52,22 +53,10 @@ import java.util.Collection;
  * date: 20130813
  */
 public class Gizmo {
-    class Elem {
-        String id;
-        String burl;
-        String furl;
-        String dbase;
-
-        Elem(String id) {
-            assert id != null;
-            this.id = id;
-        }
-    }
-
-    Collection<Elem>loadRecords(final String host,
-                                final int port,
-                                final String user,
-                                final String password) throws IOException {
+    Collection<Element>loadRecords(final String host,
+                                   final int port,
+                                   final String user,
+                                   final String password) throws IOException {
         assert host != null;
         assert port > 0;
 
@@ -85,20 +74,20 @@ public class Gizmo {
         final String fldName = ELEM_LST_FIELD + ".0." + EXPORTED_FIELD;
         final BasicDBObject query = new BasicDBObject(fldName, false);
         final DBCursor cursor = coll.find(query);
-        final Collection<Elem> col = getNotExportedElements(coll, cursor);
+        final Collection<Element> col = getNotExportedElements(coll, cursor);
 
         cursor.close();
 
         return col;
     }
 
-    Collection<Elem> getNotExportedElements(final DBCollection coll,
-                                            final DBCursor cursor)
+    Collection<Element> getNotExportedElements(final DBCollection coll,
+                                               final DBCursor cursor)
                                                            throws IOException {
         assert coll != null;
         assert cursor != null;
 
-        final Collection<Elem> col = new ArrayList<Elem>();
+        final Collection<Element> col = new ArrayList<Element>();
 
         while (cursor.hasNext()) {
             final BasicDBObject obj = (BasicDBObject)cursor.next();
@@ -112,10 +101,13 @@ public class Gizmo {
                 throw new NullPointerException("Elem element espected");
             }
             if (!lelem.getBoolean(EXPORTED_FIELD)) {
-                final Elem elem = new Elem(id);
-                elem.burl = lelem.getString(BROKEN_URL_FIELD);
-                elem.furl = lelem.getString(FIXED_URL_FIELD);
-                elem.dbase = obj.getString(MST_FIELD);
+                final Element elem = new Element(id,
+                                     lelem.getString(BROKEN_URL_FIELD),
+                                     lelem.getString(FIXED_URL_FIELD),
+                                     obj.getString(MST_FIELD),
+                                     lelem.getDate(LAST_UPDATE_FIELD).toString(),
+                                     null,
+                                     false);
                 col.add(elem);
                 
                 lelem.put(EXPORTED_FIELD, true);
@@ -150,18 +142,16 @@ public class Gizmo {
             throw new NullPointerException("encoding");
         }
 
-        final Collection<Elem> elems = loadRecords(host, port, user, password);
+        final Collection<Element> elems = loadRecords(host, port, user, password);
         final BufferedWriter out = new BufferedWriter(new OutputStreamWriter
                                     (new FileOutputStream(gizFile), encoding));
 
-        for (Elem elem : elems) {
-            final String[] split = elem.id.split("_", 2);
-            //final String burl = elem.burl.replaceAll("&amp;", "&").trim();
-            //final String furl = elem.furl.replaceAll("&amp;", "&").trim();
-            final String burl = elem.burl.trim();
-            final String furl = elem.furl.trim();
-            out.append(burl + "|" + furl + "|" + elem.dbase + "|" + split[0] 
-                                                       + "|" + split[1] + "\n");
+        for (Element elem : elems) {
+            final String[] split = elem.getId().split("_", 2);
+            final String burl = elem.getBurl().trim();
+            final String furl = elem.getFurl().trim();
+            out.append(burl + "|" + furl + "|" + elem.getDbase() + "|" + split[0] 
+                                + "|" + split[1] + "|" + elem.getDate() + "\n");
         }
 
         out.close();

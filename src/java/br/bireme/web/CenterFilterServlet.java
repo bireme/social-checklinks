@@ -28,6 +28,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -49,17 +50,17 @@ public class CenterFilterServlet extends HttpServlet {
     protected void processRequest(final HttpServletRequest request, 
                                   final HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
         
         final String lang = request.getParameter("lang");
         final String order = request.getParameter("order");
-        final String collFilterCenter = request.getParameter("collFilterCenter");
+        /*final HttpSession session = request.getSession();
+        final String collFilterCenter = (String)
+                                     session.getAttribute("collFilterCenter");*/
         final ServletContext context = getServletContext();
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
-           "/list.jsp?group=0&lang=" + lang 
-               + ((order == null) ? "" : "&order=" + order) 
-               + ((collFilterCenter == null) ? "" 
-                                    : "&collFilterCenter=" + collFilterCenter));
+           "/list.jsp?group=0&lang=" + lang + "&order=" + order);
         dispatcher.forward(request, response);
     }
 

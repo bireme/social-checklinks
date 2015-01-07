@@ -53,21 +53,21 @@ public class CheckOneLinkServlet extends HttpServlet {
     protected void processRequest(final HttpServletRequest request,
                                   final HttpServletResponse response)
                                          throws ServletException, IOException {
+        request.setCharacterEncoding(CODEC);
+        
         final String id = request.getParameter("id");
         final String url = request.getParameter("url");
-        final String url_E = URLEncoder.encode(url, CODEC);
+        final String url_E = URLEncoder.encode(url, CODEC);        
         final String furl = request.getParameter("furl");
-        final String furl_E = URLEncoder.encode(furl, CODEC);
+        final String furl_E = URLEncoder.encode(furl, CODEC);        
         final String lang = request.getParameter("lang");
         final String group = request.getParameter("group");
         final int errCode = CheckUrl.check(furl);
         final boolean isBroken = CheckUrl.isBroken(errCode);
-        final boolean is200 = (errCode == 200);
         final ServletContext context = getServletContext();
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
-                                    "/editRecord.jsp?id=" + id + "&url=" + url_E
-                      + "&furl=" + furl_E + "&status=" 
-                      + (isBroken ? 2 : (is200 ? 0 : 1))
+                                   "/editRecord.jsp?id=" + id + "&url=" + url_E
+                      + "&furl=" + furl_E + "&status=" + (isBroken ? 1 : 0)
                       + "&lang=" + lang + "&group=" + group);
         dispatcher.forward(request, response);
     }

@@ -36,7 +36,8 @@ import javax.servlet.http.HttpServletResponse;
  * date 20131121
  */
 public class GoogleSearchServlet extends HttpServlet {
-
+    private static final String CODEC = "UTF-8";
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -49,6 +50,8 @@ public class GoogleSearchServlet extends HttpServlet {
     protected void processRequest(final HttpServletRequest request, 
                                   final HttpServletResponse response)
                                           throws ServletException, IOException {
+        request.setCharacterEncoding(CODEC);
+        
         final String url = request.getParameter("url");
         final Set<String> exprSet = Tools.getTitles(url);
         final StringBuilder builder = new StringBuilder();

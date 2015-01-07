@@ -1,1 +1,1 @@
-curl --data "readOnlyMode=true" http://socialchecklinks.teste.bireme.org/ReadOnlyModeServlet
+curl -s --data "readOnlyMode=true" http://socialchecklinks.teste.bireme.org/ReadOnlyModeServlet

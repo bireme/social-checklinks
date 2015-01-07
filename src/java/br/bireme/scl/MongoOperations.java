@@ -542,34 +542,6 @@ public class MongoOperations {
         return ret;
     }
 
-    /**
-     * Filtra um conjunto com id de centros colaboradores deixando apenas os que
-     * aparecem nos documentos da colacao
-     * @param coll colecao onde serao procurados os cc
-     * @param centerIds conjunto inicial com os ccs
-     * @return conjunto final com ccs que aparecem nos documentos da colecao
-     */
-    public static Set<String> filterCenterIds(final DBCollection coll,
-                                              final Set<String> centerIds) {
-        if (coll == null) {
-            throw new NullPointerException("coll");
-        } 
-        if (centerIds == null) {
-            throw new NullPointerException("centerIds");
-        }
-        final Set<String> set = new HashSet<String>();
-        
-        for (String cid : centerIds) {
-            final BasicDBObject query = new BasicDBObject(CENTER_FIELD, cid);
-            final BasicDBObject doc = (BasicDBObject)coll.findOne(query);
-
-            if (doc != null) {
-                set.add(cid);
-            }
-        }
-        return set;
-    }
-                                            
     public static void main(final String[] args) throws UnknownHostException,
                                                                    IOException {
         final MongoClient mongoClient = new MongoClient("ts01vm.bireme.br");

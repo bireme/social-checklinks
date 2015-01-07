@@ -57,6 +57,8 @@ public class CheckManyLinksServlet extends HttpServlet {
     protected void processRequest(final HttpServletRequest request,
                                   final HttpServletResponse response)
                                          throws ServletException, IOException {
+        request.setCharacterEncoding(CODEC);
+        
         final ServletContext context = getServletContext();
         final DBCollection coll =
                                (DBCollection)context.getAttribute("collection");
@@ -68,29 +70,20 @@ public class CheckManyLinksServlet extends HttpServlet {
                                (String)session.getAttribute("collFilterCenter");
         final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");         
-        final String brokenUrl_D = (String)request.getParameter("url");
-        final String brokenUrl_E = URLEncoder.encode(brokenUrl_D, CODEC);
-        final String fixedUrl_D = (String)request.getParameter("furl");
-        final String fixedUrl_E = URLEncoder.encode(fixedUrl_D, CODEC);
+        final String brokenUrl = (String)request.getParameter("url");
+        final String brokenUrl_E = URLEncoder.encode(brokenUrl, CODEC);
+        final String fixedUrl = (String)request.getParameter("furl");
+        final String fixedUrl_E = URLEncoder.encode(fixedUrl, CODEC);
         final String lang = (String)request.getParameter("lang");
         final String group = (String)request.getParameter("group");
         final String id = (String)request.getParameter("id");
         final Set<IdUrl> fixed = MongoOperations.fixRelatedUrls(coll, hcoll,
-                    user, centerIds, collCenterFilter, brokenUrl_D, fixedUrl_D);
-        final RequestDispatcher dispatcher;
-        
-        if (fixed.isEmpty()) {
-            dispatcher = context.getRequestDispatcher(
-                        "/editRecord.jsp?id=" + id + "&url=" + brokenUrl_D
-                      + "&furl=" + fixedUrl_D + "&status=2" 
-                      + "&lang=" + lang + "&group=" + group);
-        } else {
-            dispatcher = context.getRequestDispatcher(
+                    user, centerIds, collCenterFilter, brokenUrl, fixedUrl);
+        final RequestDispatcher dispatcher = context.getRequestDispatcher(
                 "/showFixedUrls.jsp?group=0&lgroup=" + group + "&lang=" + lang 
             + "&id=" + id + "&brokenUrl=" + brokenUrl_E + "&url=" + fixedUrl_E);
 
-            session.setAttribute("IdUrls", fixed);
-        }
+        session.setAttribute("IdUrls", fixed);
         dispatcher.forward(request, response);
     }
 

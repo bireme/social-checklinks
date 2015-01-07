@@ -36,7 +36,8 @@ import javax.servlet.http.HttpServletResponse;
  * date 201312111
  */
 public class ReadOnlyModeServlet extends HttpServlet {
-
+    private static final String CODEC = "UTF-8";
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -50,7 +51,9 @@ public class ReadOnlyModeServlet extends HttpServlet {
                                   final HttpServletResponse response)
                                           throws ServletException, IOException {
         
+        request.setCharacterEncoding(CODEC);
         response.setContentType("text/html;charset=UTF-8");
+        
         PrintWriter out = response.getWriter();
         try {
             final boolean readOnlyMode = Boolean.parseBoolean(

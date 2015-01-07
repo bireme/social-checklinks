@@ -45,7 +45,8 @@ public class CopyMongoDb {
                                final String to_db,
                                final String from_port,
                                final String to_port,
-                               final boolean appendCollections) 
+                               final boolean appendCollections,
+                               final boolean displayAllIds) 
                                                    throws UnknownHostException {
         assert from_host != null;
         assert to_host != null;
@@ -79,7 +80,7 @@ public class CopyMongoDb {
             DBCursor cursor = fromColl.find();
             int curr = 0;
             
-            System.err.println("Copying collection: " + cname);
+            System.out.println("Copying collection: " + cname);
             
             while (cursor.hasNext()) {
                 if (curr % MAX_LOOP_SIZE == 0) {
@@ -95,19 +96,22 @@ public class CopyMongoDb {
                     System.err.println("write error doc id=" + doc.get("_id"));
                 }
                 if (++curr % 1000 == 0) {
-                    System.err.println("+++" + curr);
+                    System.out.println("+++" + curr);
+                }
+                if (displayAllIds) {
+                    System.out.println(" id=" + doc.get("_id"));
                 }
             }
             cursor.close();
             
-            System.err.println();
+            System.out.println();
         }
     }
     
     private static void usage() {
         System.err.println("usage: CopyMongoDb <from_host> <to_host> <from_db>"
         + " [-to_db=<name>] [-from_port=<port>] [-to_port=<port>]"
-        + " [--appendCollections]");
+        + " [--appendCollections] [--displayAllIds]");
         System.exit(1);
     }
     
@@ -119,6 +123,7 @@ public class CopyMongoDb {
         String fromPort = Integer.toString(BrokenLinks.DEFAULT_PORT);
         String toPort =  fromPort;
         boolean appendCollections = false;
+        boolean displayAllIds = false;
         
         for (int idx = 3; idx < args.length; idx++) {
             if (args[idx].startsWith("-to_db=")) {
@@ -129,12 +134,14 @@ public class CopyMongoDb {
                 toPort = args[idx].substring(9);
             } else if (args[idx].equals("--appendCollections")) {
                 appendCollections = true;
+            } else if (args[idx].equals("--displayAllIds")) {
+                displayAllIds = true;
             } else {
                 usage();
             }
         }
         
         copyDB(args[0], args[1], args[2], toDb, fromPort, toPort, 
-                                                             appendCollections);
+                                              appendCollections, displayAllIds);
     }
 }

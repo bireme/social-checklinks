@@ -26,13 +26,12 @@ import br.bireme.accounts.Authentication;
 import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
-import br.bireme.scl.MongoOperations;
 import br.bireme.scl.Tools;
-import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -53,7 +52,7 @@ import org.json.simple.JSONObject;
  * date: 20130731
  */
 public class AuthenticationServlet extends HttpServlet {
-    private boolean ok = false;
+    private static final String CODEC = "UTF-8";
     
     @Override
     public void init() {
@@ -75,27 +74,14 @@ public class AuthenticationServlet extends HttpServlet {
             }
             
             final DBCollection coll = db.getCollection(BROKEN_LINKS_COL);
-            if (coll == null) {
-                throw new NullPointerException("collection[" + BROKEN_LINKS_COL
-                                                                 + "] is null");
-            }
-            final BasicDBObject doc = (BasicDBObject)coll.findOne();
-            
             final DBCollection hcoll = db.getCollection(HISTORY_COL);            
-            if (hcoll == null) {
-                throw new NullPointerException("collection[" + HISTORY_COL
-                                                                 + "] is null");
-            }
-            final BasicDBObject hdoc = (BasicDBObject)hcoll.findOne();
             
             context.setAttribute("collection", coll);
             context.setAttribute("historycoll", hcoll);
             context.setAttribute("readOnlyMode", false);
-            ok = true;
-        } catch (Exception ex) {
+        } catch (UnknownHostException ex) {
             Logger.getLogger(AuthenticationServlet.class.getName())
                                                    .log(Level.SEVERE, null, ex);
-            ok = false;
         }
     }
 
@@ -113,9 +99,7 @@ public class AuthenticationServlet extends HttpServlet {
                                   final HttpServletResponse response)
                                           throws ServletException, IOException {
         
-        if (!ok) {
-            throw new IOException("Connection to the MongoDb server failed");
-        }
+        request.setCharacterEncoding(CODEC);
         
         final String username = request.getParameter("email");
         final String password = request.getParameter("password");
@@ -151,12 +135,8 @@ public class AuthenticationServlet extends HttpServlet {
                     }
                     centerIds.add(auth.getColCenter(user)); // cc may not belong to a net (it not appear in centerIds)
                     
-                    final DBCollection coll = 
-                               (DBCollection)context.getAttribute("collection");
-                    final Set<String> filteredCenterIds = 
-                               MongoOperations.filterCenterIds(coll, centerIds);
                     session.setAttribute("user", username); // Login user.
-                    session.setAttribute("centerIds", filteredCenterIds);   
+                    session.setAttribute("centerIds", centerIds);   
                     dispatcher = context.getRequestDispatcher(
                                    "/CenterFilterServlet?lang=" + lang);
                 } else {
@@ -168,12 +148,10 @@ public class AuthenticationServlet extends HttpServlet {
                 }     
                 dispatcher.forward(request, response);
             } catch(Exception ex) {
-                final String eMess = ex.getMessage();
                 dispatcher = context.getRequestDispatcher(
                                                     "/index.jsp?lang=" + lang
                           + "&errMsg=" + messages.getString("exception_found")
-                          + "<br/><br/>" + (eMess == null ? ex.toString() 
-                                                          : eMess));
+                          + "<br/><br/>" + ex.getMessage());                
                 dispatcher.forward(request, response);
             }
         } else {            

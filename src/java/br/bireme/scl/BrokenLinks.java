@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -56,7 +57,7 @@ import java.util.Set;
  * date 20130625
  */
 public class BrokenLinks {
-    public static final String VERSION = "0.4";
+    public static final String VERSION = "0.3";
 
     /* MongoDb settings */
     public static final String DEFAULT_FILE_ENCODING = "IBM850";
@@ -113,7 +114,7 @@ public class BrokenLinks {
         "HTTP Version Not Supported", "HTTP Exception" };
 
     public static String[] DEFAULT_ALLOWED_MESS = {"MALFORMED_URL", "Not found",
-                                                   "UNKNOWN_HOST_EXCEPTION" };
+                                  "UNKNOWN_HOST_EXCEPTION", "Not Acceptable" };
     
     public static void createLinks(final String outCheckFile,
                                    final String mstName) throws BrumaException,
@@ -148,6 +149,9 @@ public class BrokenLinks {
                                                                  IOException {
         if (outCheckFile == null) {
             throw new NullPointerException("outCheckFile");
+        }
+        if (outEncoding == null) {
+            throw new NullPointerException("outEncoding");
         }
         if (mstName == null) {
             throw new NullPointerException("mstName");
@@ -216,7 +220,10 @@ public class BrokenLinks {
                                     ? split[2].substring(0, openPos) : split[2];
 
                 if (allowedMess.contains(prefix.trim())) {
-                    saveRecord(mName, split[0], split[1], 
+                    final String decoded = URLDecoder.decode(split[1], 
+                                                                   outEncoding);
+//System.out.println(split[0] + " url=" + decoded);                    
+                    saveRecord(mName, split[0], decoded, 
                                      split[2], urlTag, tags, mst, coll, occMap);
                 }
                 if (++tell % 5000 == 0) {
@@ -334,7 +341,10 @@ public class BrokenLinks {
 
         final Record rec = mst.getRecord(Integer.parseInt(id));
         if (!rec.isActive()) {
-            throw new BrumaException("not active record mfn=" + id);
+            //throw new BrumaException("not active record mfn=" + id);
+            System.err.println("WARNING: record[" + id + "] is not active. "
+                                                              + "Ignoring it!");
+            return false;
         }
 
         final List<Field> urls = rec.getFieldList(urlTag);        

@@ -1,9 +1,0 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Servlet ReadOnlyModeServlet</title>
-</head>
-<body>
-<h1>Read Only Mode = true</h1>
-</body>
-</html>
