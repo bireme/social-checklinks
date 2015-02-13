@@ -22,17 +22,16 @@
 
 package br.bireme.scl;
 
-import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
 import static br.bireme.scl.BrokenLinks.BROKEN_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.CENTER_FIELD;
 import static br.bireme.scl.BrokenLinks.DATE_FIELD;
-import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import static br.bireme.scl.BrokenLinks.ELEM_LST_FIELD;
+import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
 import static br.bireme.scl.BrokenLinks.MSG_FIELD;
-
+import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -61,6 +60,17 @@ import java.util.regex.Pattern;
  * date: 20130729
  */
 public class MongoOperations {
+    public static class SearchResult {
+        public final int size;
+        public final List<IdUrl> documents;
+
+        public SearchResult(final int size, 
+                            final List<IdUrl> documents) {
+            this.size = size;
+            this.documents = documents;
+        }                
+    }
+    
     public static final String FIXED_URL_FIELD = "furl";
     public static final String USER_FIELD = "user";
     public static final String AUTO_FIX_FIELD = "autofix";
@@ -81,7 +91,16 @@ public class MongoOperations {
 
         return set;
     }
+    
+    public static Set<String> getDatabases(final DBCollection coll) {
+        if (coll == null) {
+            throw new NullPointerException("coll");
+        }        
 
+        return new TreeSet<String>(coll.distinct("mst"));
+    }
+
+    
     public static List<IdUrl> getCenterUrls(final DBCollection coll,
                                             final Set<String> centerIds,
                                             final String filter) {
@@ -176,166 +195,71 @@ public class MongoOperations {
         return lst;
     }
     
-    public static List<IdUrl> getDocMaster(final DBCollection coll,
-                                           final String docMast,
-                                           final int from,
-                                           final int count) {
+    public static SearchResult getDocuments(final DBCollection coll,
+                                            final String docMast,
+                                            final String docId,
+                                            final String docUrl,
+                                            final Set<String> centerIds,
+                                            final boolean decreasingOrder,
+                                            final int from,
+                                            final int count) {
         if (coll == null) {
             throw new NullPointerException("coll");
-        }
-        if (docMast == null) {
-            throw new NullPointerException("docMast");
         }
         if (from < 1) {
             throw new IllegalArgumentException("from[" + from + "] < 1");
         }
         if (count < 1) {
             throw new IllegalArgumentException("count[" + count + "] < 1");
-        }
-        
+        }        
         final List<IdUrl> lst = new ArrayList<IdUrl>();
-        final SimpleDateFormat format = 
-                                    new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        final BasicDBObject query = new BasicDBObject();
         
-        final BasicDBObject query = new BasicDBObject("mst", docMast);
-        final DBCursor cursor = coll.find(query).skip(from - 1).limit(count);
-        
-        while (cursor.hasNext()) {
-            final DBObject doc = cursor.next();
-            final BasicDBList ccsLst = (BasicDBList)doc.get(CENTER_FIELD);
-            final Set<String> ccs = new TreeSet<String>();
-
-            for (Object cc : ccsLst) {
-                ccs.add((String)cc);
-            }
-            final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
-                                       (String)doc.get(BROKEN_URL_FIELD),
-                                       ccs,
-                                  format.format((Date)doc.get(DATE_FIELD)),
-                                       (String)doc.get(MST_FIELD));
-            lst.add(iu);
-
+        if (docMast != null) {
+            query.append("mst", docMast);
         }
-        cursor.close();
-        return lst;
-    }
-    
-    public static List<IdUrl> getDocId(final DBCollection coll,
-                                       final String docId) {
-        if (coll == null) {
-            throw new NullPointerException("coll");
+        if (docId != null) {
+            final Pattern pat = Pattern.compile(docId.trim() + "_\\d+");
+            query.append("_id", pat);
         }
-        if (docId == null) {
-            throw new NullPointerException("docId");
+        if (docUrl != null) {
+            query.append("burl", docUrl);
         }
-        final List<IdUrl> lst = new ArrayList<IdUrl>();
-        final SimpleDateFormat format = 
-                                    new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        final Pattern pat = Pattern.compile(docId.trim() + "_\\d+");
-        final BasicDBObject query = new BasicDBObject("_id", pat);
-        final DBCursor cursor = coll.find(query);
-        
-        while (cursor.hasNext()) {
-            final DBObject doc = cursor.next();
-            final BasicDBList ccsLst = (BasicDBList)doc.get(CENTER_FIELD);
-            final Set<String> ccs = new TreeSet<String>();
-
-            for (Object cc : ccsLst) {
-                ccs.add((String)cc);
-            }
-            final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
-                                       (String)doc.get(BROKEN_URL_FIELD),
-                                       ccs,
-                                  format.format((Date)doc.get(DATE_FIELD)),
-                                       (String)doc.get(MST_FIELD));
-            lst.add(iu);
-        }
-        cursor.close();
-        return lst;
-    }
-    
-    public static List<IdUrl> getDocUrl(final DBCollection coll,
-                                        final String docUrl) {
-        if (coll == null) {
-            throw new NullPointerException("coll");
-        }
-        if (docUrl == null) {
-            throw new NullPointerException("docUrl");
-        }
-        final List<IdUrl> lst = new ArrayList<IdUrl>();
-        final SimpleDateFormat format = 
-                                    new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        
-        final BasicDBObject query = new BasicDBObject("burl", docUrl);
-        final DBCursor cursor = coll.find(query);
-        
-        while (cursor.hasNext()) {
-            final DBObject doc = cursor.next();
-            final BasicDBList ccsLst = (BasicDBList)doc.get(CENTER_FIELD);
-            final Set<String> ccs = new TreeSet<String>();
-
-            for (Object cc : ccsLst) {
-                ccs.add((String)cc);
-            }
-            final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
-                                       (String)doc.get(BROKEN_URL_FIELD),
-                                       ccs,
-                                  format.format((Date)doc.get(DATE_FIELD)),
-                                       (String)doc.get(MST_FIELD));
-            lst.add(iu);
-
-        }
-        cursor.close();
-        return lst;
-    }
-                                            
-    public static int getDocMasterNum(final DBCollection coll,
-                                      final String docMast) {
-        if (coll == null) {
-            throw new NullPointerException("coll");
-        }
-        if (docMast == null) {
-            throw new NullPointerException("docMast");
-        }
-        int num;
-        final BasicDBObject query = new BasicDBObject("mst", docMast);
-        final DBCursor cursor = coll.find(query);
-        
-        num = cursor.size();
-        cursor.close();
-        
-        return num;
-    }
-    
-    public static int getCentersUrlsNum(final DBCollection coll,
-                                        final Set<String> centerIds,
-                                        final String filter) {
-        if (coll == null) {
-            throw new NullPointerException("coll");
-        }
-        if (centerIds == null) {
-            throw new NullPointerException("centerIds");
-        }
-        int num = 0;
-        final BasicDBObject query;
-        
-        if (filter == null) {
-            final BasicDBList or = new BasicDBList();
-
+        if (centerIds != null) {
+            final BasicDBList cclst = new BasicDBList();
             for (String centerId : centerIds) {
-                or.add(new BasicDBObject(CENTER_FIELD, centerId));
+                cclst.add(centerId);
             }
-            query = new BasicDBObject("$or", or);
-        } else {
-            query = new BasicDBObject(CENTER_FIELD, filter);
+            final BasicDBObject in = new BasicDBObject("$in", cclst);
+            query.append(CENTER_FIELD, in);
+        }                
+        final BasicDBObject sort = new BasicDBObject(DATE_FIELD, 
+                                                      decreasingOrder ? -1 : 1);
+        final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
+                                                                  .limit(count);
+        final int size = cursor.count();
+        final SimpleDateFormat format = 
+                                    new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        while (cursor.hasNext()) {
+            final DBObject doc = cursor.next();
+            final BasicDBList ccsLst = (BasicDBList)doc.get(CENTER_FIELD);
+            final Set<String> ccs = new TreeSet<String>();
+
+            for (Object cc : ccsLst) {
+                ccs.add((String)cc);
+            }
+            final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
+                                       (String)doc.get(BROKEN_URL_FIELD),
+                                       ccs,
+                                     format.format((Date)(doc.get(DATE_FIELD))),
+                                       (String)doc.get(MST_FIELD));
+            lst.add(iu);                 
         }
-        final DBCursor cursor = coll.find(query);
-        num = cursor.size();
         cursor.close();
         
-        return num;
+        return new SearchResult(size, lst);
     }
-
+    
     static Set<IdUrl> getDocsWith(final DBCollection coll,
                                   final Set<String> centerIds,
                                   final String filter,
@@ -411,7 +335,7 @@ public class MongoOperations {
                               
         lsthdoc.add(0, hcurdoc);
         
-        final boolean ret1 = coll.remove(doc, WriteConcern.SAFE)
+        final boolean ret1 = coll.remove(doc, WriteConcern.ACKNOWLEDGED)
                                                            .getLastError().ok();
         final boolean ret2 = hcoll.save(hdoc).getLastError().ok();
 
@@ -445,21 +369,23 @@ public class MongoOperations {
                                                                          + "]");
         }
         final BasicDBObject doc = new BasicDBObject();        
-        doc.put(DATE_FIELD, (Date)hdoc.get(DATE_FIELD));
-        doc.put(LAST_UPDATE_FIELD, (Date)hcurdoc.get(LAST_UPDATE_FIELD));
-        doc.put(MST_FIELD, (String)hdoc.get(MST_FIELD));
+        doc.put(DATE_FIELD, hdoc.get(DATE_FIELD));
+        doc.put(LAST_UPDATE_FIELD, hcurdoc.get(LAST_UPDATE_FIELD));
+        doc.put(MST_FIELD, hdoc.get(MST_FIELD));
         doc.put(ID_FIELD, docId);
-        doc.put(BROKEN_URL_FIELD, (String)hcurdoc.get(BROKEN_URL_FIELD));
-        doc.put(MSG_FIELD, (String)hcurdoc.get(MSG_FIELD));
-        doc.put(CENTER_FIELD, (BasicDBList)hcurdoc.get(CENTER_FIELD));    
+        doc.put(BROKEN_URL_FIELD, hcurdoc.get(BROKEN_URL_FIELD));
+        doc.put(MSG_FIELD, hcurdoc.get(MSG_FIELD));
+        doc.put(CENTER_FIELD, hcurdoc.get(CENTER_FIELD));    
         
         final boolean ret1 = coll.save(doc).getLastError().ok();
         final boolean ret2;
         
         if (lst.isEmpty()) {
-            ret2 = hcoll.remove(query, WriteConcern.SAFE).getLastError().ok();
+            ret2 = hcoll.remove(query, WriteConcern.ACKNOWLEDGED).getLastError()
+                                                                          .ok();
         } else {
-            ret2 = hcoll.save(hdoc, WriteConcern.SAFE).getLastError().ok();
+            ret2 = hcoll.save(hdoc, WriteConcern.ACKNOWLEDGED).getLastError()
+                                                                          .ok();
         }       
 
         return ret1 && ret2;

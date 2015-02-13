@@ -57,7 +57,8 @@ import java.util.Set;
  * date 20130625
  */
 public class BrokenLinks {
-    public static final String VERSION = "0.3";
+    public static final String VERSION = "0.4";
+    public static final String VERSION_DATE = "2015";
 
     /* MongoDb settings */
     public static final String DEFAULT_FILE_ENCODING = "IBM850";
@@ -85,6 +86,7 @@ public class BrokenLinks {
     
     /* CC_FIELDS_COL colection fields */
     public static final String MST_FIELD = "mst";
+    public static final String ID_TAG_FIELD = "idTag";
     public static final String URL_TAG_FIELD = "urlTag";
     public static final String CC_TAGS_FIELD = "ccTags";
     
@@ -113,8 +115,8 @@ public class BrokenLinks {
         "Bad Gateway", "Service Unavailable", "Gateway Timeout", 
         "HTTP Version Not Supported", "HTTP Exception" };
 
-    public static String[] DEFAULT_ALLOWED_MESS = {"MALFORMED_URL", "Not found",
-                                  "UNKNOWN_HOST_EXCEPTION", "Not Acceptable" };
+    public static final String[] DEFAULT_ALLOWED_MESS = {"MALFORMED_URL", 
+                      "Not found", "UNKNOWN_HOST_EXCEPTION", "Not Acceptable" };
     
     public static void createLinks(final String outCheckFile,
                                    final String mstName) throws BrumaException,
@@ -194,6 +196,7 @@ public class BrokenLinks {
                 throw new IOException("CC fields collection creation failed");
             }
         }
+        final int idTag = getIsisIdField(mName, ccColl);
         final int urlTag = getIsisUrlFields(mName, ccColl);
         if (urlTag <= 0) {
             throw new IOException("Missing Isis url fields");
@@ -201,6 +204,7 @@ public class BrokenLinks {
         final List<Integer> tags = getIsisCcFields(mName, ccColl);
         final Set<String> allowedMess = new HashSet<String>(
                                                 Arrays.asList(allowedMessages));
+        final Map<String,Integer> idMap = getIdMfn(mst, idTag);
         int tell = 0;
 
         if (clearCol) {
@@ -220,10 +224,19 @@ public class BrokenLinks {
                                     ? split[2].substring(0, openPos) : split[2];
 
                 if (allowedMess.contains(prefix.trim())) {
-                    final String decoded = URLDecoder.decode(split[1], 
-                                                                   outEncoding);
+                    final Integer id = idMap.get(split[0]); 
+                    if (id == null) {
+                        throw new IOException("id[" + split[0] + "] not found");
+                    }
+                    
+                    String decoded;                    
+                    try {
+                        decoded = URLDecoder.decode(split[1], outEncoding);
+                    } catch(IllegalArgumentException iae) {
+                        decoded = split[1];
+                    }                    
 //System.out.println(split[0] + " url=" + decoded);                    
-                    saveRecord(mName, split[0], decoded, 
+                    saveRecord(mName, id, decoded, 
                                      split[2], urlTag, tags, mst, coll, occMap);
                 }
                 if (++tell % 5000 == 0) {
@@ -257,10 +270,11 @@ public class BrokenLinks {
         lst.add(920);
         lst.add(930);
         doc.put(MST_FIELD, "LILACS");
+        doc.put(ID_TAG_FIELD, 2);
         doc.put(URL_TAG_FIELD, 8);
         doc.put(CC_TAGS_FIELD, lst);
 
-        final WriteResult ret = coll.save(doc, WriteConcern.SAFE);
+        final WriteResult ret = coll.save(doc, WriteConcern.ACKNOWLEDGED);
 
         return ret.getCachedLastError().ok();
     }
@@ -290,8 +304,25 @@ public class BrokenLinks {
         cursor.close();
 
         return lst;        
-    }
+    }        
     
+    private static int getIsisIdField(final String mstName,
+                                      final DBCollection coll) 
+                                                            throws IOException {
+        assert mstName != null;
+        assert coll != null;
+        
+        final BasicDBObject query = new BasicDBObject(MST_FIELD, mstName);
+        final BasicDBObject doc = (BasicDBObject)coll.findOne(query);
+
+        if (doc == null) {
+            throw new IOException("Missing fields: collection[" + coll.getName() 
+                    + "] or master name[" + mstName + "]");
+        }
+
+        return doc.getInt(ID_TAG_FIELD);
+    }
+            
     private static int getIsisUrlFields(final String mstName,
                                         final DBCollection coll) 
                                                             throws IOException {
@@ -309,17 +340,50 @@ public class BrokenLinks {
         return doc.getInt(URL_TAG_FIELD);
     }
 
+    private static Map<String,Integer> getIdMfn(final Master mst, 
+                                                final int idTag) 
+                                                         throws BrumaException,
+                                                                IOException {
+        assert mst != null;
+        assert idTag > 0;
+        
+        System.out.println("Parsing ids ...");
+        
+        int cur = 0;
+        
+        final Map<String,Integer> map = new HashMap<String,Integer>();
+        for (Record rec : mst) {
+            final int mfn = rec.getMfn();
+            
+            if (rec.isActive()) {
+                final Field idFld = rec.getField(idTag, 1);
+                if (idFld == null) {
+                    throw new IOException("idTag[" + idTag + "] not found in " +
+                                                        " record[" + mfn + "]");
+                }
+                map.put(idFld.getContent(), mfn);
+            }
+            if (++cur % 100000 == 0) {
+                System.out.println("*" + cur);
+            }
+        }
+        System.out.println();
+        
+        return map;
+    }
+    
     private static void createIndex(final DBCollection coll) {
         assert coll != null;
 
         final BasicDBObject flds = new BasicDBObject();
         flds.append(CENTER_FIELD, 1);
         flds.append(BROKEN_URL_FIELD, 1);
+        flds.append(MST_FIELD, 1);
         coll.ensureIndex(flds);
     }
 
     private static boolean saveRecord(final String mstName,
-                                      final String id,
+                                      final int id,
                                       final String url,
                                       final String err,
                                       final int urlTag,
@@ -330,7 +394,7 @@ public class BrokenLinks {
                                                          throws BrumaException,
                                                                 IOException {
         assert mstName != null;
-        assert id != null;
+        assert id > 0;
         assert url != null;
         assert urlTag > 0;
         assert err != null;
@@ -339,7 +403,7 @@ public class BrokenLinks {
         assert coll != null;
         assert occMap != null;
 
-        final Record rec = mst.getRecord(Integer.parseInt(id));
+        final Record rec = mst.getRecord(id);
         if (!rec.isActive()) {
             //throw new BrumaException("not active record mfn=" + id);
             System.err.println("WARNING: record[" + id + "] is not active. "
@@ -372,7 +436,7 @@ public class BrokenLinks {
             if (date == null) {
                 date = obj.getDate(DATE_FIELD);
             } else {
-                final WriteResult wr = coll.remove(obj, WriteConcern.SAFE);
+                final WriteResult wr = coll.remove(obj, WriteConcern.ACKNOWLEDGED);
                 if (!wr.getCachedLastError().ok()) {
                     //TODO
                 }
@@ -388,7 +452,7 @@ public class BrokenLinks {
         doc.put(MSG_FIELD, err);
         doc.put(CENTER_FIELD, getCCS(rec, ccsFlds));        
 
-        final WriteResult ret = coll.save(doc, WriteConcern.SAFE);
+        final WriteResult ret = coll.save(doc, WriteConcern.ACKNOWLEDGED);
 
         return ret.getCachedLastError().ok();
     }
@@ -467,7 +531,7 @@ public class BrokenLinks {
             final Date auxDate = obj.getDate(LAST_UPDATE_FIELD);
             if ((auxDate == null) || 
                              (now.getTime() - auxDate.getTime()) > 60*60*1000) {
-                final WriteResult wr = coll.remove(obj, WriteConcern.SAFE);
+                final WriteResult wr = coll.remove(obj, WriteConcern.ACKNOWLEDGED);
                 ret = ret && wr.getCachedLastError().ok();
             }
         }
@@ -475,8 +539,7 @@ public class BrokenLinks {
     }
     
     private static void usage() {
-        System.err.println(
-                         "usage: CreateBrokenLinks <outFile> <mstName> <host>"
+        System.err.println("usage: BrokenLinks <outFile> <mstName> <host>"
      + "\n\t\t[-outFileEncoding=<outFileEncod>] [-outMstEncoding=<outMstEncod>]"
      + "\n\t\t[-port=<port>] [-user=<user> -password=<pswd>] [--clearColl]");
         System.exit(1);

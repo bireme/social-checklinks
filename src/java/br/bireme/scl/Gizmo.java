@@ -24,12 +24,12 @@ package br.bireme.scl;
 
 import static br.bireme.scl.BrokenLinks.BROKEN_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.DEFAULT_PORT;
+import static br.bireme.scl.BrokenLinks.ELEM_LST_FIELD;
 import static br.bireme.scl.BrokenLinks.FIXED_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
-import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
-import static br.bireme.scl.BrokenLinks.ELEM_LST_FIELD;
 import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
+import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import static br.bireme.scl.MongoOperations.EXPORTED_FIELD;
 import static br.bireme.scl.MongoOperations.MST_FIELD;
 import com.mongodb.BasicDBList;
@@ -111,7 +111,8 @@ public class Gizmo {
                 col.add(elem);
                 
                 lelem.put(EXPORTED_FIELD, true);
-                final WriteResult res = coll.save(obj, WriteConcern.SAFE);
+                final WriteResult res = coll.save(obj, 
+                                                     WriteConcern.ACKNOWLEDGED);
 
                 if (!res.getCachedLastError().ok()) {
                     throw new IOException("write doc[" + obj.getString(ID_FIELD)

@@ -90,7 +90,8 @@ public class CopyMongoDb {
                     }
                 }
                 final DBObject doc = cursor.next();
-                final WriteResult ret = toColl.save(doc, WriteConcern.SAFE);
+                final WriteResult ret = toColl.save(doc, 
+                                                     WriteConcern.ACKNOWLEDGED);
 
                 if (!ret.getCachedLastError().ok()) {
                     System.err.println("write error doc id=" + doc.get("_id"));

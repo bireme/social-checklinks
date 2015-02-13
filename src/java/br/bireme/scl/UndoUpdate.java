@@ -75,23 +75,39 @@ public class UndoUpdate {
         int total = 0;
         int reverted = 0;
         
+        System.out.println("host=" + host);
+        System.out.println("port=" + port);
+        System.out.println("database=" + database);
+        System.out.println("from date=[" + fromDate + "," + fDate + "]");
+        System.out.println("found=" + cursor.size());
+        
         while (cursor.hasNext()) {
-            final BasicDBObject doc = (BasicDBObject)cursor.next();
-            final String id = doc.getString(ID_FIELD);
-            final BasicDBList list = (BasicDBList)doc.get(ELEM_LST_FIELD);
+            final BasicDBObject doc_from = (BasicDBObject)cursor.next();
+            final BasicDBObject doc_to = new BasicDBObject(doc_from);
+            final String id = doc_from.getString(ID_FIELD);
+            final BasicDBList list = (BasicDBList)doc_from.get(ELEM_LST_FIELD);
             final BasicDBObject elem = (BasicDBObject)list.get(0);
+            final Date date = elem.getDate(LAST_UPDATE_FIELD);
             
-            doc.put(LAST_UPDATE_FIELD, elem.getDate(LAST_UPDATE_FIELD));
-            doc.put(BROKEN_URL_FIELD, elem.getString(BROKEN_URL_FIELD));
-            doc.put(MSG_FIELD, elem.getString(MSG_FIELD));
-            doc.put(CENTER_FIELD, elem.get(CENTER_FIELD));
-            doc.removeField(ELEM_LST_FIELD);
+            doc_to.put(LAST_UPDATE_FIELD, date);
+            doc_to.put(BROKEN_URL_FIELD, elem.getString(BROKEN_URL_FIELD));
+            doc_to.put(MSG_FIELD, elem.getString(MSG_FIELD));
+            doc_to.put(CENTER_FIELD, elem.get(CENTER_FIELD));
+            doc_to.removeField(ELEM_LST_FIELD);
             
-            final WriteResult wr = to_coll.save(doc, WriteConcern.SAFE);
-            if (!wr.getCachedLastError().ok()) {
-                System.err.println("Document[" + id + "] update error.");
+            final WriteResult wr = to_coll.save(doc_to, 
+                                                     WriteConcern.ACKNOWLEDGED);
+            if (wr.getCachedLastError().ok()) {
+                final WriteResult wr2 = from_coll.remove(doc_from, 
+                                                     WriteConcern.ACKNOWLEDGED);
+                if (wr2.getCachedLastError().ok()) {
+                    reverted++;
+                    System.out.println("+++id=" + id + " date=" + date);
+                } else {
+                    System.err.println("Document[" + id + "] delete error.");
+                }
             } else {
-                reverted++;
+                System.err.println("Document[" + id + "] update error.");
             }
             total++;
         }
@@ -115,7 +131,7 @@ public class UndoUpdate {
         String fromDate = "20140101";
         int port = BrokenLinks.DEFAULT_PORT;
         
-        for (int idx = 2; idx < args.length; idx++) {
+        for (int idx = 1; idx < args.length; idx++) {
             if (args[idx].startsWith("-mongo_db=")) {
                 mongo_db = args[idx].substring(10);
             } else if (args[idx].startsWith("-from_date=")) {

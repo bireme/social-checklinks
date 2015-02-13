@@ -66,22 +66,29 @@ public class CheckManyLinksServlet extends HttpServlet {
                               (DBCollection)context.getAttribute("historycoll");
         final HttpSession session = request.getSession();
         final String user = (String)session.getAttribute("user");
-        final String collCenterFilter = 
-                               (String)session.getAttribute("collFilterCenter");
         final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");         
-        final String brokenUrl = (String)request.getParameter("url");
+        final String brokenUrl = request.getParameter("url");
         final String brokenUrl_E = URLEncoder.encode(brokenUrl, CODEC);
-        final String fixedUrl = (String)request.getParameter("furl");
+        final String fixedUrl = request.getParameter("furl");
         final String fixedUrl_E = URLEncoder.encode(fixedUrl, CODEC);
-        final String lang = (String)request.getParameter("lang");
-        final String group = (String)request.getParameter("group");
-        final String id = (String)request.getParameter("id");
+        final String lang = request.getParameter("lang");
+        final String group = request.getParameter("group");
+        final String id = request.getParameter("id");
+        final String collCenterFilter = request.getParameter("collCenterFilter");
+        
+        final String sorder = request.getParameter("order");
+        final String order = "null".equals(sorder) ? "descending" : sorder;
+        final String sdbFilter = request.getParameter("dbFilter");
+        final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;    
+        
         final Set<IdUrl> fixed = MongoOperations.fixRelatedUrls(coll, hcoll,
                     user, centerIds, collCenterFilter, brokenUrl, fixedUrl);
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
-                "/showFixedUrls.jsp?group=0&lgroup=" + group + "&lang=" + lang 
-            + "&id=" + id + "&brokenUrl=" + brokenUrl_E + "&url=" + fixedUrl_E);
+                "/showFixedUrls.jsp?group=0&lgroup=" + group 
+            + "&dbFilter=" + dbFilter + "&lang=" + lang 
+            + "&id=" + id + "&brokenUrl=" + brokenUrl_E + "&url=" + fixedUrl_E
+            + "&collCenterFilter=" + collCenterFilter + "&order=" + order);
 
         session.setAttribute("IdUrls", fixed);
         dispatcher.forward(request, response);

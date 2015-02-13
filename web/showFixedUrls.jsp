@@ -55,18 +55,23 @@
     final int fixedUrls = fixed.size();
     final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");
-    final boolean showCenters = (centerIds.size() > 1);    
     final int group = Integer.parseInt(request.getParameter("group"));
     final int lgroup = Integer.parseInt(request.getParameter("lgroup")); // list urls group
     final String id = request.getParameter("id");
     final String id2 = id.substring(0, id.lastIndexOf('_'));
-    final int groupSize = 17;
+    final int groupSize = 18;
     final int from = (group * groupSize);
     final int mod = (fixedUrls % groupSize);
     int lastGroup = (fixedUrls / groupSize);
     lastGroup = ((fixedUrls > 0) && (mod == 0)) ? lastGroup - 1 : lastGroup;
     final int initGroup = (group <= 1) ? 0 : (group >= lastGroup - 2) 
                                                 ? (lastGroup - 4) : (group - 2);
+    final String collCenterFilter = request.getParameter("collCenterFilter");        
+    final String sorder = request.getParameter("order");
+    final String order = "null".equals(sorder) ? "descending" : sorder;
+    final String sdbFilter = request.getParameter("dbFilter");
+    final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;    
+    
     final Set<IdUrl> fixedX = new HashSet<IdUrl>();
     int current = 0;
     int begin = group * groupSize;
@@ -134,14 +139,16 @@
                  postToUrl('<%=response.encodeRedirectURL("UndoFixServlet")%>', 
                  {undoUrl:url, group:'<%=group%>', lgroup:'<%=lgroup%>', 
                   lang:'<%=lang%>', id:'<%=id%>', brokenUrl:'<%=brokenUrl%>',
-                  url:'<%=url%>'});
+                  url:'<%=url%>', dbFilter:'<%=dbFilter%>',                     
+                  collCenterFilter:'<%=collCenterFilter%>', 
+                  order:'<%=order%>'});
             } else {
                 // Do nothing!
             }
         }
         </script>        
     </head>
-    <body>
+    <body style="background-color:#f7faff">
 	<div id="wrap">
             <div class="navbar navbar-inverse navbar-fixed-top">
                 <div class="navbar-inner">
@@ -238,7 +245,7 @@
                                         %>             
                                         </td>
                                         <td><%=iu.since%></td>
-                                        <td><a href="javascript:confirmUndo('<%=iu.url%>');" title="<%=messages.getString("undo_last_url")%>" class="btn btn-mini btn-primary pull-right"><%=messages.getString("undo")%></a></td>
+                                        <td><a href="javascript:confirmUndo('<%=iu.url%>');" title="<%=messages.getString("undo_last_url")%>" class="btn btn-primary btn-mini pull-right"><%=messages.getString("undo")%></a></td>
                                         <!--td><a href="http://www.bireme.br" title="<%=messages.getString("undo_last_url")%>" class="btn btn-mini btn-primary"><%=messages.getString("undo")%></a></td-->
                                     </tr>
                                 <%
@@ -248,7 +255,7 @@
                             </tbody>
                         </table>                
                     <% } %>
-                    <p align="right"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>'});" class="btn btn-mini"><%=messages.getString("more_broken_links")%></a></p>
+                    <p align="right"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>'});" class="btn btn-primary btn-small"><%=messages.getString("more_broken_links")%></a></p>
                     
                     <div class="accordion">
                         <div class="pagination pagination-centered">
@@ -277,8 +284,8 @@
 	</div>
 	<footer id="footer">
             <div class="container">
-                <strong><%=messages.getString("bireme_social_checklinks")%> - V<%= BrokenLinks.VERSION %> - 2013</strong><br/>
-                <%=messages.getString("source_code")%>: <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>
+                <strong><%=messages.getString("bireme_social_checklinks")%> - V<%= BrokenLinks.VERSION %> - <%=BrokenLinks.VERSION_DATE%></strong><br/>
+                <%=messages.getString("source_code")%>: <a href="https://github.com/bireme/social-checklinks">https://github.com/bireme/social-checklinks</a>
             </div>
 	</footer>
 	<!-- javascript

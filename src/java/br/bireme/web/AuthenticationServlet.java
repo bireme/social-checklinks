@@ -26,6 +26,7 @@ import br.bireme.accounts.Authentication;
 import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
+import br.bireme.scl.MongoOperations;
 import br.bireme.scl.Tools;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -75,10 +76,13 @@ public class AuthenticationServlet extends HttpServlet {
             
             final DBCollection coll = db.getCollection(BROKEN_LINKS_COL);
             final DBCollection hcoll = db.getCollection(HISTORY_COL);            
+            final Set<String> databases = 
+                                      MongoOperations.getDatabases(coll);
             
             context.setAttribute("collection", coll);
             context.setAttribute("historycoll", hcoll);
             context.setAttribute("readOnlyMode", false);
+            context.setAttribute("databases", databases);
         } catch (UnknownHostException ex) {
             Logger.getLogger(AuthenticationServlet.class.getName())
                                                    .log(Level.SEVERE, null, ex);

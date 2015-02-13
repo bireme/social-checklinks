@@ -49,11 +49,18 @@
     final String id = (String)request.getParameter("id");
     final String id2 = id.substring(0, id.lastIndexOf('_'));
     final String url = (String)request.getParameter("url");
-    final String group = (String)request.getParameter("group");
-    
+    final String sgroup = (String)request.getParameter("group");
+    final String group = "null".equals(sgroup) ? "0" : sgroup;
+    final String scollCenterFilter = request.getParameter("collCenterFilter");
+    final String collCenterFilter = "null".equals(scollCenterFilter) ? null 
+                                                            : scollCenterFilter;    
+    final String sorder = request.getParameter("order");
+    final String order = "null".equals(sorder) ? "descending" : sorder;
     final String furl = (String)request.getParameter("furl");
     final String lang2 = lang.equals("null") ? "en" : lang.equals("fr") 
-                                                    ? "en" :lang;
+                                                    ? "en" :lang;    
+    final String sdbFilter = request.getParameter("dbFilter");
+    final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;    
 %>
 
 <!-- ================================================== -->
@@ -113,17 +120,20 @@
            //var nurl = encodeURIComponent(document.getElementById('input-1').value);
            var nurl = document.getElementById('input-1').value;
            var nurl2 = encodeURI(nurl);
-           //alert(nurl);
+           alert(nurl);
            postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', 
-                 {id: id, url: url, furl: nurl, lang: lang, group: <%=group%>});                                                        
-                 
+                 {id:id, url:url, furl:nurl, lang:lang, group:'<%=group%>',      
+                  dbFilter:'<%=dbFilter%>', 
+                  collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});                                  
         }
         function callUrl2(id, url, lang) {
             var nurl = document.getElementById('input-1').value;
             //var nurl = encodeURIComponent(document.getElementById('input-1').value);
             //alert(nurl2);
             postToUrl('<%=response.encodeRedirectURL("CheckManyLinksServlet")%>',
-            {id: id, url: url, furl: nurl, lang: lang, group: <%=group%>});
+            {id:id, url:url, furl:nurl, lang:lang, group:'<%=group%>'},
+             dbFilter:'<%=dbFilter%>', 
+             collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});
         }
         
         function isVisible(elem) {
@@ -142,7 +152,7 @@
         
         </script>                
     </head>
-    <body>
+    <body style="background-color:#f7faff">
 	<div id="wrap">
             <div class="navbar navbar-inverse navbar-fixed-top">
                 <div class="navbar-inner">
@@ -152,10 +162,10 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="brand" href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>'});"><%=messages.getString("bireme_social_checklinks")%></a>
+                        <a class="brand" href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("bireme_social_checklinks")%></a>
                         <div class="nav-collapse collapse">
                             <ul class="nav">
-                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>'});"><%=messages.getString("home")%></a></li>
+                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("home")%></a></li>
                                 <li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
                                 <li><a href="http://feedback.bireme.org/feedback/?application=socialchecklinks&version=<%=BrokenLinks.VERSION%>&lang=<%=lang%>" target="_blank"><%=messages.getString("contact")%></a></li>
                             </ul>
@@ -184,7 +194,7 @@
             <div class="container">
                 <div class="breadcrumb"
                     <ul class="breadcrumb">
-                        <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'<%=lang%>'});"><%=messages.getString("list")%></a> <span class="divider">/</span></li>
+                        <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("list")%></a> <span class="divider">/</span></li>
                         <li class="active"><%=messages.getString("edit")%></li>
                     </ul>     
                 </div>
@@ -195,7 +205,7 @@
                             <div class="URL-tested">ID: <a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id2%>"><%=id2%></a></div>
                             <div class="URL-tested">URL: <a target="_blank" href="<%=url%>"><%=url%></a> &#8594; ?</div>
                             <div class="URL-tested2">
-                                <input type="url" id="input-1" class="span8" onfocus="hideSave()" value="<%=furl%>"/> &nbsp;
+                                <input style="vertical-align:top;"  type="url" id="input-1" class="span8" onfocus="hideSave()" value="<%=furl%>"/> &nbsp;
                                 <a href="javascript:callUrl('<%=id%>','<%=url%>','<%=lang%>');" class="btn btn-primary" title="Test your changes"><%=messages.getString("test")%></a>
                             </div>
 
@@ -237,8 +247,8 @@
 
         <footer id="footer" class="footer">
             <div class="container">
-                <strong><%=messages.getString("bireme_social_checklinks")%> - V<%= BrokenLinks.VERSION %> - 2013</strong><br/>
-                <%=messages.getString("source_code")%>: <a href="https://github.com/bireme/">https://github.com/bireme/social-checklinks</a>
+                <strong><%=messages.getString("bireme_social_checklinks")%> - V<%= BrokenLinks.VERSION %> - <%=BrokenLinks.VERSION_DATE%></strong><br/>
+                <%=messages.getString("source_code")%>: <a href="https://github.com/bireme/social-checklinks">https://github.com/bireme/social-checklinks</a>
             </div>
         </footer>
         <!-- javascript

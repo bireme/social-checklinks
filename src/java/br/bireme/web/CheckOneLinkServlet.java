@@ -62,13 +62,23 @@ public class CheckOneLinkServlet extends HttpServlet {
         final String furl_E = URLEncoder.encode(furl, CODEC);        
         final String lang = request.getParameter("lang");
         final String group = request.getParameter("group");
+        final String collCenterFilter = request.getParameter("collCenterFilter");
+        
+        final String sorder = request.getParameter("order");
+        final String order = "null".equals(sorder) ? "descending" : sorder;
+        final String sdbFilter = request.getParameter("dbFilter");
+        final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;    
+    
         final int errCode = CheckUrl.check(furl);
         final boolean isBroken = CheckUrl.isBroken(errCode);
         final ServletContext context = getServletContext();
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
                                    "/editRecord.jsp?id=" + id + "&url=" + url_E
                       + "&furl=" + furl_E + "&status=" + (isBroken ? 1 : 0)
-                      + "&lang=" + lang + "&group=" + group);
+                      + "&lang=" + lang + "&group=" + group 
+                      + "&dbFilter=" + dbFilter                     
+                      + "&collCenterFilter=" + collCenterFilter 
+                      + "&order=" + order);
         dispatcher.forward(request, response);
     }
 

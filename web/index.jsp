@@ -75,7 +75,7 @@
             </div>
             <form class="form-signin" action="authenticate?lang=<%=lang%>" method="post">
                 <h2 class="form-signin-heading"><%=messages.getString("please_sign_in")%></h2>
-                <input type="email" class="input-block-level" placeholder="<%=messages.getString("email_address")%>" name="email"/>
+                <input style="min-height: 37px;" type="email" class="input-block-level" placeholder="<%=messages.getString("email_address")%>" name="email"/>
                 <input type="password" class="input-block-level" placeholder="<%=messages.getString("password")%>" name="password"/>
                 <button class="btn btn-large btn-primary" type="submit"><%=messages.getString("sign_in")%></button>
             </form>

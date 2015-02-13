@@ -20,6 +20,9 @@ echo "Inicio da execucao: ${NOW2}" >> execution.log
 echo "Muda para diretorio de trabalho: $HOME"
 cd $HOME
 
+echo "Avisa inicio do processo de atualizacao do Social Check Links
+sendemail -f appofi@bireme.org -u "Social Check Links - `date '+%Y%m%d'`" -m "Inicio do processamento de atualizacao do Social Check Links." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+
 echo "Bloqueia escrita na interface web do Social Check Links"
 sh/$SERVER/setReadOnlyMode.sh > out
 grep -o "<h1>Read Only Mode = true</h1>" out > gout
@@ -65,6 +68,7 @@ do
     $ISIS/mx $db "proc=$proc" -all tell=10000 now append=${db}_url
 
     tar -czpvf history/${db}_${NOW}.tgz ${db}_url.mst ${db}_url.xrf
+    tar -czpvf ${db}_${NOW}.tgz ${db}.mst ${db}.xrf
     rm ${db}_url.{mst,xrf}
 done < config.txt
 
@@ -80,6 +84,26 @@ if [ -s Gv8broken.giz ]; then
     rm *.{mst,xrf}
     mv other/*.{mst,xrf} .
 fi
+
+while IFS="|" read db server user path proc lilG4
+do
+    echo "Transfere a base compactada ${db}.tgz original para local de origem"
+    scp -p ${db}_${NOW}.tgz $user@$server:$path
+    if [ $? -ne 0 ]; then
+        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base compactada ${db}.tgz original para local de origem." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+        exit 1
+    fi
+    rm ${db}_${NOW}.tgz
+
+    echo "Transfere a base $db apos aplicacao do gizmo para local de origem"
+    scp -p $db.{mst,xrf} $user@$server:$path
+    if [ $? -ne 0 ]; then
+        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base $db apos aplicacao do gizmo para local de origem." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+        exit 1
+    fi
+done < config.txt
+
+clearcol="--clearColl"
 
 while IFS="|" read db server user path proc lilG4
 do
@@ -103,11 +127,12 @@ do
     echo $val2 > ${db}_broken.txt
 
     echo "Alimenta os links quebrados no Social Check Links"
-    sh/$SERVER/loadBrokenLinks.sh ${db}
+    sh/$SERVER/loadBrokenLinks.sh ${db} ${clearcol}
     if [ $? -ne 0 ]; then
        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Alimenta os links quebrados no Social Check Links." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
        exit 1
    fi
+   clearcol=""
 done < config.txt
 
 echo "Desbloqueia escrita na interface web do Social Check Links"
@@ -125,6 +150,10 @@ echo "Retorna para diretorio original"
 cd -
 
 END=$(date +"%Y%m%d-%T")
+
+echo "Avisa termino do processo de atualizacao do Social Check Links
+sendemail -f appofi@bireme.org -u "Social Check Links - $END" -m "Termino do processamento de atualizacao do Social Check Links." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+
 echo
 echo "Fim da execuçao: $END"
 echo "Fim da execuçao: $END" >> execution.log
