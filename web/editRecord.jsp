@@ -46,17 +46,18 @@
     final boolean isNew = (status == -1);
     final boolean isBroken = (status == 1);    
     final String user = (String)session.getAttribute("user");
-    final String id = (String)request.getParameter("id");
+    final String id = request.getParameter("id");
     final String id2 = id.substring(0, id.lastIndexOf('_'));
-    final String url = (String)request.getParameter("url");
-    final String sgroup = (String)request.getParameter("group");
+    final String url = request.getParameter("url");
+    final String sgroup = request.getParameter("group");
     final String group = "null".equals(sgroup) ? "0" : sgroup;
     final String scollCenterFilter = request.getParameter("collCenterFilter");
     final String collCenterFilter = "null".equals(scollCenterFilter) ? null 
                                                             : scollCenterFilter;    
     final String sorder = request.getParameter("order");
-    final String order = "null".equals(sorder) ? "descending" : sorder;
-    final String furl = (String)request.getParameter("furl");
+    final String order = (sorder == null) ? "descending" 
+                              : ("null".equals(sorder) ? "descending" : sorder);
+    final String furl = request.getParameter("furl");
     final String lang2 = lang.equals("null") ? "en" : lang.equals("fr") 
                                                     ? "en" :lang;    
     final String sdbFilter = request.getParameter("dbFilter");
@@ -88,8 +89,32 @@
 	<script type="text/javascript" src="js/modernizr.js"></script>
                 
         <script LANGUAGE="JavaScript" TYPE="text/javascript">
-            
+        
         function postToUrl(path, params) {
+            var form = document.createElement("form");
+            form.setAttribute("charset", "UTF-8");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", path);            
+
+            for(var key in params) {
+                if ((key !== null) && (params.hasOwnProperty(key))) {
+                    var value = params[key];  
+                    var hiddenField = document.createElement("input");
+                    
+                    hiddenField.setAttribute("type", "hidden");
+                    hiddenField.setAttribute("name", key);
+                    hiddenField.setAttribute("value", value);
+                    //alert('key=' + key + ' value' + params[key])
+                    form.appendChild(hiddenField);
+                }
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+   
+    
+        function XXXpostToUrl(path, params) {
             var form = document.createElement("form");
             form.setAttribute("charset", "UTF-8");
             form.setAttribute("method", "post");
@@ -106,7 +131,7 @@
                  }
             }
 
-            document.body.appendChild(form);
+            document.body.appendChild(form);            
             form.submit();
         }    
             
@@ -116,26 +141,30 @@
             }
             return string;
         }               
+        
         function callUrl(id, url, lang) {
            //var nurl = encodeURIComponent(document.getElementById('input-1').value);
            var nurl = document.getElementById('input-1').value;
            var nurl2 = encodeURI(nurl);
-           alert(nurl);
+           //alert('nurl=' + nurl);
+           
            postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', 
-                 {id:id, url:url, furl:nurl, lang:lang, group:'<%=group%>',      
-                  dbFilter:'<%=dbFilter%>', 
-                  collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});                                  
+                 {id:id, url:url, furl:nurl, lang:lang, group:'<%=group%>',
+                  dbFilter:'<%=dbFilter%>', collCenterFilter:'<%=collCenterFilter%>', 
+                  order:'<%=order%>'});
+              
         }
+        
         function callUrl2(id, url, lang) {
             var nurl = document.getElementById('input-1').value;
             //var nurl = encodeURIComponent(document.getElementById('input-1').value);
-            //alert(nurl2);
+
             postToUrl('<%=response.encodeRedirectURL("CheckManyLinksServlet")%>',
-            {id:id, url:url, furl:nurl, lang:lang, group:'<%=group%>'},
-             dbFilter:'<%=dbFilter%>', 
-             collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});
+                {id: id, url: url, furl: nurl, lang: lang, group: '<%=group%>',
+                dbFilter: '<%=dbFilter%>', collCenterFilter: '<%=collCenterFilter%>',
+                order: '<%=order%>'});
         }
-        
+                
         function isVisible(elem) {
             return elem.offsetWidth > 0 || elem.offsetHeight > 0;
         }
@@ -152,6 +181,7 @@
         
         </script>                
     </head>
+    
     <body style="background-color:#f7faff">
 	<div id="wrap">
             <div class="navbar navbar-inverse navbar-fixed-top">
@@ -166,7 +196,7 @@
                         <div class="nav-collapse collapse">
                             <ul class="nav">
                                 <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("home")%></a></li>
-                                <li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
+                                <li><a href="http://wiki.bireme.org/<%=lang%>/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
                                 <li><a href="http://feedback.bireme.org/feedback/?application=socialchecklinks&version=<%=BrokenLinks.VERSION%>&lang=<%=lang%>" target="_blank"><%=messages.getString("contact")%></a></li>
                             </ul>
                             <ul class="nav pull-right">
@@ -204,8 +234,8 @@
                         <div class="seg-q">
                             <div class="URL-tested">ID: <a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id2%>"><%=id2%></a></div>
                             <div class="URL-tested">URL: <a target="_blank" href="<%=url%>"><%=url%></a> &#8594; ?</div>
-                            <div class="URL-tested2">
-                                <input style="vertical-align:top;"  type="url" id="input-1" class="span8" onfocus="hideSave()" value="<%=furl%>"/> &nbsp;
+                            <div class="URL-tested2">                                
+                                <input  style="vertical-align:top;" type="url" id="input-1" class="span8" onfocus="hideSave()" value="<%=furl%>"/> &nbsp;
                                 <a href="javascript:callUrl('<%=id%>','<%=url%>','<%=lang%>');" class="btn btn-primary" title="Test your changes"><%=messages.getString("test")%></a>
                             </div>
 

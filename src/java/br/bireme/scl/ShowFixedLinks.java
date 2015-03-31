@@ -105,7 +105,7 @@ public class ShowFixedLinks {
         }*/
         final List<Element> lst = new ArrayList<Element>();
         final SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
-        final Date date = (fromDate == null) ? new Date() 
+        final Date date = (fromDate == null) ? new Date(0) 
                                              : simple.parse(fromDate);
         final String updated = ELEM_LST_FIELD + ".0." + LAST_UPDATE_FIELD;
         final BasicDBObject qdate = new BasicDBObject("$gte", date);

@@ -96,7 +96,7 @@ public class BrokenLinks {
     public static final String DEF_FIELD = ID_FIELD;
     
     /* CheckLinks - HTTP error messages */
-    public static String[] ALL_MESS = { "OK", "CONNECTION_REFUSED", 
+    public static final String[] ALL_MESS = { "OK", "CONNECTION_REFUSED", 
         "CONNECTION_TIMED_OUT", "UNKNOWN_HOST_EXCEPTION", "MALFORMED_URL", 
         "SSL_EXCEPTION", "NO_ROUTE_TO_HOST_EXCEPTION", "SOCKET_EXCEPTION", 
         "FILE_NOT_FOUND_EXCEPTION", "IO_EXCEPTION", "CONNECTION_RESET_BY_PEER", 

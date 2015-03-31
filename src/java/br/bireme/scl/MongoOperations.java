@@ -42,6 +42,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -390,6 +391,64 @@ public class MongoOperations {
 
         return ret1 && ret2;
     }
+    
+    public static boolean undoUpdateDocument2(final DBCollection coll,
+                                             final DBCollection hcoll,
+                                             final String fromDate)
+                                                           throws IOException, 
+                                                                ParseException {
+        if (coll == null) {
+            throw new NullPointerException("coll");
+        }
+        if (hcoll == null) {
+            throw new NullPointerException("hcoll");
+        }
+        final SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
+        final Date date = (fromDate == null) ? new Date(0) 
+                                             : simple.parse(fromDate);
+        final String updated = ELEM_LST_FIELD + ".0." + LAST_UPDATE_FIELD;
+        final BasicDBObject qdate = new BasicDBObject("$gte", date);
+        final BasicDBObject query = new BasicDBObject(updated, qdate);
+        final BasicDBObject sort = new BasicDBObject(updated, -1);  
+        final DBCursor cursor = coll.find(query).sort(sort);
+        
+        boolean ret = true;
+                
+        while (cursor.hasNext()) {
+            final BasicDBObject hdoc = (BasicDBObject)cursor.next();                        
+            final BasicDBList lst = (BasicDBList)hdoc.get(ELEM_LST_FIELD);
+            final BasicDBObject hcurdoc = (BasicDBObject)lst.remove(0);
+            if (hcurdoc == null) {
+                throw new IOException("document last element found.");
+            }
+            final BasicDBObject doc = new BasicDBObject();        
+            doc.put(DATE_FIELD, hdoc.get(DATE_FIELD));
+            doc.put(LAST_UPDATE_FIELD, hcurdoc.get(LAST_UPDATE_FIELD));
+            doc.put(MST_FIELD, hdoc.get(MST_FIELD));
+            doc.put(ID_FIELD, hdoc.get(ID_FIELD));
+            doc.put(BROKEN_URL_FIELD, hcurdoc.get(BROKEN_URL_FIELD));
+            doc.put(MSG_FIELD, hcurdoc.get(MSG_FIELD));
+            doc.put(CENTER_FIELD, hcurdoc.get(CENTER_FIELD));    
+
+            final boolean ret1 = coll.save(doc).getLastError().ok();
+            final boolean ret2;
+
+            if (lst.isEmpty()) {
+                ret2 = hcoll.remove(query, WriteConcern.ACKNOWLEDGED)
+                                                          .getLastError().ok();
+            } else {
+                ret2 = hcoll.save(hdoc, WriteConcern.ACKNOWLEDGED)
+                                                          .getLastError().ok();
+            } 
+            final boolean auxret = (ret1 && ret2);
+            if (!auxret) {
+                System.err.println("doc[" + hdoc.get(ID_FIELD) + "] write error");
+            }
+            ret &= auxret;
+        }
+
+        return ret;
+    }
 
     public static Set<IdUrl> fixRelatedUrls(final DBCollection coll,
                                             final DBCollection hcoll,
@@ -444,9 +503,14 @@ public class MongoOperations {
                                                                    patterns[0]);
             final Set<IdUrl> converted = Tools.getConvertedUrls(docs,
                                                       patterns[0], patterns[1]);
-            final Map<String,IdUrl> map = new HashMap<String,IdUrl>();
+            final Map<String,List<IdUrl>> map = new HashMap<String,List<IdUrl>>();
             for (IdUrl iu : converted) {
-                map.put(iu.url, iu);
+                List<IdUrl> liu = map.get(iu.url);
+                if (liu == null) {
+                    liu = new ArrayList<IdUrl>();
+                    map.put(iu.url, liu);
+                }
+                liu.add(iu);
             }
 
             final String[] inurls = map.keySet().toArray(new String[0]);
@@ -455,12 +519,13 @@ public class MongoOperations {
 
             for (int idx = 0; idx < len; idx++) {
                 if (!CheckUrl.isBroken(results[idx])) {
-                    final IdUrl iu = map.get(inurls[idx]);
-                    ret.add(iu);
-                    if (!updateDocument(coll, hcoll, iu.id, iu.url, user,
-                                                !fixedUrl.equals(iu.url))) {
-                        throw new IOException(
+                    for (IdUrl iu : map.get(inurls[idx])) {                    
+                        ret.add(iu);
+                        if (!updateDocument(coll, hcoll, iu.id, iu.url, user,
+                                                    !fixedUrl.equals(iu.url))) {
+                            throw new IOException(
                                        "could not update document id=" + iu.id);
+                        }
                     }
                 }
             }

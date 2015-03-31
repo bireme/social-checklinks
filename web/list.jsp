@@ -180,7 +180,7 @@
                             <div class="nav-collapse collapse">
                                 <ul class="nav">
                                     <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("home")%></a></li>
-                                    <li><a href="http://wiki.bireme.org/pt/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
+                                    <li><a href="http://wiki.bireme.org/<%=lang%>/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
                                     <li><a href="http://feedback.bireme.org/feedback/?application=socialchecklinks&version=<%=BrokenLinks.VERSION%>&lang=<%=lang%>" target="_blank"><%=messages.getString("contact")%></a></li>
                                 </ul>
                                 <ul class="nav pull-right">
@@ -310,7 +310,7 @@
                                                             <%
                                                             for (String id : centerIds)  {                               
                                                             %>    
-                                                                <li style="margin-bottom: 8px;"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=id%>',order:'<%=order%>'});"><%=id%></a></li>
+                                                                <li style="margin-bottom: 8px;"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=id%>',order:'<%=order%>'});"><%=id%></a></li>
                                                             <%
                                                             } 
                                                             %>
