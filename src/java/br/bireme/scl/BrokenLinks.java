@@ -190,6 +190,7 @@ public class BrokenLinks {
 
         final DBCollection coll = db.getCollection(BROKEN_LINKS_COL);
         final DBCollection ccColl = db.getCollection(CC_FIELDS_COL);
+        final DBCollection hColl = db.getCollection(HISTORY_COL);
         
         if (ccColl.findOne() == null) {
             if (!createCcFieldsCollection(ccColl)) {
@@ -245,7 +246,11 @@ public class BrokenLinks {
             }
         }
 
-        removeOldDocs(coll);
+        System.out.print("Fixing url that not start with http://");
+        MongoOperations.fixMissingHttp(coll, hColl);
+        System.out.println(" - OK");
+        
+        //removeOldDocs(coll);
         
         if (clearCol) {
             createIndex(coll);

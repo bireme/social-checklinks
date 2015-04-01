@@ -75,8 +75,9 @@ public class CheckManyLinksServlet extends HttpServlet {
         final String lang = request.getParameter("lang");
         final String group = request.getParameter("group");
         final String id = request.getParameter("id");
-        final String collCenterFilter = request.getParameter("collCenterFilter");
-        
+        final String scollCenterFilter = request.getParameter("collCenterFilter");
+        final String collCenterFilter = "null".equals(scollCenterFilter) ? null 
+                                                            : scollCenterFilter;            
         final String sorder = request.getParameter("order");
         final String order = "null".equals(sorder) ? "descending" : sorder;
         final String sdbFilter = request.getParameter("dbFilter");

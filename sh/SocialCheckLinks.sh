@@ -20,7 +20,7 @@ echo "Inicio da execucao: ${NOW2}" >> execution.log
 echo "Muda para diretorio de trabalho: $HOME"
 cd $HOME
 
-echo "Avisa inicio do processo de atualizacao do Social Check Links
+echo "Avisa inicio do processo de atualizacao do Social Check Links"
 sendemail -f appofi@bireme.org -u "Social Check Links - `date '+%Y%m%d'`" -m "Inicio do processamento de atualizacao do Social Check Links." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
 
 echo "Bloqueia escrita na interface web do Social Check Links"

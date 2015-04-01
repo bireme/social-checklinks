@@ -26,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Locale;
@@ -251,6 +252,16 @@ public class Tools {
             out = in.substring(0, len) + "...";
         }
         return out;
+    }
+    
+    public static boolean isDomain(final String surl) 
+                                                  throws MalformedURLException {
+        if (surl == null) {
+            throw new NullPointerException("surl");
+        }
+        final URL url = new URL(surl);
+        
+        return (url.getPath() == null);
     }
     
     public static void main(final String[] args) {

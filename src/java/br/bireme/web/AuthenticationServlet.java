@@ -32,7 +32,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -82,8 +81,8 @@ public class AuthenticationServlet extends HttpServlet {
             context.setAttribute("collection", coll);
             context.setAttribute("historycoll", hcoll);
             context.setAttribute("readOnlyMode", false);
-            context.setAttribute("databases", databases);
-        } catch (UnknownHostException ex) {
+            context.setAttribute("databases", databases);            
+        } catch (Exception ex) {
             Logger.getLogger(AuthenticationServlet.class.getName())
                                                    .log(Level.SEVERE, null, ex);
         }
@@ -109,7 +108,7 @@ public class AuthenticationServlet extends HttpServlet {
         final String password = request.getParameter("password");
         final String lang = request.getParameter("lang");                        
         final ServletContext context = getServletContext();
-        final HttpSession session = request.getSession();  
+        final HttpSession session = request.getSession();          
         final ResourceBundle messages = Tools.getMessages(lang);
         
         boolean isAccountsWorking = true;    
@@ -129,16 +128,19 @@ public class AuthenticationServlet extends HttpServlet {
             try {            
                 final Authentication auth = new Authentication(
                                      context.getInitParameter("accounts_host"));
-                final JSONObject user = auth.getUser(username, password);
-                Set<String> centerIds = auth.getCenterIds(user);
+                final JSONObject user = auth.getUser(username, password);                
                                 
                 //if (auth.isAuthenticated(user) && (centerIds != null)) {
                 if (auth.isAuthenticated(user)) {
-                    if (centerIds == null) {
-                        centerIds = new HashSet<String>();
+                    Set<String> auxCenterIds = auth.getCenterIds(user);
+                    if (auxCenterIds == null) {
+                        auxCenterIds = new HashSet<String>();
                     }
-                    centerIds.add(auth.getColCenter(user)); // cc may not belong to a net (it not appear in centerIds)
-                    
+                    auxCenterIds.add(auth.getColCenter(user)); // cc may not belong to a net (it not appear in centerIds)
+                    final DBCollection coll = (DBCollection)context
+                                                    .getAttribute("collection");
+                    final Set<String> centerIds = 
+                         MongoOperations.filterCenterFields(coll, auxCenterIds);
                     session.setAttribute("user", username); // Login user.
                     session.setAttribute("centerIds", centerIds);   
                     dispatcher = context.getRequestDispatcher(

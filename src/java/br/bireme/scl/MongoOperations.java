@@ -532,7 +532,62 @@ public class MongoOperations {
         }
         return ret;
     }
+    
+    public static void fixMissingHttp(final DBCollection coll,
+                                      final DBCollection hcoll)
+                                                           throws IOException {
+        if (coll == null) {
+            throw new NullPointerException("coll");
+        }
+        if (hcoll == null) {
+            throw new NullPointerException("hcoll");
+        }
+        final String HTTP = "http://";        
+        final DBCursor cursor = coll.find();        
+        
+        while (cursor.hasNext()) {
+            final DBObject dbo = cursor.next();
+            final String url = ((String) dbo.get(BROKEN_URL_FIELD)).trim();
 
+            if (!url.startsWith(HTTP)) {
+                final String fixedUrl = HTTP + url;
+                final String id = (String) dbo.get(ID_FIELD);
+            
+                if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl))) {
+                    if (!Tools.isDomain(fixedUrl)) {
+                        if (!updateDocument(coll, hcoll, id, fixedUrl, "system",
+                                                                        true)) {
+                            throw new IOException("could not update document id=" 
+                                                                          + id);
+                        }
+                    }
+                }
+            }
+        }
+        cursor.close();
+    }
+
+    public static Set<String> filterCenterFields(final DBCollection coll,
+                                                 final Set<String> centerIds) {
+        if (coll == null) {
+            throw new NullPointerException("coll");
+        }
+        if (centerIds == null) {
+            throw new NullPointerException("centerIds");
+        }
+        final Set<String> ret = new TreeSet<String>();
+        
+        for (String id : centerIds) {
+            final BasicDBObject query = new BasicDBObject(CENTER_FIELD, id);
+            final DBObject dbo = coll.findOne(query);
+            if (dbo != null) {
+                ret.add(id);
+            }
+        }
+        
+        return ret;
+    }
+    
     public static void main(final String[] args) throws UnknownHostException,
                                                                    IOException {
         final MongoClient mongoClient = new MongoClient("ts01vm.bireme.br");

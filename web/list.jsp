@@ -51,7 +51,6 @@
     final boolean readOnlyMode = (Boolean)context.getAttribute("readOnlyMode");
     final DBCollection coll = (DBCollection)context.getAttribute("collection");           
     final Set<String> databases = (Set<String>)context.getAttribute("databases");
-    
     final Set<String> centerIds = (Set<String>)session.getAttribute("centerIds");
         
     String dbFilter = request.getParameter("dbFilter");
