@@ -456,7 +456,8 @@ public class MongoOperations {
                                             final Set<String> centerIds,
                                             final String filter,
                                             final String brokenUrl,
-                                            final String fixedUrl)
+                                            final String fixedUrl,
+                                            final String id)
                                                            throws IOException {
         if (coll == null) {
             throw new NullPointerException("coll");
@@ -475,6 +476,9 @@ public class MongoOperations {
         }
         if (fixedUrl == null) {
             throw new NullPointerException("fixedUrl");
+        }
+        if (id == null) {
+            throw new NullPointerException("id");
         }
         final Set<IdUrl> ret = new HashSet<IdUrl>();
         final String[] patterns = Tools.getPatterns(brokenUrl, fixedUrl);
@@ -501,7 +505,8 @@ public class MongoOperations {
         } else {
             final Set<IdUrl> docs = getDocsWith(coll, centerIds, null, 
                                                                    patterns[0]);
-            final Set<IdUrl> converted = Tools.getConvertedUrls(docs,
+            final Set<IdUrl> docs2 = Tools.filterDomains(docs, id);
+            final Set<IdUrl> converted = Tools.getConvertedUrls(docs2,
                                                       patterns[0], patterns[1]);
             final Map<String,List<IdUrl>> map = new HashMap<String,List<IdUrl>>();
             for (IdUrl iu : converted) {

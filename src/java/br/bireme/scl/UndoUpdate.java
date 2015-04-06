@@ -54,23 +54,31 @@ public class UndoUpdate {
         private static void undo(final String host,
                                  final int port,
                                  final String database,
-                                 final String fromDate) 
+                                 final String fromDate,
+                                 final String docId) 
                                                     throws UnknownHostException, 
                                                            ParseException {
         assert host != null;
         assert port > 0;
         assert database != null;
-        assert fromDate != null;
+        assert (fromDate != null || docId != null);
         
         final MongoClient client = new MongoClient(host, port); 
         final DB db = client.getDB(database);
         final DBCollection from_coll = db.getCollection(HISTORY_COL);
         final DBCollection to_coll = db.getCollection(BROKEN_LINKS_COL);
         final String prefix = ELEM_LST_FIELD + ".0.";
-        final SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
-        final Date fDate = simple.parse(fromDate);            
-        final BasicDBObject query = new BasicDBObject(prefix +LAST_UPDATE_FIELD, 
+        final BasicDBObject query;
+        
+        if (fromDate == null) {
+            query = new BasicDBObject("_id", docId);
+        } else { 
+            final SimpleDateFormat simple = new SimpleDateFormat(
+                "yyyyMMdd" + (fromDate.contains(":") ? "-HH:mm:ss" : ""));
+            final Date fDate = simple.parse(fromDate);            
+            query = new BasicDBObject(prefix +LAST_UPDATE_FIELD, 
                                               new BasicDBObject("$gte", fDate));
+        }
         final DBCursor cursor = from_coll.find(query);
         int total = 0;
         int reverted = 0;
@@ -78,7 +86,11 @@ public class UndoUpdate {
         System.out.println("host=" + host);
         System.out.println("port=" + port);
         System.out.println("database=" + database);
-        System.out.println("from date=[" + fromDate + "," + fDate + "]");
+        if (fromDate == null) {
+            System.out.println("doc id=" + docId);
+        } else {
+            System.out.println("from date=" + fromDate);
+        }
         System.out.println("found=" + cursor.size());
         
         while (cursor.hasNext()) {
@@ -118,7 +130,8 @@ public class UndoUpdate {
     
     private static void usage() {
         System.err.println("usage: UndoUpdate <mongo_host> " + 
-        "[-mongo_db=<mongo_db>] [-from_date=<yyyymmdd>] [-mongo_port=<port>]");
+        "[-mongo_db=<mongo_db>] [-mongo_port=<port>] " + 
+        "([-from_date=<yyyymmdd[-hh:mm:ss]>]|-doc_id=<id>)");
         System.exit(1);
     }
     
@@ -129,19 +142,25 @@ public class UndoUpdate {
         }
         String mongo_db = SOCIAL_CHECK_DB;
         String fromDate = "20140101";
+        String docId = null;
         int port = BrokenLinks.DEFAULT_PORT;
         
         for (int idx = 1; idx < args.length; idx++) {
             if (args[idx].startsWith("-mongo_db=")) {
                 mongo_db = args[idx].substring(10);
             } else if (args[idx].startsWith("-from_date=")) {
-                fromDate = args[idx].substring(11);
+                fromDate = args[idx].substring(11);                
+                docId = null;
             } else if (args[idx].startsWith("-mongo_port=")) {
                 port = Integer.parseInt(args[idx].substring(12));
+            } else if (args[idx].startsWith("-doc_id=")) {                
+                docId = args[idx].substring(8);
+                fromDate = null;
             } else {
+                System.err.println(args[idx] + "\n");
                 usage();
             }
         }        
-        undo(args[0], port, mongo_db, fromDate);
+        undo(args[0], port, mongo_db, fromDate, docId);
     }
 }

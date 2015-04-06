@@ -84,7 +84,7 @@ public class CheckManyLinksServlet extends HttpServlet {
         final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;    
         
         final Set<IdUrl> fixed = MongoOperations.fixRelatedUrls(coll, hcoll,
-                    user, centerIds, collCenterFilter, brokenUrl, fixedUrl);
+                    user, centerIds, collCenterFilter, brokenUrl, fixedUrl, id);
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
                 "/showFixedUrls.jsp?group=0&lgroup=" + group 
             + "&dbFilter=" + dbFilter + "&lang=" + lang 

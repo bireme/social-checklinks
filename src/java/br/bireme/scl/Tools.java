@@ -259,9 +259,42 @@ public class Tools {
         if (surl == null) {
             throw new NullPointerException("surl");
         }
-        final URL url = new URL(surl);
+        final Matcher mat = Pattern.compile("([a-zA-Z]{3,10}://)?\\w+/.+")
+                                                          .matcher(surl.trim());
+        //final URL url = new URL(surl);
         
-        return (url.getPath() == null);
+        return (!mat.find());
+    }
+    
+    /**
+     * 
+     * @param urls list of input urls
+     * @param id if some urls are only domain, return only that with this id
+     * @return return a set of url that are not only domais except one.
+     * @throws java.net.MalformedURLException
+     */
+    public static Set<IdUrl> filterDomains(final Set<IdUrl> urls,
+                                           final String id) 
+                                                  throws MalformedURLException {
+        if (urls == null) {
+            throw new NullPointerException("urls");
+        }
+        if (id == null) {
+            throw new NullPointerException("id");
+        }
+        final Set<IdUrl> ret = new HashSet<IdUrl>();
+        
+        for (IdUrl url : urls) {
+            if (isDomain(url.url)) {
+                if (url.id.equals(id)) {
+                    ret.add(url);
+                }
+            } else {
+                ret.add(url);
+            }
+        }
+        
+        return ret;
     }
     
     public static void main(final String[] args) {
