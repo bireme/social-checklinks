@@ -246,7 +246,7 @@ public class BrokenLinks {
             }
         }
 
-        System.out.print("Fixing url that not start with http://");
+        System.out.print("Fixing urls that do not start with http:// ... ");
         MongoOperations.fixMissingHttp(coll, hColl);
         System.out.println(" - OK");
         
