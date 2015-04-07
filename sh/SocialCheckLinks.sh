@@ -21,14 +21,14 @@ echo "Muda para diretorio de trabalho: $HOME"
 cd $HOME
 
 echo "Avisa inicio do processo de atualizacao do Social Check Links"
-sendemail -f appofi@bireme.org -u "Social Check Links - `date '+%Y%m%d'`" -m "Inicio do processamento de atualizacao do Social Check Links." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+sendemail -f appofi@bireme.org -u "Social Check Links - `date '+%Y%m%d'`" -m "Inicio do processamento de atualizacao do Social Check Links." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
 
 echo "Bloqueia escrita na interface web do Social Check Links"
 sh/$SERVER/setReadOnlyMode.sh > out
 grep -o "<h1>Read Only Mode = true</h1>" out > gout
 if [ ! -s gout ]
 then
-    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Bloqueia escrita na interface web do Social Check Links." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Bloqueia escrita na interface web do Social Check Links." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
     rm out gout
     exit 1
 fi
@@ -45,7 +45,7 @@ fi
 echo "Gera gizmo a partir do Social Check Links"
 sh/$SERVER/gizmo.sh
 if [ $? -ne 0 ]; then
-    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Gera gizmo a partir do Social Check Links." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Gera gizmo a partir do Social Check Links." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
     exit 1
 fi
 
@@ -59,7 +59,7 @@ do
     echo "Transfere a base $db de $server:$path/$db.{mst,xrf} para o diretorio corrente"
     scp -p $user@$server:$path/$db.{mst,xrf} .
     if [ $? -ne 0 ]; then
-        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base $db de $server:$path para o diretorio corrente." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base $db de $server:$path para o diretorio corrente." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
         exit 1
     fi
 
@@ -76,7 +76,7 @@ if [ -s Gv8broken.giz ]; then
     echo "Executa gizmo nas bases de dados se gizmo nao vazio"
     sh/gizmo2Isis.sh Gv8broken.giz other
     if [ $? -ne 0 ]; then
-        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Executa gizmo nas bases de dados." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Executa gizmo nas bases de dados." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
         exit 1
     fi
 
@@ -90,7 +90,7 @@ do
     echo "Transfere a base compactada ${db}.tgz original para local de origem"
     scp -p ${db}_${NOW}.tgz $user@$server:$path
     if [ $? -ne 0 ]; then
-        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base compactada ${db}.tgz original para local de origem." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base compactada ${db}.tgz original para local de origem." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
         exit 1
     fi
     rm ${db}_${NOW}.tgz
@@ -98,7 +98,7 @@ do
     echo "Transfere a base $db apos aplicacao do gizmo para local de origem"
     scp -p $db.{mst,xrf} $user@$server:$path
     if [ $? -ne 0 ]; then
-        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base $db apos aplicacao do gizmo para local de origem." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base $db apos aplicacao do gizmo para local de origem." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
         exit 1
     fi
 done < config.txt
@@ -121,7 +121,7 @@ do
     res=$(echo $val1 $val2 | bc sh/insideLimits.bc)
 
     if [ $res -eq 0 ]; then
-        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Numero de links quebrados [$val2] verificados para a base de dados [$db] variou em mais de 10% desde a ultima checagem." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Numero de links quebrados [$val2] verificados para a base de dados [$db] variou em mais de 10% desde a ultima checagem." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
         exit 1
     fi
     echo $val2 > ${db}_broken.txt
@@ -129,7 +129,7 @@ do
     echo "Alimenta os links quebrados no Social Check Links"
     sh/$SERVER/loadBrokenLinks.sh ${db} ${clearcol}
     if [ $? -ne 0 ]; then
-       sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Alimenta os links quebrados no Social Check Links." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+       sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Alimenta os links quebrados no Social Check Links." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
        exit 1
    fi
    clearcol=""
@@ -140,7 +140,7 @@ sh/$SERVER/resetReadOnlyMode.sh > out
 grep -o "<h1>Read Only Mode = false</h1>" out > gout
 if [ ! -s gout ]
 then
-    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Desbloqueia escrita na interface web do Social Check Links." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Desbloqueia escrita na interface web do Social Check Links." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
     rm out gout
     exit 1
 fi
@@ -152,7 +152,7 @@ cd -
 END=$(date +"%Y%m%d-%T")
 
 echo "Avisa termino do processo de atualizacao do Social Check Links
-sendemail -f appofi@bireme.org -u "Social Check Links - $END" -m "Termino do processamento de atualizacao do Social Check Links." -t lilacsdb@bireme.org -cc botturam@paho.org britofa@paho.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+sendemail -f appofi@bireme.org -u "Social Check Links - $END" -m "Termino do processamento de atualizacao do Social Check Links." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
 
 echo
 echo "Fim da execuçao: $END"
