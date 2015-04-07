@@ -33,6 +33,7 @@ import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import static br.bireme.scl.MongoOperations.EXPORTED_FIELD;
 import static br.bireme.scl.MongoOperations.MST_FIELD;
+import static br.bireme.scl.MongoOperations.USER_FIELD;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -61,18 +62,18 @@ public class ShowFixedLinks {
     final DBCollection coll;
     
     public ShowFixedLinks(final String host, 
-                         final String database, 
-                         final String collection) throws UnknownHostException {
+                          final String database, 
+                          final String collection) throws UnknownHostException {
         this(host, DEFAULT_PORT, null, null, database, collection);
         
     }
     
     public ShowFixedLinks(final String host, 
-                         final int port,
-                         final String user, 
-                         final String password, 
-                         final String database, 
-                         final String collection) throws UnknownHostException {
+                          final int port,
+                          final String user, 
+                          final String password, 
+                          final String database, 
+                          final String collection) throws UnknownHostException {
         if (host == null) {
             throw new NullPointerException("host");
         }
@@ -129,7 +130,8 @@ public class ShowFixedLinks {
                                      upd.getString(BROKEN_URL_FIELD),
                                      upd.getString(FIXED_URL_FIELD),
                                      doc.getString(MST_FIELD),
-                                     upd.getDate(LAST_UPDATE_FIELD).toString(),                                    
+                                     upd.getDate(LAST_UPDATE_FIELD).toString(),
+                                     upd.getString(USER_FIELD),
                                      ccs2,
                                      upd.getBoolean(EXPORTED_FIELD));
                 lst.add(elem);
@@ -143,6 +145,7 @@ public class ShowFixedLinks {
                                      upd.getString(FIXED_URL_FIELD),
                                      doc.getString(MST_FIELD),
                                      upd.getDate(LAST_UPDATE_FIELD).toString(),
+                                     upd.getString(USER_FIELD),
                                      ccs2,
                                      upd.getBoolean(EXPORTED_FIELD));
                         lst.add(elem);

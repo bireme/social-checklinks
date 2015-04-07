@@ -32,6 +32,7 @@ import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import static br.bireme.scl.MongoOperations.EXPORTED_FIELD;
 import static br.bireme.scl.MongoOperations.MST_FIELD;
+import static br.bireme.scl.MongoOperations.USER_FIELD;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -106,6 +107,7 @@ public class Gizmo {
                                      lelem.getString(FIXED_URL_FIELD),
                                      obj.getString(MST_FIELD),
                                      lelem.getDate(LAST_UPDATE_FIELD).toString(),
+                                     lelem.getString(USER_FIELD),
                                      null,
                                      false);
                 col.add(elem);

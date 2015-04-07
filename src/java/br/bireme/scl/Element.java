@@ -37,6 +37,7 @@ public class Element {
     private final String furl;
     private final String dbase;
     private final String date;
+    private final String user;
     private final List<String> ccs;
     private final boolean exported;
     private final StringBuilder  builder;
@@ -46,12 +47,14 @@ public class Element {
                    final String furl, 
                    final String dbase, 
                    final String date,
+                   final String user,
                    final List<String> ccs,
                    final boolean exported) {
         this.id = id;
         this.burl = burl;
         this.furl = furl;
         this.dbase = dbase;
+        this.user = user;
         this.date = date;
         this.ccs = (ccs == null) ? new ArrayList<String>() : ccs;
         this.exported = exported;
@@ -78,6 +81,10 @@ public class Element {
         return date;
     }
     
+    public String getUser() {
+        return user;
+    }
+    
     public List<String> getCcs() {
         return ccs;
     }
@@ -93,6 +100,8 @@ public class Element {
         builder.setLength(0);
         builder.append("date=");
         builder.append(date);
+        builder.append("\nuser=");
+        builder.append(user);
         builder.append("\ndbase=");
         builder.append(dbase);
         builder.append("\nid=");

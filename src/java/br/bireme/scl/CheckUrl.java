@@ -84,14 +84,16 @@ public class CheckUrl {
             }
             final String path = url.getPath();
             final String query = url.getQuery();
-            final String mess = "HEAD " + (path.isEmpty() ? "/" : path)
+            //final String mess = "HEAD " + (path.isEmpty() ? "/" : path) // Algumas urls retornam code 500 com HEAD
+            final String mess = "GET " + (path.isEmpty() ? "/" : path)        
               + ((query == null) ? "" : ("?" + query))
-              + " HTTP/1.0\r\n"
-              + "User-Agent: CERN-LineMode/2.15 libwww/2.17b3\r\n"
+              + " HTTP/1.1\r\n"
+              //+ "User-Agent: CERN-LineMode/2.15 libwww/2.17b3\r\n"
+              + "User-Agent: curl/7.37.1\r\n"
               + "Host: " + host + "\r\n"
               + "Connection: close\r\n\r\n";
 
-//System.out.println("mess=[" + mess + "]\n");
+//System.out.println("Mess=[" + mess + "]");
             port = url.getPort() == -1 ? 80 : url.getPort();
             socket = new Socket();
             socket.setKeepAlive(false);
@@ -272,8 +274,8 @@ public class CheckUrl {
              usage();
         }
 
-        System.out.println("URL=[" + args[0] + "]\n");
-
-        System.out.println(CheckUrl.check(args[0]));
+        System.out.println();
+        System.out.println("URL=[" + args[0] + "]");
+        System.out.println("ErrCode=" + CheckUrl.check(args[0]));
     }
 }
