@@ -90,7 +90,7 @@
                 
         <script LANGUAGE="JavaScript" TYPE="text/javascript">
         
-        function postToUrl(path, params) {
+        function postToUrl(path, params, blank) {
             var form = document.createElement("form");
             form.setAttribute("charset", "UTF-8");
             form.setAttribute("method", "post");
@@ -110,31 +110,13 @@
             }
 
             document.body.appendChild(form);
+            
+            if (blank) {
+                form.setAttribute("target", "_blank");
+            }
             form.submit();
         }
-   
-    
-        function XXXpostToUrl(path, params) {
-            var form = document.createElement("form");
-            form.setAttribute("charset", "UTF-8");
-            form.setAttribute("method", "post");
-            form.setAttribute("action", path);
-
-            for(var key in params) {
-                if (params.hasOwnProperty(key)) {
-                    var hiddenField = document.createElement("input");
-                    hiddenField.setAttribute("type", "hidden");
-                    hiddenField.setAttribute("name", key);
-                    hiddenField.setAttribute("value", params[key]);
-
-                    form.appendChild(hiddenField);
-                 }
-            }
-
-            document.body.appendChild(form);            
-            form.submit();
-        }    
-            
+               
         function replaceAll(string, token, newtoken) {
             while (string.indexOf(token) !== -1) {
  		string = string.replace(token, newtoken);
@@ -196,6 +178,7 @@
                         <div class="nav-collapse collapse">
                             <ul class="nav">
                                 <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0', lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("home")%></a></li>
+                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("report.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("report")%></a></li>
                                 <li><a href="http://wiki.bireme.org/<%=lang%>/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
                                 <li><a href="http://feedback.bireme.org/feedback/?application=socialchecklinks&version=<%=BrokenLinks.VERSION%>&lang=<%=lang%>" target="_blank"><%=messages.getString("contact")%></a></li>
                             </ul>

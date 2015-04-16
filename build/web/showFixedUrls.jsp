@@ -114,7 +114,7 @@
         
         <script LANGUAGE="JavaScript" TYPE="text/javascript">
             
-        function postToUrl(path, params) {
+        function postToUrl(path, params, blank) {
             var form = document.createElement("form");
             form.setAttribute("method", "post");
             form.setAttribute("action", path);
@@ -131,6 +131,10 @@
             }
 
             document.body.appendChild(form);
+            
+            if (blank) {
+                form.setAttribute("target", "_blank");
+            }
             form.submit();
         }
         
@@ -165,6 +169,8 @@
                             <ul class="nav">
                                 <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', 
                                        {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("home")%></a></li>
+                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("report.jsp")%>', 
+                                       {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("report")%></a></li>       
                                 <li><a href="http://wiki.bireme.org/<%=lang%>/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
                                 <li><a href="http://feedback.bireme.org/feedback/?application=socialchecklinks&version=<%=BrokenLinks.VERSION%>&lang=<%=lang%>" target="_blank"><%=messages.getString("contact")%></a></li>
                             </ul>

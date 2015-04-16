@@ -106,6 +106,7 @@ public class ShowFixedLinks {
         }*/
         final List<Element> lst = new ArrayList<Element>();
         final SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
+        final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
         final Date date = (fromDate == null) ? new Date(0) 
                                              : simple.parse(fromDate);
         final String updated = ELEM_LST_FIELD + ".0." + LAST_UPDATE_FIELD;
@@ -126,11 +127,13 @@ public class ShowFixedLinks {
             }
             
             if (ccs == null) {                    
-                final Element elem = new Element(doc.getString(ID_FIELD),
+                final String id = doc.getString(ID_FIELD);
+                final Element elem = new Element(
+                                     id.substring(0, id.indexOf('_')),
                                      upd.getString(BROKEN_URL_FIELD),
                                      upd.getString(FIXED_URL_FIELD),
                                      doc.getString(MST_FIELD),
-                                     upd.getDate(LAST_UPDATE_FIELD).toString(),
+                                     sdf.format(upd.getDate(LAST_UPDATE_FIELD)),
                                      upd.getString(USER_FIELD),
                                      ccs2,
                                      upd.getBoolean(EXPORTED_FIELD));
@@ -139,12 +142,13 @@ public class ShowFixedLinks {
                 for (String cc : ccs) {
                     if (ccLst.contains(cc)) {
 //System.out.println("cc=" + cc + " id=" + doc.getString(ID_FIELD));
+                        final String id = doc.getString(ID_FIELD);
                         final Element elem = new Element(
-                                     doc.getString(ID_FIELD),
+                                     id.substring(0, id.indexOf('_')),
                                      upd.getString(BROKEN_URL_FIELD),
                                      upd.getString(FIXED_URL_FIELD),
                                      doc.getString(MST_FIELD),
-                                     upd.getDate(LAST_UPDATE_FIELD).toString(),
+                                     sdf.format(upd.getDate(LAST_UPDATE_FIELD)),
                                      upd.getString(USER_FIELD),
                                      ccs2,
                                      upd.getBoolean(EXPORTED_FIELD));
@@ -159,13 +163,22 @@ public class ShowFixedLinks {
         return lst;
     }
     
+    static String element2CSV(final Element elem) {
+        assert elem != null;
+        
+        return elem.getDate() + "\t" + elem.getUser() + "\t" + elem.getDbase() + 
+           "\t" + elem.getId() + "\t" + elem.getBurl() + "\t" + elem.getFurl() + 
+           "\t" + elem.getCcs().get(0) + "\t" + elem.isExported() + "\n";
+    }
+    
     private static void usage() {
-        System.err.println("usage: ShowFixedLinks <host> " +
-                "[-port=<port>]\n\t\t     [-user=<user> -password=<pswd>] " +
-                "\n\t\t     [-database=<dbase>] [-collection=<col>] " +
-                "\n\t\t     [-fromDate=<YYYYMMDD>] " +
-                "\n\t\t     [-ccs=<cc>,<cc>,...,<cc>] " +
-                "\n\t\t     [-outFile=<outputFile>]");
+        System.err.println("usage: ShowFixedLinks <host> [-port=<port>]" +
+                "\n\t\t     [-user=<user> -password=<pswd>]" +
+                "\n\t\t     [-database=<dbase>] [-collection=<col>]" +
+                "\n\t\t     [-fromDate=<YYYYMMDD>]" +
+                "\n\t\t     [-ccs=<cc>,<cc>,...,<cc>]" +
+                "\n\t\t     [-outFile=<outputFile>]" +
+                "\n\t\t     [--csv_format]");
         System.exit(1);
     }
     
@@ -185,6 +198,10 @@ public class ShowFixedLinks {
         String fromDate = "20140101";
         List<String> ccs = null; 
         String outFile = null;
+        boolean csvFormat = false;
+        
+        final String csvHeader = "Date\tUser\tDbase\tId\tBrokenUrl\tFixedUrl\t"+
+                                                                "CC\tExported";
                 
         for (int idx = 1; idx < args.length; idx++) {
             if (args[idx].startsWith("-port=")) {                
@@ -204,6 +221,8 @@ public class ShowFixedLinks {
                 ccs = Arrays.asList(cc);
             } else if (args[idx].startsWith("-outFile=")) {
                 outFile = args[idx].substring(9);
+            } else if (args[idx].equals("--csv_format")) {
+                csvFormat = true;
             } else {
                 usage();
             }
@@ -218,16 +237,19 @@ public class ShowFixedLinks {
                                                 : new FileOutputStream(outFile);
             final BufferedWriter out = new BufferedWriter(
                                                   new OutputStreamWriter(outs));
-            boolean first = true;
+            if (csvFormat) {
+                out.append(csvHeader);
+                out.newLine();
+            }
             
             for (Element elem : lst) {
-                if (first) {
-                    first = false;
+                if (csvFormat) {
+                    out.append(element2CSV(elem));
                 } else {
+                    out.append(elem.toString());
+                    out.newLine();
                     out.newLine();
                 }
-                out.append(elem.toString());
-                out.newLine();
             }
             out.close();
         }        

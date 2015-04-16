@@ -79,7 +79,8 @@ public class UndoFixServlet extends HttpServlet {
         
         for (IdUrl iu : fixed) {
             if (iu.id.equals(id)) {
-                if (! MongoOperations.undoUpdateDocument(coll, hcoll, iu.id)) {
+                if (! MongoOperations.undoUpdateDocument(coll, hcoll, iu.id, 
+                                                                        true)) {
                    throw new IOException("Undo operation failed.");
                 }
             } else {

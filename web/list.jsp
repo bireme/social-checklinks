@@ -66,7 +66,8 @@
     collCenterFilter = "null".equals(collCenterFilter) ? null : collCenterFilter;
     
     String sgroup = request.getParameter("group");
-    int group = "null".equals(sgroup) ? 0 : Integer.parseInt(sgroup);
+    int group = ((sgroup == null) || "null".equals(sgroup)) ? 0 
+                                                     : Integer.parseInt(sgroup);
 
     String order = request.getParameter("order");
     order = "null".equals(order) ? "descending" : order;
@@ -128,7 +129,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script LANGUAGE="JavaScript" TYPE="text/javascript">        
             
-        function postToUrl(path, params) {
+        function postToUrl(path, params, blank) {
             var form = document.createElement("form");
             form.setAttribute("charset", "UTF-8");
             form.setAttribute("method", "post");
@@ -149,6 +150,9 @@
 
             document.body.appendChild(form);
             
+            if (blank) {
+                form.setAttribute("target", "_blank");
+            }
             form.submit();
         }
         function isNumber(n) {
@@ -179,6 +183,7 @@
                             <div class="nav-collapse collapse">
                                 <ul class="nav">
                                     <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("home")%></a></li>
+                                    <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("report.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("report")%></a></li>
                                     <li><a href="http://wiki.bireme.org/<%=lang%>/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
                                     <li><a href="http://feedback.bireme.org/feedback/?application=socialchecklinks&version=<%=BrokenLinks.VERSION%>&lang=<%=lang%>" target="_blank"><%=messages.getString("contact")%></a></li>
                                 </ul>
@@ -242,7 +247,7 @@
                                     <div class="nav-collapse">
                                         <ul style="list-style: none; padding: 0px; margin: 0px;">
                                             <li class="dropdown">
-                                                <a class="dropdown-toggle" href="#" data-toggle="dropdown"><%=messages.getString("database")%><strong class="caret"></strong></a>
+                                                <a class="dropdown-toggle" href="#" data-toggle="dropdown">DB<strong class="caret"></strong></a>
                                                 <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
                                                     <ul style="list-style: none; padding: 0px; margin: 0px;">
                                                         <li style="margin-bottom: 8px;">
@@ -352,7 +357,7 @@
                                     <td><%=cur%></td>
                                     <td><%=iu.mst%></td>
                                     <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>"><%=id%></a></td>                                    
-                                    <td><a target="_blank" href="<%=iu.url%>"><%=Tools.limitString(iu.url.trim(),77)%></a></td>  
+                                    <td><a target="_blank" href="<%=iu.url%>"><%=Tools.limitString(iu.url.trim(),100)%></a></td>  
                                     <td>
                                     <%
                                     for (String cc : iu.ccs) {
@@ -380,31 +385,37 @@
                             %>
                         </tbody>
                     </table>
-                    <div class="pagination pagination-centered">                               
-                        <ul>
-                            <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&LeftArrowBar;</a></li>
-                            <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%= (group > 0 ? group -1 : 0)%>',lang:'<%=lang%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&LeftArrow;</a></li>
-                            <!--li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&laquo;</a></li-->
-                                    <%                                        
-                            for (int idx = initGroup; idx < initGroup+5; idx++) {
-                                if (idx == group) {
-                            %>
-                                    <li class="active"><a><%=idx+1%></a></li>
-                            <%
-                                } else if (idx <= lastGroup) {
-                            %>
-                                    <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=idx%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=idx+1%></a></li>
-                            <%
-                                }
-                            }    
-                            %>
-                            <li><input class="gotoPage" id="gotoPage" type="text" placeholder='<%=messages.getString("goto_page")%>' value="" onkeydown="if (event.keyCode == 13) gotoPage('gotoPage')"  /></li>
-                            <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=(group < lastGroup ? group + 1 : lastGroup)%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&RightArrow;</a></li>
-                            <li class="enabled"><a href="javascript:gotoPage('gotoPage');">&RightArrowBar;</a></li>
-                            <!--li class="enabled"><a href="javascript:gotoPage('gotoPage');">&raquo;</a></li-->
-                            <!--li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&raquo;</a></li-->
-                        </ul>
-                    </div>   
+                    <%
+                    if (maxUrls > groupSize) {        
+                    %>    
+                        <div class="pagination pagination-centered">                               
+                            <ul>
+                                <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&LeftArrowBar;</a></li>
+                                <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%= (group > 0 ? group -1 : 0)%>',lang:'<%=lang%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&LeftArrow;</a></li>
+                                <!--li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&laquo;</a></li-->
+                                        <%                                        
+                                for (int idx = initGroup; idx < initGroup+5; idx++) {
+                                    if (idx == group) {
+                                %>
+                                        <li class="active"><a><%=idx+1%></a></li>
+                                <%
+                                    } else if (idx <= lastGroup) {
+                                %>
+                                        <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=idx%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=idx+1%></a></li>
+                                <%
+                                    }
+                                }    
+                                %>
+                                <li><input class="gotoPage" id="gotoPage" type="text" placeholder='<%=messages.getString("goto_page")%>' value="" onkeydown="if (event.keyCode == 13) gotoPage('gotoPage')"  /></li>
+                                <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=(group < lastGroup ? group + 1 : lastGroup)%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&RightArrow;</a></li>
+                                <li class="enabled"><a href="javascript:gotoPage('gotoPage');">&RightArrowBar;</a></li>
+                                <!--li class="enabled"><a href="javascript:gotoPage('gotoPage');">&raquo;</a></li-->
+                                <!--li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&raquo;</a></li-->
+                            </ul>
+                        </div>   
+                    <%
+                    }
+                    %>
                 </div> <!-- /container -->
             <!--div id="push"></div-->
 	</div>

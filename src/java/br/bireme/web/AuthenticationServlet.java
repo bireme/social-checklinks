@@ -78,6 +78,7 @@ public class AuthenticationServlet extends HttpServlet {
             final Set<String> databases = 
                                       MongoOperations.getDatabases(coll);
             
+            context.setAttribute("userEmail", user.trim());
             context.setAttribute("collection", coll);
             context.setAttribute("historycoll", hcoll);
             context.setAttribute("readOnlyMode", false);

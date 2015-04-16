@@ -89,7 +89,7 @@ public class Element {
         return ccs;
     }
     
-    public boolean getExported() {
+    public boolean isExported() {
         return exported;
     }
     

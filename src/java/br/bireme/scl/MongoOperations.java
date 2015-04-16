@@ -45,6 +45,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,6 +69,19 @@ public class MongoOperations {
         public SearchResult(final int size, 
                             final List<IdUrl> documents) {
             this.size = size;
+            this.documents = documents;
+        }                
+    }
+    public static class SearchResult2 {
+        public final int size;
+        public final int size2;
+        public final List<Element> documents;
+
+        public SearchResult2(final int size, 
+                             final int size2,
+                             final List<Element> documents) {
+            this.size = size;
+            this.size2 = size;
             this.documents = documents;
         }                
     }
@@ -217,14 +231,14 @@ public class MongoOperations {
         final BasicDBObject query = new BasicDBObject();
         
         if (docMast != null) {
-            query.append("mst", docMast);
+            query.append(MST_FIELD, docMast);
         }
         if (docId != null) {
             final Pattern pat = Pattern.compile(docId.trim() + "_\\d+");
-            query.append("_id", pat);
+            query.append(ID_FIELD, pat);
         }
         if (docUrl != null) {
-            query.append("burl", docUrl);
+            query.append(BROKEN_URL_FIELD, docUrl.trim());
         }
         if (centerIds != null) {
             final BasicDBList cclst = new BasicDBList();
@@ -239,8 +253,7 @@ public class MongoOperations {
         final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
                                                                   .limit(count);
         final int size = cursor.count();
-        final SimpleDateFormat format = 
-                                    new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        final SimpleDateFormat format =  new SimpleDateFormat("dd-MM-yyyy");
         while (cursor.hasNext()) {
             final DBObject doc = cursor.next();
             final BasicDBList ccsLst = (BasicDBList)doc.get(CENTER_FIELD);
@@ -259,8 +272,97 @@ public class MongoOperations {
         cursor.close();
         
         return new SearchResult(size, lst);
-    }
+    }        
     
+    public static SearchResult2 getHistoryDocuments(final DBCollection coll,
+                                                    final Element elem,                                             
+                                                    final int from,
+                                                    final int count) throws 
+                                                   IOException, ParseException {
+        if (coll == null) {
+            throw new NullPointerException("coll");
+        }
+        if (elem == null) {
+            throw new NullPointerException("elem");
+        }
+        if (from < 1) {
+            throw new IllegalArgumentException("from[" + from + "] < 1");
+        }
+        if (count < 1) {
+            throw new IllegalArgumentException("count[" + count + "] < 1");
+        }        
+        final List<Element> lst = new ArrayList<Element>();
+        final BasicDBObject query = new BasicDBObject();
+        final String root = ELEM_LST_FIELD + ".0.";
+        final String updated = root + LAST_UPDATE_FIELD; 
+        
+        if (elem.getDbase() != null) {
+            query.append(MST_FIELD, elem.getDbase().trim());
+        }
+        
+        if (elem.getId() != null) {
+            final Pattern pat = Pattern.compile(elem.getId().trim() + "_\\d+");
+            query.append(ID_FIELD, pat);
+        }
+        
+        if (elem.getFurl() != null) {
+            query.append(root + FIXED_URL_FIELD, elem.getFurl().trim());
+        }
+        
+        if (!elem.getCcs().isEmpty()) {
+            final BasicDBList cclst = new BasicDBList();
+            for (String centerId : elem.getCcs()) {
+                cclst.add(centerId.trim());
+            }
+            final String cc = root + CENTER_FIELD;
+            final BasicDBObject in = new BasicDBObject("$in", cclst);        
+            query.append(cc, in);
+        }
+        
+        if (elem.getDate() != null) {
+            
+            final SimpleDateFormat simple = new SimpleDateFormat("dd-MM-yyyy");
+            final Date date = simple.parse(elem.getDate().trim());
+            final BasicDBObject qdate = new BasicDBObject("$gte", date);                        
+            query.append(updated, qdate);
+        }
+        
+        if (elem.getUser() != null) {
+            final String user = root + USER_FIELD;
+            query.append(user, elem.getUser().trim());
+        }
+        
+        final BasicDBObject sort = new BasicDBObject(updated, -1);
+        final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
+                                                                  .limit(count); 
+        final int size = cursor.count();
+        final SimpleDateFormat format = 
+                                    new SimpleDateFormat("dd-MM-yyyy");
+        
+        while (cursor.hasNext()) {
+            final BasicDBObject hdoc = (BasicDBObject)cursor.next();                        
+            final BasicDBList elst = (BasicDBList)hdoc.get(ELEM_LST_FIELD);
+            final BasicDBObject hcurdoc = (BasicDBObject)elst.get(0);
+            if (hcurdoc == null) {
+                throw new IOException("document last element found.");
+            }
+            final BasicDBList ccLst = (BasicDBList) hcurdoc.get(CENTER_FIELD);
+            final List<String> ccs = Arrays.asList(ccLst.toArray(new String[0]));
+            final Element elem2 = new Element(hdoc.getString(ID_FIELD),
+                       hcurdoc.getString(BROKEN_URL_FIELD),
+                       hcurdoc.getString(FIXED_URL_FIELD),
+                       hdoc.getString(MST_FIELD),
+                       format.format((Date)(hcurdoc.get(LAST_UPDATE_FIELD))),                                          
+                       hcurdoc.getString(USER_FIELD),
+                       ccs,
+                       hcurdoc.getBoolean(EXPORTED_FIELD));
+            lst.add(elem2);
+        }
+        cursor.close();
+        
+        return new SearchResult2(size, lst.size(), lst);
+    }
+                
     static Set<IdUrl> getDocsWith(final DBCollection coll,
                                   final Set<String> centerIds,
                                   final String filter,
@@ -345,7 +447,8 @@ public class MongoOperations {
 
     public static boolean undoUpdateDocument(final DBCollection coll,
                                              final DBCollection hcoll,
-                                             final String docId)
+                                             final String docId,
+                                             final boolean updateBrokenColl)
                                                            throws IOException {
         if (coll == null) {
             throw new NullPointerException("coll");
@@ -378,7 +481,8 @@ public class MongoOperations {
         doc.put(MSG_FIELD, hcurdoc.get(MSG_FIELD));
         doc.put(CENTER_FIELD, hcurdoc.get(CENTER_FIELD));    
         
-        final boolean ret1 = coll.save(doc).getLastError().ok();
+        final boolean ret1 = updateBrokenColl 
+                                    ? coll.save(doc).getLastError().ok() : true;
         final boolean ret2;
         
         if (lst.isEmpty()) {
@@ -393,8 +497,8 @@ public class MongoOperations {
     }
     
     public static boolean undoUpdateDocument2(final DBCollection coll,
-                                             final DBCollection hcoll,
-                                             final String fromDate)
+                                              final DBCollection hcoll,
+                                              final String fromDate)
                                                            throws IOException, 
                                                                 ParseException {
         if (coll == null) {

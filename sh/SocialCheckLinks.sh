@@ -13,12 +13,12 @@ ISIS=/usr/local/bireme/cisis/5.7e/linux64/isis1660
 NOW=$(date +"%Y%m%d")
 NOW2=$(date +"%Y%m%d-%T")
 
+echo "Muda para diretorio de trabalho: $HOME"
+cd $HOME
+
 echo "Inicio da execucao: ${NOW2}"
 echo
 echo "Inicio da execucao: ${NOW2}" >> execution.log
-
-echo "Muda para diretorio de trabalho: $HOME"
-cd $HOME
 
 echo "Avisa inicio do processo de atualizacao do Social Check Links"
 sendemail -f appofi@bireme.org -u "Social Check Links - `date '+%Y%m%d'`" -m "Inicio do processamento de atualizacao do Social Check Links." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
@@ -96,11 +96,11 @@ do
     rm ${db}_${NOW}.tgz
 
     echo "Transfere a base $db apos aplicacao do gizmo para local de origem"
-    scp -p $db.{mst,xrf} $user@$server:$path
-    if [ $? -ne 0 ]; then
-        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base $db apos aplicacao do gizmo para local de origem." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
-        exit 1
-    fi
+    scp -p ${db}.{mst,xrf} $user@$server:$path
+    #if [ $? -ne 0 ]; then
+    #    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base $db apos aplicacao do gizmo para local de origem." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+    #    exit 1
+    #fi
 done < config.txt
 
 clearcol="--clearColl"
@@ -146,14 +146,15 @@ then
 fi
 rm out gout
 
+END=$(date +"%Y%m%d-%T")
+echo "Fim da execuçao: $END" >> execution.log
+
 echo "Retorna para diretorio original"
 cd -
 
-END=$(date +"%Y%m%d-%T")
-
-echo "Avisa termino do processo de atualizacao do Social Check Links
+echo "Avisa termino do processo de atualizacao do Social Check Links"
 sendemail -f appofi@bireme.org -u "Social Check Links - $END" -m "Termino do processamento de atualizacao do Social Check Links." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
 
 echo
 echo "Fim da execuçao: $END"
-echo "Fim da execuçao: $END" >> execution.log
+

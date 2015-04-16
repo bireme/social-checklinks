@@ -90,6 +90,10 @@ public class CheckUrl {
               + " HTTP/1.1\r\n"
               //+ "User-Agent: CERN-LineMode/2.15 libwww/2.17b3\r\n"
               + "User-Agent: curl/7.37.1\r\n"
+              //+ "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:37.0) Gecko/20100101 Firefox/37.0\r\n"
+              + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"      
+              //+ "Accept-Language: pt-BR,pt;q=0.8,en-US;q=0.5,en;q=0.3\r\n"
+              //+ "Accept-Encoding: gzip, deflate\r\n"      
               + "Host: " + host + "\r\n"
               + "Connection: close\r\n\r\n";
 

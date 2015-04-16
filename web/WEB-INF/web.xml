@@ -29,6 +29,11 @@
         <param-name>accounts_host</param-name>
         <param-value>accounts.bireme.org</param-value>
     </context-param>
+    <context-param>
+        <description>Error email address</description>
+        <param-name>email-address</param-name>
+        <param-value>lilacsdb@bireme.org</param-value>
+    </context-param>
     <servlet>
         <servlet-name>authenticate</servlet-name>
         <servlet-class>br.bireme.web.AuthenticationServlet</servlet-class>
@@ -44,6 +49,10 @@
     <servlet>
         <servlet-name>UndoFixServlet</servlet-name>
         <servlet-class>br.bireme.web.UndoFixServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UndoFixReportServlet</servlet-name>
+        <servlet-class>br.bireme.web.UndoFixReportServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>CenterFilterServlet</servlet-name>
@@ -72,6 +81,10 @@
     <servlet-mapping>
         <servlet-name>UndoFixServlet</servlet-name>
         <url-pattern>/UndoFixServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UndoFixReportServlet</servlet-name>
+        <url-pattern>/UndoFixReportServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CenterFilterServlet</servlet-name>
