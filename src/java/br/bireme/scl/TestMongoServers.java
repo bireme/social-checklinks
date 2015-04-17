@@ -49,7 +49,7 @@ public class TestMongoServers {
             System.out.println("(" + SOCIAL_CHECK_DB + 
                     "," + BROKEN_LINKS_COL + ") #docs:" + cursor.count());
             System.out.println("(" + SOCIAL_CHECK_DB + 
-                    "," + HISTORY_COL + ") #docs:" + hcursor.count());
+                    "," + HISTORY_COL + ") #docs:" + hcursor.count() + "\n");
             
             cursor.close();
             hcursor.close();                        

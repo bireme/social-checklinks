@@ -30,6 +30,7 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Set;
 
@@ -47,7 +48,7 @@ public class CopyMongoDb {
                                final String to_port,
                                final boolean appendCollections,
                                final boolean displayAllIds) 
-                                                   throws UnknownHostException {
+                                                   throws UnknownHostException, IOException {
         assert from_host != null;
         assert to_host != null;
         assert from_db != null;
@@ -87,6 +88,9 @@ public class CopyMongoDb {
                     if (curr > 0) {
                         cursor.close();
                         cursor = fromColl.find().skip(curr);
+                        if (!cursor.hasNext()) {
+                            throw new IOException("hasNext() failed");
+                        }
                     }
                 }
                 final DBObject doc = cursor.next();
@@ -116,7 +120,8 @@ public class CopyMongoDb {
         System.exit(1);
     }
     
-    public static void main(final String[] args) throws UnknownHostException {
+    public static void main(final String[] args) throws UnknownHostException, 
+                                                                   IOException {
         if (args.length < 3) {
             usage();
         }

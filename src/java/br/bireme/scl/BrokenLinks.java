@@ -219,7 +219,7 @@ public class BrokenLinks {
             }
             final String lineT = line.trim();
             if (!lineT.isEmpty()) {
-                final String[] split = lineT.split(" *\\| *", 3);
+                final String[] split = lineT.split(" *\\| *", 4);
                 final int openPos = split[2].indexOf('('); // cut extra data               
                 final String prefix = (openPos > 0) 
                                     ? split[2].substring(0, openPos) : split[2];
@@ -246,7 +246,7 @@ public class BrokenLinks {
             }
         }
 
-        System.out.print("Fixing urls that do not start with http:// ... ");
+        System.out.print("Fixing urls that does not start with http:// ... ");
         MongoOperations.fixMissingHttp(coll, hColl);
         System.out.println(" - OK");
         
