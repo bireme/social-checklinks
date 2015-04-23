@@ -22,7 +22,7 @@
 
 <%@page language="java"%>
 <%@page session="true" %>
-<%@page import="java.util.*,java.net.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
+<%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
 <%@page contentType="text/html;charset=UTF-8"%>
 
 <% 
@@ -137,7 +137,6 @@
 
             for(var key in params) {
                 if (params.hasOwnProperty(key)) {
-                    var value = params[key];                    
                     var hiddenField = document.createElement("input");
                     
                     hiddenField.setAttribute("type", "hidden");

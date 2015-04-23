@@ -41,7 +41,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -230,14 +229,9 @@ public class BrokenLinks {
                         throw new IOException("id[" + split[0] + "] not found");
                     }
                     
-                    String decoded;                    
-                    try {
-                        decoded = URLDecoder.decode(split[1], outEncoding);
-                    } catch(IllegalArgumentException iae) {
-                        decoded = split[1];
-                    }                    
-//System.out.println(split[0] + " url=" + decoded);                    
-                    saveRecord(mName, id, decoded, 
+                    final String url_whites = split[1].replace(" ", "%20");
+                    
+                    saveRecord(mName, id, url_whites, 
                                      split[2], urlTag, tags, mst, coll, occMap);
                 }
                 if (++tell % 5000 == 0) {

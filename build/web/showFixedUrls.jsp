@@ -50,8 +50,8 @@
 
     //final String url = (String)session.getAttribute("url");
     final Set<IdUrl> fixed = (Set<IdUrl>)session.getAttribute("IdUrls");
-    final String url = (String)request.getParameter("url");
-    final String brokenUrl = request.getParameter("brokenUrl");
+    final String url = (String)request.getParameter("url").replace(" ", "%20");
+    final String brokenUrl = request.getParameter("brokenUrl").replace(" ", "%20");
     final int fixedUrls = fixed.size();
     final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");
@@ -266,27 +266,29 @@
                     <% } %>
                     <p align="right"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});" class="btn btn-primary btn-small"><%=messages.getString("more_broken_links")%></a></p>
                     
-                    <div class="accordion">
-                        <div class="pagination pagination-centered">
-                            <ul>
-                                <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&laquo;</a></li>
-                                <%                                        
-                                for (int idx = initGroup; idx < initGroup+5; idx++) {
-                                    if (idx == group) {
-                                %>
-                                        <li class="active"><a><%=idx+1%></a></li>
-                                <%
-                                    } else if (idx <= lastGroup) {
-                                %>
-                                        <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=idx%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});" ><%=idx+1%></a></li>
-                                <%
-                                    }
-                                }    
-                                %>
-                                <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&raquo;</a></li>
-                            </ul>
+                    <% if (fixedUrls > groupSize) { %>
+                        <div class="accordion">
+                            <div class="pagination pagination-centered">
+                                <ul>
+                                    <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&laquo;</a></li>
+                                    <%                                        
+                                    for (int idx = initGroup; idx < initGroup+5; idx++) {
+                                        if (idx == group) {
+                                    %>
+                                            <li class="active"><a><%=idx+1%></a></li>
+                                    <%
+                                        } else if (idx <= lastGroup) {
+                                    %>
+                                            <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=idx%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});" ><%=idx+1%></a></li>
+                                    <%
+                                        }
+                                    }    
+                                    %>
+                                    <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&raquo;</a></li>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
+                    <% } %>            
                 </div>
             </div> <!-- /container -->
             <div id="push"></div>

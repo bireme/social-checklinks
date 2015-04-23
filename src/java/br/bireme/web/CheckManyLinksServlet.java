@@ -26,7 +26,6 @@ import br.bireme.scl.IdUrl;
 import br.bireme.scl.MongoOperations;
 import com.mongodb.DBCollection;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -68,10 +67,10 @@ public class CheckManyLinksServlet extends HttpServlet {
         final String user = (String)session.getAttribute("user");
         final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");         
-        final String brokenUrl = request.getParameter("url");
-        final String brokenUrl_E = URLEncoder.encode(brokenUrl, CODEC);
-        final String fixedUrl = request.getParameter("furl");
-        final String fixedUrl_E = URLEncoder.encode(fixedUrl, CODEC);
+        final String brokenUrl = request.getParameter("url").replace(" ", "%20");
+        //final String brokenUrl_E = URLEncoder.encode(brokenUrl, CODEC);
+        final String fixedUrl = request.getParameter("furl").replace(" ", "%20");
+        //final String fixedUrl_E = URLEncoder.encode(fixedUrl, CODEC);
         final String lang = request.getParameter("lang");
         final String group = request.getParameter("group");
         final String id = request.getParameter("id");
@@ -88,7 +87,7 @@ public class CheckManyLinksServlet extends HttpServlet {
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
                 "/showFixedUrls.jsp?group=0&lgroup=" + group 
             + "&dbFilter=" + dbFilter + "&lang=" + lang 
-            + "&id=" + id + "&brokenUrl=" + brokenUrl_E + "&url=" + fixedUrl_E
+            + "&id=" + id + "&brokenUrl=" + brokenUrl + "&url=" + fixedUrl
             + "&collCenterFilter=" + collCenterFilter + "&order=" + order);
 
         session.setAttribute("IdUrls", fixed);

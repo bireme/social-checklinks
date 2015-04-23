@@ -22,7 +22,7 @@
 
 <%@page language="java"%>
 <%@page session="true" %>
-<%@page import="java.util.*,java.net.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
+<%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
 <%@page contentType="text/html;charset=UTF-8"%>
 
 <%     
@@ -48,7 +48,7 @@
     final String user = (String)session.getAttribute("user");
     final String id = request.getParameter("id");
     final String id2 = id.substring(0, id.lastIndexOf('_'));
-    final String url = request.getParameter("url");
+    final String url = request.getParameter("url").replace(" ", "%20");
     final String sgroup = request.getParameter("group");
     final String group = "null".equals(sgroup) ? "0" : sgroup;
     final String scollCenterFilter = request.getParameter("collCenterFilter");
@@ -57,7 +57,7 @@
     final String sorder = request.getParameter("order");
     final String order = (sorder == null) ? "descending" 
                               : ("null".equals(sorder) ? "descending" : sorder);
-    final String furl = request.getParameter("furl");
+    final String furl = request.getParameter("furl").replace(" ", "%20");
     final String lang2 = lang.equals("null") ? "en" : lang.equals("fr") 
                                                     ? "en" :lang;    
     final String sdbFilter = request.getParameter("dbFilter");
@@ -125,24 +125,26 @@
         }               
         
         function callUrl(id, url, lang) {
-           //var nurl = encodeURIComponent(document.getElementById('input-1').value);
            var nurl = document.getElementById('input-1').value;
-           var nurl2 = encodeURI(nurl);
-           //alert('nurl=' + nurl);
+           var nurl2 = replaceAll(nurl, " ", "%20");
+           
+           //var nurl2 = encodeURI(nurl);
+           //var nurl2 = decodeURI(nurl);
+           //alert('nurl=' + nurl2);
            
            postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', 
-                 {id:id, url:url, furl:nurl, lang:lang, group:'<%=group%>',
+                 {id:id, url:url, furl:nurl2, lang:lang, group:'<%=group%>',
                   dbFilter:'<%=dbFilter%>', collCenterFilter:'<%=collCenterFilter%>', 
-                  order:'<%=order%>'});
-              
+                  order:'<%=order%>'});              
         }
         
         function callUrl2(id, url, lang) {
             var nurl = document.getElementById('input-1').value;
-            //var nurl = encodeURIComponent(document.getElementById('input-1').value);
+            var nurl2 = replaceAll(nurl, " ", "%20");
+            //var nurl = decodeURIComponent(document.getElementById('input-1').value);
 
             postToUrl('<%=response.encodeRedirectURL("CheckManyLinksServlet")%>',
-                {id: id, url: url, furl: nurl, lang: lang, group: '<%=group%>',
+                {id: id, url: url, furl: nurl2, lang: lang, group: '<%=group%>',
                 dbFilter: '<%=dbFilter%>', collCenterFilter: '<%=collCenterFilter%>',
                 order: '<%=order%>'});
         }

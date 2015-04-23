@@ -26,7 +26,6 @@ import br.bireme.scl.IdUrl;
 import br.bireme.scl.MongoOperations;
 import com.mongodb.DBCollection;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.ServletContext;
@@ -73,9 +72,7 @@ public class UndoFixServlet extends HttpServlet {
         final String lang = request.getParameter("lang");
         final String id = request.getParameter("id");
         final String brokenUrl = request.getParameter("brokenUrl");
-        final String brokenUrl_E = URLEncoder.encode(brokenUrl, CODEC);
         final String url = request.getParameter("url");
-        final String url_E = URLEncoder.encode(url, CODEC);
         
         for (IdUrl iu : fixed) {
             if (iu.id.equals(id)) {
@@ -90,8 +87,8 @@ public class UndoFixServlet extends HttpServlet {
         session.setAttribute("IdUrls", nfixed);
         response.sendRedirect(response.encodeRedirectURL(
                    "showFixedUrls.jsp?group=" + group + "&lgroup=" + lgroup 
-                  + "&lang=" + lang + "&id=" + id + "&brokenUrl=" + url_E
-                  + "&url=" + brokenUrl_E));
+                  + "&lang=" + lang + "&id=" + id + "&brokenUrl=" + url
+                  + "&url=" + brokenUrl));
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

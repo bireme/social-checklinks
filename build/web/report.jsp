@@ -28,7 +28,7 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page session="true" %>
-<%@page import="java.util.*,java.net.*,java.text.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
+<%@page import="java.util.*,java.text.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
 
 <%
     final String CODEC = "UTF-8";    
@@ -95,6 +95,8 @@
     String r_collCenterFilter = request.getParameter("r_collCenterFilter");
     r_collCenterFilter = "null".equals(r_collCenterFilter) ? null 
                                                            : r_collCenterFilter;
+    r_collCenterFilter = (r_collCenterFilter == null) ? null :
+                                        r_collCenterFilter.trim().toUpperCase();
     
     String r_sgroup = request.getParameter("r_group");
     int r_group = ((r_sgroup == null) || "null".equals(r_sgroup)) ? 0 
@@ -114,7 +116,7 @@
     if (r_collCenterFilter == null) {
         collCenters.addAll(centerIds);        
     } else {
-        collCenters.add(r_collCenterFilter.trim().toUpperCase());
+        collCenters.add(r_collCenterFilter);
     }
                     
     final Element elem = new Element(r_idFilter, 
