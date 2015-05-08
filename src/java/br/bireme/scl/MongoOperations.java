@@ -100,7 +100,8 @@ public class MongoOperations {
         final DBCursor cursor = coll.find();
 
         while (cursor.hasNext()) {
-            set.add((String) cursor.next().get(CENTER_FIELD));
+            final BasicDBList lst = (BasicDBList)cursor.next().get(CENTER_FIELD);
+            set.add((String) lst.get(0));
         }
         cursor.close();
 

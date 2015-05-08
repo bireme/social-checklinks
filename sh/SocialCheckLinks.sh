@@ -9,7 +9,6 @@
 
 SERVER=production    # test homolog production
 HOME=/home/javaapps/SocialCheckLinks/social-checklinks
-ISIS=/usr/local/bireme/cisis/5.7e/linux64/isis1660
 NOW=$(date +"%Y%m%d")
 NOW2=$(date +"%Y%m%d-%T")
 
@@ -64,8 +63,8 @@ do
     fi
 
     echo "Armazena em backup a base antes de aplicar o gizmo"
-    $ISIS/mx $db create=${db}_url count=0 -all now
-    $ISIS/mx $db "proc=$proc" -all tell=10000 now append=${db}_url
+    $LINDG4/mx null create=${db}_url count=0 -all now
+    $LINDG4/mx $db "proc=$proc" -all tell=10000 now append=${db}_url
 
     tar -czpvf history/${db}_${NOW}.tgz ${db}_url.mst ${db}_url.xrf
     tar -czpvf ${db}_${NOW}.tgz ${db}.mst ${db}.xrf

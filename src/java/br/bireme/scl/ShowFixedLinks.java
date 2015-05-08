@@ -158,6 +158,8 @@ public class ShowFixedLinks {
                 }
             }                        
         }
+        cursor.close();
+        
         System.out.println("size=" + lst.size() + "\n");
         
         return lst;

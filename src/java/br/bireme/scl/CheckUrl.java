@@ -41,7 +41,7 @@ public class CheckUrl {
     private static final String HTTP_REG_EXP = "HTTP/\\d\\.\\d\\s+(\\d+)";
 
     private static final int CONNECT_TIMEOUT = 5000; //60000; // connect timeout (miliseconds)
-    private static final int SO_TIMEOUT = 5000; //60000; // read timeout (miliseconds)
+    private static final int SO_TIMEOUT = 20000; //5000; //60000; // read timeout (miliseconds)
     private static final int SO_LINGER = 10; // close timeout (seconds)
 
     public static final int UNKNOWN = 1000;
@@ -282,7 +282,7 @@ public class CheckUrl {
         }
 
         System.out.println();
-        System.out.println("URL=[" + args[0] + "]");
+        System.out.print("URL=[" + args[0] + "] ");
         System.out.println("ErrCode=" + CheckUrl.check(args[0]));
     }
 }
