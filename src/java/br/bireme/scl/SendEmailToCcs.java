@@ -232,7 +232,7 @@ public class SendEmailToCcs {
     }
     
     private static void usage() {
-        System.err.println("usage: SendEmailToCC <to_file> <host>" +
+        System.err.println("usage: SendEmailToCCs <to_file> <host>" +
                 "\n\t\t     [-port=<port>]" +
                 "\n\t\t     [-user=<user> -password=<pswd>]" +
                 "\n\t\t     [-database=<dbase>] [-collection=<col>]");

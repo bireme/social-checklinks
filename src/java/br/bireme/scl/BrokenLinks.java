@@ -56,7 +56,7 @@ import java.util.Set;
  * date 20130625
  */
 public class BrokenLinks {
-    public static final String VERSION = "0.5";
+    public static final String VERSION = "0.6";
     public static final String VERSION_DATE = "2015";
 
     /* MongoDb settings */
@@ -177,8 +177,9 @@ public class BrokenLinks {
                               new FileInputStream(outCheckFile), outEncoding));
         final MongoClient mongoClient = new MongoClient(host, port);
         final DB db = mongoClient.getDB(SOCIAL_CHECK_DB);
-        final Map<String,Integer> occMap = new HashMap<String,Integer>();
-
+        // map -> mfn ->  url,occ
+        final Map<Integer,Map<String,Integer>> occMap = 
+                                    new HashMap<Integer,Map<String,Integer>>();
         final boolean checkPassword = false;
         if (checkPassword) {
             final boolean auth = db.authenticate(user, password.toCharArray());
@@ -208,6 +209,7 @@ public class BrokenLinks {
         int tell = 0;
 
         if (clearCol) {
+            coll.dropIndexes();
             coll.remove(new BasicDBObject());
         }
 
@@ -217,8 +219,8 @@ public class BrokenLinks {
                 break;
             }
             final String lineT = line.trim();
-            if (!lineT.isEmpty()) {
-                final String[] split = lineT.split(" *\\| *", 4);
+            if (!lineT.isEmpty()) {                
+                final String[] split = lineT.split(" *\\| *", 4); //id|url|msg|master
                 final int openPos = split[2].indexOf('('); // cut extra data               
                 final String prefix = (openPos > 0) 
                                     ? split[2].substring(0, openPos) : split[2];
@@ -229,9 +231,9 @@ public class BrokenLinks {
                         throw new IOException("id[" + split[0] + "] not found");
                     }
                     
-                    final String url_whites = split[1].replace(" ", "%20");
+                    //final String url_e = split[1].replace(" ", "%20");
                     
-                    saveRecord(mName, id, url_whites, 
+                    saveRecord(mName, id, split[1], 
                                      split[2], urlTag, tags, mst, coll, occMap);
                 }
                 if (++tell % 5000 == 0) {
@@ -240,7 +242,7 @@ public class BrokenLinks {
             }
         }
 
-        System.out.print("Fixing urls that does not start with http:// ... ");
+        System.out.print("Fixing urls that do not start with http:// ... ");
         MongoOperations.fixMissingHttp(coll, hColl);
         System.out.println(" - OK");
         
@@ -376,7 +378,7 @@ public class BrokenLinks {
 
         final BasicDBObject flds = new BasicDBObject();
         flds.append(CENTER_FIELD, 1);
-        flds.append(BROKEN_URL_FIELD, 1);
+        flds.append(BROKEN_URL_FIELD, 1); //Btree::insert: key too large to index
         flds.append(MST_FIELD, 1);
         coll.ensureIndex(flds);
     }
@@ -389,7 +391,7 @@ public class BrokenLinks {
                                       final List<Integer> ccsFlds,                                      
                                       final Master mst,
                                       final DBCollection coll,
-                                      final Map<String,Integer> occMap)
+                                  final Map<Integer,Map<String,Integer>> occMap)
                                                          throws BrumaException,
                                                                 IOException {
         assert mstName != null;
@@ -414,13 +416,15 @@ public class BrokenLinks {
         final Date now = new Date();
         Date date;
         
-        Integer curOcc = occMap.get(id);
-        if (curOcc == null) {
-            curOcc = 0;
+        Map<String,Integer> fldMap = occMap.get(id);
+        if (fldMap == null) {
+            fldMap = new HashMap<String,Integer>();
+            occMap.put(id, fldMap);
         }
-        final int occ = nextOcc(url, urls, curOcc, occMap);
+        
+        final int occ = nextOcc(url, urls, fldMap);
         if (occ == -1) {                
-            //System.err.println("url[" + url + "] not found. mfn=" + id);
+            System.err.println("url[" + url + "] not found. mfn=" + id);
             //throw new IOException("url[" + url + "] not found. mfn=" + id);                
             return false;
         }
@@ -442,12 +446,15 @@ public class BrokenLinks {
                 date = obj.getDate(DATE_FIELD);
             }
         }
+        final String url_e = url.replace(" ", "%20");
+        final String url_e_l = (url_e.length() >= 900) 
+                                    ? url_e.substring(0, 900) + "..." : url_e;
         final BasicDBObject doc = new BasicDBObject();        
         doc.put(DATE_FIELD, date);
         doc.put(LAST_UPDATE_FIELD, now);
         doc.put(MST_FIELD, mstName);
         doc.put(ID_FIELD, id + "_" + occ);
-        doc.put(BROKEN_URL_FIELD, url);
+        doc.put(BROKEN_URL_FIELD, url_e_l);
         doc.put(MSG_FIELD, err);
         doc.put(CENTER_FIELD, getCCS(rec, ccsFlds));        
 
@@ -458,35 +465,43 @@ public class BrokenLinks {
 
     private static int nextOcc(final String url,
                                final List<Field> urls,
-                               final int code,
-                               final Map<String,Integer> occMap) 
+                               final Map<String,Integer> fldMap) 
                                                          throws BrumaException {
         assert url != null;
         assert urls != null;
-        assert code >= 0;
-        assert occMap != null;
+        assert fldMap != null;
 
-        int code2 = code;
-        int val = 1;
-        int ret = 1;
+        Integer curOcc = fldMap.get(url.trim()); // bits indicating used occs
+        if (curOcc == null) {
+            curOcc = 0;
+            fldMap.put(url.trim(), curOcc);
+        }
+        
+        int val = 1;      // current check bit position
+        int ret = 1;      // possible not used occurrence
+        boolean found = false;
         
         outter : for (Field fld : urls) {
             for (Subfield sub : fld.getSubfields()) {
                 if (url.trim().equals(sub.getContent().trim())) {
-                    if ((code2 & val) == 0) { // occurrence not used
-                        code2 |= val;
-                        occMap.put(url, code2);
+                    if ((curOcc & val) == 0) { // found not used occurrence
+                        curOcc |= val;
+                        fldMap.put(url, curOcc);
+                        found = true;
                         break outter;
                     }
                 }    
             }
-            if (val > Integer.MAX_VALUE/2) {
+            if (val > Integer.MAX_VALUE / 2) {  // all positions already used
                 ret = -1;
                 break;
             }
-            val *= 2;
+            val *= 2; // go to the next bit position
             ret++;
-        }        
+        }      
+        if (!found) {
+            ret = -1;
+        }
         return ret;
     }
     

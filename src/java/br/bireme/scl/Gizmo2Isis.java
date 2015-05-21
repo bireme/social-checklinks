@@ -30,8 +30,10 @@ import bruma.master.Record;
 import bruma.master.Subfield;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,23 +68,35 @@ class GizmoElem {
 
 public class Gizmo2Isis {    
     public static void apply(final String gizmoFile,
-                             final String confFile,
-                             final String outputDir) throws IOException, 
+                             final String inputDir,
+                             final String outputDir,
+                             final String gizEncoding,
+                             final String confFile) throws IOException, 
                                                             BrumaException {
         if (gizmoFile == null) {
             throw new NullPointerException("gizmoFile");
         }
+        if (inputDir == null) {
+            throw new NullPointerException("inputDir");
+        }
         if (outputDir == null) {
             throw new NullPointerException("outputDir");
         }
-        final List<GizmoElem> giz = readGizmo(gizmoFile);
-        final Map<String, String> cipar = (confFile == null) ? null 
-                                                       : readConfFile(confFile);
+        if (gizEncoding == null) {
+            throw new NullPointerException("gizEncoding");
+        }
+        if (inputDir.equals(outputDir)) {
+            throw new IOException(
+                             "Input and output directories should be diffent");
+        }
+        
+        final List<GizmoElem> giz = readGizmo(gizmoFile, gizEncoding);
+        final Map<String, String> encodingMap = readConfFile(confFile);
         final Map<String, Master> inmap = new HashMap<String, Master>();
         final Map<String, Master> outmap = new HashMap<String, Master>();
         
         for (GizmoElem elem : giz) {
-            changeElem(elem, cipar, inmap, outmap, outputDir);
+            changeElem(elem, inputDir, outputDir, encodingMap, inmap, outmap);
         }
         for (Master mst : inmap.values()) {
             mst.close();
@@ -93,40 +107,43 @@ public class Gizmo2Isis {
     }
     
     private static void changeElem(final GizmoElem elem,
-                                   final Map<String, String> cipar,
+                                   final String inputDir,
+                                   final String outputDir,
+                                   final Map<String, String> encodingMap,
                                    final Map<String, Master> inmap,
-                                   final Map<String, Master> outmap,
-                                   final String outDir) throws BrumaException, 
+                                   final Map<String, Master> outmap) 
+                                                          throws BrumaException, 
                                                                    IOException {
         assert elem != null;
+        assert inputDir != null;
+        assert outputDir != null;
+        assert encodingMap != null;
         assert inmap != null;
         assert outmap != null;
-        assert outDir != null;
-        
+                        
         final String from = elem.from;
-        final String path = (cipar == null) ? "./" + elem.mst 
-                                            : cipar.get(elem.mst);
-        if ((path == null) || (path.isEmpty())) {
-            throw new IllegalArgumentException("master path");
-        }
         
-        System.out.println(elem.mst + ": " + elem.mfn);
+        System.out.println("applying gizmo at " + elem.mst + ": " + elem.mfn);
         
         Master inmst = inmap.get(elem.mst);
         if (inmst == null) {
-            inmst = MasterFactory.getInstance(path).open();
+            final File in = new File(inputDir, elem.mst);
+            String encoding = encodingMap.get(elem.mst);
+            encoding = (encoding == null) ? BrokenLinks.DEFAULT_MST_ENCODING 
+                                          : encoding;
+            inmst = MasterFactory.getInstance(in.getPath())
+                                             .setInMemoryXrf(false)
+                                             .setEncoding(encoding)
+                                             .open();
             inmap.put(elem.mst, inmst);
         }
         Master outmst = outmap.get(elem.mst);
         if (outmst == null) {
-            final File file = new File(path);
-            final String name = file.getName();
-            final File out = new File(outDir, name);
+            final File out = new File(outputDir, elem.mst);
             outmst = (Master) MasterFactory.getInstance(out.getPath())
                                            .setInMemoryXrf(false)
                                            .asAnotherMaster(inmst)
                                            .forceCreate();
-//System.out.println("in=" + path + " out=" + out.getPath());
             outmap.put(elem.mst, outmst);
             copyMaster(inmst, outmst);
         }
@@ -159,23 +176,24 @@ public class Gizmo2Isis {
             }
         }
         if (!changed) {
-            //throw new IOException("mfn [" + elem.mfn + "] url [" + elem.from 
-            //                            + "] not found in this record");
             System.err.println("ERROR: mfn [" + elem.mfn + "] url [" + elem.from 
                                           + "] not found in this record");
         }
         outmst.writeRecord(new Record().setMfn(elem.mfn).addFields(flds));
     }
     
-    private static List<GizmoElem> readGizmo(final String gizmoFile)
+    private static List<GizmoElem> readGizmo(final String gizmoFile,
+                                             final String encoding)
                                                             throws IOException {
         assert gizmoFile != null;
+        assert encoding != null;
         
         final List<GizmoElem> lst = new ArrayList<GizmoElem>();
         BufferedReader reader = null;
         
         try {
-            reader = new BufferedReader(new FileReader(gizmoFile));
+            reader = new BufferedReader(new InputStreamReader(
+                                     new FileInputStream(gizmoFile), encoding));
             while (true) {
                 final String line = reader.readLine();
                 if (line == null) {
@@ -198,64 +216,41 @@ public class Gizmo2Isis {
         return lst;
     }
     
+    /**
+     * Reads the configuration file to get the master file enconding
+     * @param confFile configuration file path
+     * @return map with (mstName -> mst encoding)
+     * @throws IOException 
+     */
     private static Map<String,String> readConfFile(final String confFile) 
                                                             throws IOException {
-        assert confFile != null;
-        
         final Map<String,String> map = new HashMap<String,String>();
-        BufferedReader reader = null;
-        
-        try {
-            reader = new BufferedReader(new FileReader(confFile));
-            while (true) {
-                final String line = reader.readLine();
-                if (line == null) {
-                    break;
+                
+        if (confFile != null) {
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(confFile));
+                while (true) {
+                    final String line = reader.readLine();
+                    if (line == null) {
+                        break;
+                    }
+                    final String[] split = line.trim().split("\\|", 7);
+                    if (split.length != 7) {
+                        throw new IOException("Wrong line format: " + line);
+                    }
+                    map.put(split[0], split[6]);
                 }
-                final String[] split = line.trim().split("\\|", 5);
-                if (split.length != 5) {
-                    throw new IOException("Wrong line format: " + line);
+            } finally {
+                if (reader != null) {
+                     reader.close();
                 }
-                map.put(split[0], split[3] + "/" + split[0]);
-            }
-        } finally {
-            if (reader != null) {
-                 reader.close();
             }
         }
         
         return map;
     }
-    
-    private static Map<String,String> readCipar(final String ciparFile) 
-                                                            throws IOException {
-        assert ciparFile != null;
         
-        final Map<String,String> map = new HashMap<String,String>();
-        BufferedReader reader = null;
-        
-        try {
-            reader = new BufferedReader(new FileReader(ciparFile));
-            while (true) {
-                final String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                final String[] split = line.trim().split("[\\s+\\,\\;=]", 2);
-                if (split.length != 2) {
-                    throw new IOException("Wrong line format: " + line);
-                }
-                map.put(split[0], split[1]);
-            }
-        } finally {
-            if (reader != null) {
-                 reader.close();
-            }
-        }
-        
-        return map;
-    }
-    
     private static void copyMaster(final Master inmst, 
                                    final Master outmst) throws BrumaException {
         assert inmst != null;
@@ -266,26 +261,37 @@ public class Gizmo2Isis {
         for (Record rec : inmst) {
             outmst.writeRecord(rec);
             if (++tell % 50000 == 0) {
-                System.out.println("copying mfn=" + rec.getMfn());
+                System.out.println("gizmo/copying mfn=" + rec.getMfn());
             }
         }
     }
     
     private static void usage() {
-        System.err.println(
-                         "usage: Gizmo2Isis <gizmoFile> <outDir> [<confFile>]");
+        System.err.println("usage: Gizmo2Isis <gizmoFile> <inputDir> " + 
+           "<outputDir>" + "[-gizEncoding=<charset>] [-confFile=<path>]");
         System.exit(1);
     }
     
     public static void main(final String[] args) throws IOException, 
                                                         BrumaException {
 
-        if (args.length < 2) {
+        if (args.length < 3) {
             usage();
         }
-        final String confFile = (args.length > 2) ? args[2] : null;
-        apply(args[0], confFile, args[1]);
+        String gizEncoding = "UTF-8";
+        String confFile = null;
         
-        //apply("Gv8broken.giz", "config.txt", "other");
+        for (int idx = 3; idx < args.length; idx++) {
+            final String arg = args[idx];
+            
+            if (arg.startsWith("-gizEncoding=")) {
+                gizEncoding = arg.substring(13);                
+            } else if (arg.startsWith("-confFile=")) {
+                confFile = arg.substring(10);
+            } else {
+                usage();
+            }
+        }
+        apply(args[0], args[1], args[2], gizEncoding, confFile);
     }
 }

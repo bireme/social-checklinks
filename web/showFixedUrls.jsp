@@ -50,15 +50,19 @@
 
     //final String url = (String)session.getAttribute("url");
     final Set<IdUrl> fixed = (Set<IdUrl>)session.getAttribute("IdUrls");
-    final String url = (String)request.getParameter("url").replace(" ", "%20");
-    final String brokenUrl = request.getParameter("brokenUrl").replace(" ", "%20");
+    //final String url = URLDecoder.decode(request.getParameter("url"),CODEC).replace("%20", " ");
+    final String url = request.getParameter("url");
+    final String url_E = URLEncoder.encode(url, CODEC);
+    final String brokenUrl = request.getParameter("brokenUrl");
+    final String brokenUrl_E = URLEncoder.encode(brokenUrl, CODEC);
     final int fixedUrls = fixed.size();
     final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");
-    final int group = Integer.parseInt(request.getParameter("group"));
+    final int group = Integer.parseInt(request.getParameter("group"));   // fixed urls group
     final int lgroup = Integer.parseInt(request.getParameter("lgroup")); // list urls group
     final String id = request.getParameter("id");
     final String id2 = id.substring(0, id.lastIndexOf('_'));
+    final boolean undo = (request.getParameter("undo") != null);
     final int groupSize = 18;
     final int from = (group * groupSize);
     final int mod = (fixedUrls % groupSize);
@@ -141,9 +145,9 @@
         function confirmUndo(undoId) {
             if (confirm('<%=messages.getString("undo_confirm")%>')) {
                  postToUrl('<%=response.encodeRedirectURL("UndoFixServlet")%>', 
-                 {undoUrl:'<%=brokenUrl%>', group:'<%=group%>', lgroup:'<%=lgroup%>', 
-                  lang:'<%=lang%>', id:undoId, brokenUrl:'<%=brokenUrl%>',
-                  url:'<%=url%>', dbFilter:'<%=dbFilter%>',                     
+                 {undoUrl:'<%=brokenUrl_E%>', group:'<%=group%>', lgroup:'<%=lgroup%>', 
+                  lang:'<%=lang%>', id:undoId, brokenUrl:'<%=brokenUrl_E%>',
+                  url:'<%=url_E%>', dbFilter:'<%=dbFilter%>',                     
                   collCenterFilter:'<%=collCenterFilter%>', 
                   order:'<%=order%>'});
             } else {
@@ -200,7 +204,7 @@
                 <div class="breadcrumb"
                     <ul class="breadcrumb">
                         <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("list")%></a> <span class="divider">/</span></li>
-                        <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=id%>',group:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>',furl:'<%=url%>',url:'<%=brokenUrl%>'});"><%=messages.getString("edit")%></a> <span class="divider">/</span></li>
+                        <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=id%>',group:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>',furl:'<%=url_E%>',url:'<%=brokenUrl_E%>'});"><%=messages.getString("edit")%></a> <span class="divider">/</span></li>
                         <li class="active"><%=messages.getString("show_changed")%></li>
                     </ul>     
                 </div>
@@ -209,7 +213,11 @@
                     <div class="urlLine">
                         <div class="seg-q">
                             <div class="URL-tested">ID: <a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id2%>"><%=id2%></a></div>
-                            <div class="URL-tested">URL: <a target="_blank" href="<%=brokenUrl%>"><%=brokenUrl%></a>  &#8594; <a target="_blank" href="<%=url%>"><%=url%></a></div>
+                            <%if(undo) {%>
+                               <div class="URL-tested">URL: <a target="_blank" href="<%=url_E%>"><%=url.replace("%20", " ")%></a>  &#8594; <a target="_blank" href="<%=brokenUrl_E%>"><%=brokenUrl.replace("%20", " ")%></a></div>
+                            <%} else {%>
+                                <div class="URL-tested">URL: <a target="_blank" href="<%=brokenUrl_E%>"><%=brokenUrl.replace("%20", " ")%></a>  &#8594; <a target="_blank" href="<%=url_E%>"><%=url.replace("%20", " ")%></a></div>
+                            <%}%>
                         </div>
                     </div>
                     <p><%=fixedUrls%> <%=messages.getString("urls_were_affected")%></p>
@@ -232,13 +240,14 @@
                                 for (IdUrl iu : fixedX) {
                                     //final String nurl_E = URLEncoder.encode(iu.url, CODEC);
                                     final String xid = iu.id.substring(0,iu.id.indexOf("_"));
+                                    final String url_D = iu.url.trim().replace("%20", " ");
                                     boolean first = true;                                                                                       
                                 %>
                                     <tr>                                    
                                         <td><%=cur%></td>
                                         <td><%=iu.mst%></td>
                                         <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=xid%>"><%=xid%></a></td>
-                                        <td><a target="_blank" href="<%=iu.url%>" title="<%=iu.url.trim()%> ->"><%=iu.url.trim()%></a></td>  
+                                        <td><a target="_blank" href="<%=iu.url%>" title="<%=url_D%> ->"><%=url_D%></a></td>  
                                         <td>
                                         <%
                                         for (String cc : iu.ccs) {
@@ -264,7 +273,7 @@
                             </tbody>
                         </table>                
                     <% } %>
-                    <p align="right"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});" class="btn btn-primary btn-small"><%=messages.getString("more_broken_links")%></a></p>
+                    <p align="right"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});" class="btn btn-primary btn-small"><%=messages.getString("more_broken_links")%></a></p>
                     
                     <% if (fixedUrls > groupSize) { %>
                         <div class="accordion">

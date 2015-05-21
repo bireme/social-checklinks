@@ -274,8 +274,8 @@ public class CheckUrl {
     }
 
     public static void main(final String[] args) {
-        final String url =  "http://citrus.uspnet.usp.br/eef/uploads/arquivo/v17 n1 artigo1.pdf";     // 200 error code
-        final String url2 = "http://citrus.uspnet.usp.br/eef/uploads/arquivo/v17%20n1%20artigo1.pdf"; // 404 error code 
+        final String url =  "http://citrus.uspnet.usp.br/eef/uploads/arquivo/v17 n1 artigo1.pdf";     // 404 error code
+        final String url2 = "http://citrus.uspnet.usp.br/eef/uploads/arquivo/v17%20n1%20artigo1.pdf"; // 200 error code 
 
         if (args.length != 1) {
              usage();

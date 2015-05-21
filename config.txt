@@ -1,1 +1,1 @@
-LILACS|serverabd2.bireme.br|transfer|/home/lilacs/www/bases/lildbi/dbcertif/lilacs|'d*' if p(v8) then '<2>'v2'</2>',('<8>'v8'</8>') else 'd.' fi|lil
+LILACS|serverabd2.bireme.br|transfer|/home/lilacs/www/bases/lildbi/dbcertif/lilacs|'d*' if p(v8) then '<2>'v2'</2>',('<8>'v8'</8>') else 'd.' fi|lil|IBM850

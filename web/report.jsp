@@ -419,7 +419,9 @@
                         int cur = from + 1;
                         for (Element xelem : sr.documents) {
                             final String furl = xelem.getFurl();
+                            final String furl_D = furl.replace("%20", " ");
                             final String burl = xelem.getBurl();
+                            final String burl_D = burl.replace("%20", " ");
                             final String id = xelem.getId()
                                        .substring(0, xelem.getId().indexOf('_'));
                         %>                        
@@ -428,10 +430,10 @@
                                 <td><%=xelem.getDbase()%></td>
                                 <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>"><%=id%></a></td>                                    
                                 <td><a target="_blank" href="<%=furl%>" 
-                                       title="<%=burl%> &#8594; <%=furl%>">
+                                       title="<%=burl_D%> &#8594; <%=furl_D%>">
                                        <%= 
-                                     (furl.length() > 60) ? furl.substring(0,60) + " ..."
-                                                          : furl
+                                     (furl_D.length() > 60) ? furl_D.substring(0,60) + " ..."
+                                                          : furl_D
                                      %>
                                     </a>
                                 </td>                                  

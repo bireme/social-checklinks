@@ -53,7 +53,7 @@ if [ -s Gv8broken.giz ]; then
     tar -czpvf history/Gv8broken_${NOW}.tgz Gv8broken.giz
 fi
 
-while IFS="|" read db server user path proc lilG4
+while IFS="|" read db server user path proc lilG4 encoding
 do
     echo "Transfere a base $db de $server:$path/$db.{mst,xrf} para o diretorio corrente"
     scp -p $user@$server:$path/$db.{mst,xrf} .
@@ -73,7 +73,7 @@ done < config.txt
 
 if [ -s Gv8broken.giz ]; then
     echo "Executa gizmo nas bases de dados se gizmo nao vazio"
-    sh/gizmo2Isis.sh Gv8broken.giz other
+    sh/gizmo2Isis.sh Gv8broken.giz . other -confFile=config.txt
     if [ $? -ne 0 ]; then
         sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Executa gizmo nas bases de dados." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
         exit 1
@@ -84,7 +84,7 @@ if [ -s Gv8broken.giz ]; then
     mv other/*.{mst,xrf} .
 fi
 
-while IFS="|" read db server user path proc lilG4
+while IFS="|" read db server user path proc lilG4 encoding
 do
     echo "Transfere a base compactada ${db}.tgz original para local de origem"
     scp -p ${db}_${NOW}.tgz $user@$server:$path
@@ -104,7 +104,7 @@ done < config.txt
 
 clearcol="--clearColl"
 
-while IFS="|" read db server user path proc lilG4
+while IFS="|" read db server user path proc lilG4 encoding
 do
     echo "Inicia processo de checagem de links da base $db"
     /usr/local/bireme/java/FisChecker/genv8notfound.sh $db $lilG4

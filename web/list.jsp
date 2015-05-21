@@ -54,29 +54,35 @@
     final Set<String> centerIds = (Set<String>)session.getAttribute("centerIds");
         
     String dbFilter = request.getParameter("dbFilter");
-    dbFilter = "null".equals(dbFilter) ? null : dbFilter;
+    dbFilter = "null".equals(dbFilter) ? null : (dbFilter == null) ? null 
+                                                               :dbFilter.trim();
     
     String idFilter = request.getParameter("idFilter");
-    idFilter = "null".equals(idFilter) ? null : idFilter;
+    idFilter = "null".equals(idFilter) ? null : (idFilter == null) ? null 
+                                                               :idFilter.trim();
     
     String urlFilter = request.getParameter("urlFilter");
-    urlFilter = "null".equals(urlFilter) ? null : urlFilter;
+    urlFilter = "null".equals(urlFilter) ? null : (urlFilter == null) ? null 
+                                                             : urlFilter.trim();
     
     String collCenterFilter = request.getParameter("collCenterFilter");
-    collCenterFilter = "null".equals(collCenterFilter) ? null : collCenterFilter;
+    collCenterFilter = "null".equals(collCenterFilter) ? null 
+                       : (collCenterFilter == null) ? null 
+                                                    : collCenterFilter.trim();
     
     String sgroup = request.getParameter("group");
     int group = ((sgroup == null) || "null".equals(sgroup)) ? 0 
                                                      : Integer.parseInt(sgroup);
 
     String order = request.getParameter("order");
-    order = "null".equals(order) ? "descending" : order;
+    order = "null".equals(order) ? "descending" : (order == null) ? null
+                                                                 : order.trim();
     
     final int groupSize = 18;
     
     final Set<String> collCenterSet;
     if (collCenterFilter == null) {
-        collCenterSet = centerIds;        
+        collCenterSet = centerIds.contains("BR1.1") ? null : centerIds;        
     } else {
         collCenterSet = new HashSet<String>();
         collCenterSet.add(collCenterFilter);
@@ -348,7 +354,7 @@
                             <%
                             int cur = from + 1;
                             for (IdUrl iu : lst) {
-                                final String nurl = iu.url;
+                                final String nurl = iu.url.trim().replace("%20", " ");
                                 final String id = iu.id.substring(0,iu.id.indexOf("_"));
                                 boolean first = true;                                                                                    
                             %>
@@ -356,7 +362,7 @@
                                     <td><%=cur%></td>
                                     <td><%=iu.mst%></td>
                                     <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>"><%=id%></a></td>                                    
-                                    <td><a target="_blank" href="<%=iu.url%>"><%=Tools.limitString(iu.url.trim(),100)%></a></td>  
+                                    <td><a target="_blank" href="<%=iu.url%>"><%=Tools.limitString(nurl,100)%></a></td>  
                                     <td>
                                     <%
                                     for (String cc : iu.ccs) {

@@ -168,7 +168,7 @@ public class MongoOperations {
             for (String centerId : centerIds) {
                 cclst.add(centerId);
             }
-            BasicDBObject in = new BasicDBObject("$in", cclst);
+            final BasicDBObject in = new BasicDBObject("$in", cclst);
             final BasicDBObject query = new BasicDBObject(CENTER_FIELD, in);
             //final DBCursor cursor = coll.find(query).skip(from - 1).limit(count);
             final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
@@ -235,7 +235,7 @@ public class MongoOperations {
             query.append(MST_FIELD, docMast);
         }
         if (docId != null) {
-            final Pattern pat = Pattern.compile(docId.trim() + "_\\d+");
+            final Pattern pat = Pattern.compile("^" + docId.trim() + "_\\d+");
             query.append(ID_FIELD, pat);
         }
         if (docUrl != null) {
@@ -302,7 +302,8 @@ public class MongoOperations {
         }
         
         if (elem.getId() != null) {
-            final Pattern pat = Pattern.compile(elem.getId().trim() + "_\\d+");
+            final Pattern pat = Pattern.compile("^" + elem.getId().trim() 
+                                                                     + "_\\d+");
             query.append(ID_FIELD, pat);
         }
         
@@ -405,6 +406,10 @@ public class MongoOperations {
         }
         if (user == null) {
             throw new NullPointerException("user");
+        }
+        if (fixedUrl.length() >= 900) {
+            throw new IOException("fixedUrl is too long >= 900. [" + fixedUrl 
+                                                                         + "]");
         }
 
         final BasicDBObject query = new BasicDBObject(ID_FIELD, docId);

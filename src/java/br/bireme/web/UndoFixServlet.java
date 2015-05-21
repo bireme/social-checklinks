@@ -87,8 +87,8 @@ public class UndoFixServlet extends HttpServlet {
         session.setAttribute("IdUrls", nfixed);
         response.sendRedirect(response.encodeRedirectURL(
                    "showFixedUrls.jsp?group=" + group + "&lgroup=" + lgroup 
-                  + "&lang=" + lang + "&id=" + id + "&brokenUrl=" + url
-                  + "&url=" + brokenUrl));
+                  + "&lang=" + lang + "&id=" + id + "&brokenUrl=" + brokenUrl
+                  + "&url=" + url + "&undo=true"));
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

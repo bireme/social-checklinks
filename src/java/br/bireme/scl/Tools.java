@@ -82,7 +82,7 @@ public class Tools {
         assert inStr != null;
 
         final String out = inStr.replaceAll(
-                    "([\\^\\$\\\\?\\+\\*\\{\\}\\(\\)\\|\\&])", "\\\\$1");
+                    "([\\^\\$\\\\?\\+\\*\\{\\}\\(\\)\\|\\&\\-\\%])", "\\\\$1");
         return out;
     }
 

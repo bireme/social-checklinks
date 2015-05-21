@@ -140,8 +140,9 @@ public class AuthenticationServlet extends HttpServlet {
                     auxCenterIds.add(auth.getColCenter(user)); // cc may not belong to a net (it not appear in centerIds)
                     final DBCollection coll = (DBCollection)context
                                                     .getAttribute("collection");
-                    final Set<String> centerIds = 
-                         MongoOperations.filterCenterFields(coll, auxCenterIds);
+                    final Set<String> centerIds = auxCenterIds.contains("BR1.1") 
+                       ? MongoOperations.getCenters(coll)
+                       : MongoOperations.filterCenterFields(coll, auxCenterIds);
                     session.setAttribute("user", username); // Login user.
                     session.setAttribute("centerIds", centerIds);   
                     dispatcher = context.getRequestDispatcher(
