@@ -31,6 +31,7 @@ import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
 import static br.bireme.scl.BrokenLinks.MSG_FIELD;
+import static br.bireme.scl.BrokenLinks.PRETTY_BROKEN_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -91,6 +92,7 @@ public class MongoOperations {
     public static final String AUTO_FIX_FIELD = "autofix";
     public static final String EXPORTED_FIELD = "exported";
     public static final String MST_FIELD = "mst";
+    public static final String CODEC = "UTF-8";
 
     public static Set<String> getCenters(final DBCollection coll) {
         if (coll == null) {
@@ -134,12 +136,12 @@ public class MongoOperations {
      * @param ascendingOrder se retorna por ordem de data ascendente ou descendente
      * @return lista de objetos IdUrl
      */
-    public static List<IdUrl> getCenterUrls(final DBCollection coll,
-                                            final Set<String> centerIds,
-                                            final String filter,
-                                            final int from,
-                                            final int count,
-                                            final boolean ascendingOrder) {
+    private static List<IdUrl> getCenterUrls(final DBCollection coll,
+                                             final Set<String> centerIds,
+                                             final String filter,
+                                             final int from,
+                                             final int count,
+                                             final boolean ascendingOrder) {
         if (coll == null) {
             throw new NullPointerException("coll");
         }
@@ -181,8 +183,9 @@ public class MongoOperations {
                 for (Object cc : ccsLst) {
                     ccs.add((String)cc);
                 }
+
                 final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
-                                           (String)doc.get(BROKEN_URL_FIELD),
+                                       (String)doc.get(PRETTY_BROKEN_URL_FIELD),
                                            ccs,
                                     format.format((Date)(doc.get(DATE_FIELD))),
                                            (String)doc.get(MST_FIELD));
@@ -198,13 +201,13 @@ public class MongoOperations {
                 final DBObject doc = cursor.next();
                 final Set<String> ccs = new TreeSet<String>();
                 ccs.add(filter);
+
                 final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
-                                           (String)doc.get(BROKEN_URL_FIELD),
+                                        (String)doc.get(PRETTY_BROKEN_URL_FIELD),
                                            ccs,
                                       format.format((Date)doc.get(DATE_FIELD)),
                                            (String)doc.get(MST_FIELD));
-                lst.add(iu);
-                
+                lst.add(iu);                
             }
             cursor.close();
         }
@@ -264,12 +267,12 @@ public class MongoOperations {
                 ccs.add((String)cc);
             }
             final IdUrl iu = new IdUrl((String)doc.get(ID_FIELD),
-                                       (String)doc.get(BROKEN_URL_FIELD),
+                                       (String)doc.get(PRETTY_BROKEN_URL_FIELD),
                                        ccs,
                                      format.format((Date)(doc.get(DATE_FIELD))),
                                        (String)doc.get(MST_FIELD));
             lst.add(iu);                 
-        }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
         cursor.close();
         
         return new SearchResult(size, lst);
@@ -352,6 +355,7 @@ public class MongoOperations {
             final List<String> ccs = Arrays.asList(ccLst.toArray(new String[0]));
             final Element elem2 = new Element(hdoc.getString(ID_FIELD),
                        hcurdoc.getString(BROKEN_URL_FIELD),
+                       hcurdoc.getString(PRETTY_BROKEN_URL_FIELD),
                        hcurdoc.getString(FIXED_URL_FIELD),
                        hdoc.getString(MST_FIELD),
                        format.format((Date)(hcurdoc.get(LAST_UPDATE_FIELD))),                                          
@@ -432,9 +436,14 @@ public class MongoOperations {
             lsthdoc = (BasicDBList)hdoc.get(ELEM_LST_FIELD);
         }
         
+        final String brokenUrl = doc.getString(BROKEN_URL_FIELD);
+        final String brokenUrl_D = EncDecUrl.decodeUrl(brokenUrl);
+        final String fixedUrl_E = EncDecUrl.encodeUrl(fixedUrl, CODEC, false);
+        //final String fixedUrl_D = EncDecUrl.decodeUrl(fixedUrl);
         final BasicDBObject hcurdoc = new BasicDBObject();
-        hcurdoc.append(BROKEN_URL_FIELD, (String)doc.get(BROKEN_URL_FIELD))
-               .append(FIXED_URL_FIELD, fixedUrl)
+        hcurdoc.append(BROKEN_URL_FIELD, brokenUrl)               
+               .append(PRETTY_BROKEN_URL_FIELD, brokenUrl_D)
+               .append(FIXED_URL_FIELD, fixedUrl_E)
                .append(MSG_FIELD, (String)doc.get(MSG_FIELD))
                .append(CENTER_FIELD, (BasicDBList)doc.get(CENTER_FIELD))               
                .append(AUTO_FIX_FIELD, automatic)
@@ -484,6 +493,7 @@ public class MongoOperations {
         doc.put(MST_FIELD, hdoc.get(MST_FIELD));
         doc.put(ID_FIELD, docId);
         doc.put(BROKEN_URL_FIELD, hcurdoc.get(BROKEN_URL_FIELD));
+        doc.put(PRETTY_BROKEN_URL_FIELD, hcurdoc.get(PRETTY_BROKEN_URL_FIELD));
         doc.put(MSG_FIELD, hcurdoc.get(MSG_FIELD));
         doc.put(CENTER_FIELD, hcurdoc.get(CENTER_FIELD));    
         
@@ -537,6 +547,7 @@ public class MongoOperations {
             doc.put(MST_FIELD, hdoc.get(MST_FIELD));
             doc.put(ID_FIELD, hdoc.get(ID_FIELD));
             doc.put(BROKEN_URL_FIELD, hcurdoc.get(BROKEN_URL_FIELD));
+            doc.put(PRETTY_BROKEN_URL_FIELD, hcurdoc.get(PRETTY_BROKEN_URL_FIELD));
             doc.put(MSG_FIELD, hcurdoc.get(MSG_FIELD));
             doc.put(CENTER_FIELD, hcurdoc.get(CENTER_FIELD));    
 
@@ -590,16 +601,19 @@ public class MongoOperations {
         if (id == null) {
             throw new NullPointerException("id");
         }
-        final Set<IdUrl> ret = new HashSet<IdUrl>();
-        final String[] patterns = Tools.getPatterns(brokenUrl, fixedUrl);
+        final Set<IdUrl> ret = new HashSet<IdUrl>();        
+        final String brokenUrl_D = EncDecUrl.decodeUrl(brokenUrl);
+        final String fixedUrl_D = EncDecUrl.decodeUrl(fixedUrl);
+        final String fixedUrl_E = EncDecUrl.encodeUrl(fixedUrl, CODEC, false);
+        final String[] patterns = Tools.getPatterns(brokenUrl_D, fixedUrl_D);
         
-        if ((brokenUrl.equals(fixedUrl)) || (patterns[0].equals("^"))) {
-            if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl))) {
+        if ((brokenUrl_D.equals(fixedUrl_D)) || (patterns[0].equals("^"))) {
+            if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl_E))) {
                 final Set<IdUrl> docs = 
                         getDocsWith(coll, centerIds, filter, 
-                                                  Tools.escapeChars(brokenUrl));
+                                                Tools.escapeChars(brokenUrl_D));
                 for (IdUrl iu : docs) {
-                    if (iu.url.equals(brokenUrl)) {
+                    if (iu.url.equals(brokenUrl_D)) {
                         IdUrl iu2 = new IdUrl(iu.id, fixedUrl, iu.ccs, iu.since, 
                                                                         iu.mst); 
                         ret.add(iu2);
@@ -637,7 +651,7 @@ public class MongoOperations {
                     for (IdUrl iu : map.get(inurls[idx])) {                    
                         ret.add(iu);
                         if (!updateDocument(coll, hcoll, iu.id, iu.url, user,
-                                                    !fixedUrl.equals(iu.url))) {
+                                                  !fixedUrl_D.equals(iu.url))) {
                             throw new IOException(
                                        "could not update document id=" + iu.id);
                         }

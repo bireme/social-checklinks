@@ -36,6 +36,11 @@ rm out gout
 echo "Espera 5 minutos para garantir o termino de todas as correcoes iniciadas"
 sleep 5m
 
+echo "Cria backup da base SocialCheckLinks no mongodb"
+bin/mongoexport --host mongodb.bireme.br --db SocialCheckLinks --collection BrokenLinks --out BrokenLinks.bck
+bin/mongoexport --host mongodb.bireme.br --db SocialCheckLinks --collection HistoryBrokenLinks --out HistoryBrokenLinks.bck
+tar -cvzpf --remove-files history/MongoDb_${NOW}.tgz BrokenLinks.bck HistoryBrokenLinks.bck
+
 echo "Apaga gizmo anterior"
 if [ -e Gv8broken.giz ]; then
     rm Gv8broken.giz

@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class IdUrl implements Comparable<IdUrl>, Serializable {
     public final String id;         // LILACS & Mongo
-    public final String url;        // main url
+    public final String url;        // main url (decoded)
     public final Set<String> ccs;   // Collaboration Centers
     public final String since;      // document creation date
     public final String mst;        // database from where it comes

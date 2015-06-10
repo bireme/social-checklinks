@@ -22,12 +22,11 @@
 
 package br.bireme.web;
 
+import br.bireme.scl.EncDecUrl;
 import br.bireme.scl.IdUrl;
 import br.bireme.scl.MongoOperations;
 import com.mongodb.DBCollection;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -69,12 +68,12 @@ public class CheckManyLinksServlet extends HttpServlet {
         final String user = (String)session.getAttribute("user");
         final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");         
-        final String brokenUrl = request.getParameter("url").replace("%20", " ");
-        final String brokenUrl_E = URLEncoder.encode(brokenUrl, CODEC);        
-        final String brokenUrl_E1 = brokenUrl.replace(" ", "%20");
-        final String fixedUrl = request.getParameter("furl").replace("%20", " ");
-        final String fixedUrl_E = URLEncoder.encode(fixedUrl, CODEC);        
-        final String fixedUrl_E1 = fixedUrl.replace(" ", "%20");
+        final String brokenUrl = request.getParameter("url");        
+        final String brokenUrl_E = EncDecUrl.encodeUrl(brokenUrl, CODEC, true);        
+        final String brokenUrl_D = EncDecUrl.decodeUrl(brokenUrl);
+        final String fixedUrl = request.getParameter("furl");
+        final String fixedUrl_E = EncDecUrl.encodeUrl(fixedUrl, CODEC, true);
+        final String fixedUrl_D = EncDecUrl.decodeUrl(fixedUrl);
         final String lang = request.getParameter("lang");
         final String group = request.getParameter("group");
         final String id = request.getParameter("id");
@@ -87,15 +86,7 @@ public class CheckManyLinksServlet extends HttpServlet {
         final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;    
         
         final Set<IdUrl> fixed_E = MongoOperations.fixRelatedUrls(coll, hcoll,
-                user, centerIds, collCenterFilter, brokenUrl_E1, fixedUrl_E1, id);
-        final Set<IdUrl> fixed = new HashSet<IdUrl>();
-        
-        /*
-        for (IdUrl idu : fixed_E) {
-            fixed.add(new IdUrl(idu.id, idu.url.replace("%20", " "), idu.ccs,
-                                idu.since, idu.mst));
-        }
-        */
+                user, centerIds, collCenterFilter, brokenUrl_D, fixedUrl_D, id);
         
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
                 "/showFixedUrls.jsp?group=0&lgroup=" + group 

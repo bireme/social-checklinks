@@ -297,6 +297,27 @@ public class Tools {
         return ret;
     }
     
+    /**
+     * Removes from url patterns %xx not allowed by enc/decoding rules
+     * @param in input string
+     * @return string with bad patterns removed from original string
+     */
+    public static String badUrlFix(final String in) {
+        if (in == null) {
+            throw new NullPointerException("in");
+        }
+        final Matcher mat = Pattern.compile(
+                    "(%([^0-9a-fA-F]|[0-9a-fA-F][^0-9a-fA-F]))").matcher(in);        
+        final StringBuffer sb = new StringBuffer();
+ 
+        while (mat.find()) {
+            mat.appendReplacement(sb, "");
+        }
+        mat.appendTail(sb);
+        
+        return sb.toString();
+    }
+    
     public static void main(final String[] args) {
         String[] result;
 

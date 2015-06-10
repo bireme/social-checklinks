@@ -56,7 +56,7 @@ import java.util.Set;
  * date 20130625
  */
 public class BrokenLinks {
-    public static final String VERSION = "0.6";
+    public static final String VERSION = "0.7";
     public static final String VERSION_DATE = "2015";
 
     /* MongoDb settings */
@@ -77,6 +77,7 @@ public class BrokenLinks {
     public static final String ID_FIELD = "_id";
     public static final String CENTER_FIELD = "center";
     public static final String BROKEN_URL_FIELD = "burl";
+    public static final String PRETTY_BROKEN_URL_FIELD = "pburl";
     public static final String FIXED_URL_FIELD = "furl";
     public static final String HISTORY_URL_FIELD = "hurl";
     public static final String MSG_FIELD = "msg";
@@ -231,9 +232,10 @@ public class BrokenLinks {
                         throw new IOException("id[" + split[0] + "] not found");
                     }
                     
-                    //final String url_e = split[1].replace(" ", "%20");
+                    final String url_e = 
+                              EncDecUrl.encodeUrl(split[1], outEncoding, false);
                     
-                    saveRecord(mName, id, split[1], 
+                    saveRecord(mName, id, url_e, 
                                      split[2], urlTag, tags, mst, coll, occMap);
                 }
                 if (++tell % 5000 == 0) {
@@ -429,8 +431,7 @@ public class BrokenLinks {
             return false;
         }
 
-        final BasicDBObject query = new BasicDBObject(ID_FIELD,
-                                                            id + "_" + occ);
+        final BasicDBObject query = new BasicDBObject(ID_FIELD, id + "_" + occ);
         final BasicDBObject obj = (BasicDBObject) coll.findOne(query);            
         if (obj == null) {
             date = now;
@@ -446,15 +447,18 @@ public class BrokenLinks {
                 date = obj.getDate(DATE_FIELD);
             }
         }
-        final String url_e = url.replace(" ", "%20");
-        final String url_e_l = (url_e.length() >= 900) 
-                                    ? url_e.substring(0, 900) + "..." : url_e;
+        final String url_d = EncDecUrl.decodeUrl(url);
+        final String url_d_l = (url_d.length() >= 900) 
+                                    ? url_d.substring(0, 900) + "..." : url_d;
+        final String url_l = (url.length() > 900)
+                                    ? url.substring(0, 900) + "..." : url;
         final BasicDBObject doc = new BasicDBObject();        
         doc.put(DATE_FIELD, date);
         doc.put(LAST_UPDATE_FIELD, now);
         doc.put(MST_FIELD, mstName);
         doc.put(ID_FIELD, id + "_" + occ);
-        doc.put(BROKEN_URL_FIELD, url_e_l);
+        doc.put(BROKEN_URL_FIELD, url_l);
+        doc.put(PRETTY_BROKEN_URL_FIELD, url_d_l);
         doc.put(MSG_FIELD, err);
         doc.put(CENTER_FIELD, getCCS(rec, ccsFlds));        
 
@@ -465,43 +469,53 @@ public class BrokenLinks {
 
     private static int nextOcc(final String url,
                                final List<Field> urls,
-                               final Map<String,Integer> fldMap) 
-                                                         throws BrumaException {
+                               final Map<String,Integer> fldMap) {
         assert url != null;
         assert urls != null;
         assert fldMap != null;
+        
+        int ret;      // possible not used occurrence
+        
+        try {
+            final String url_D = EncDecUrl.decodeUrl(url.trim());
 
-        Integer curOcc = fldMap.get(url.trim()); // bits indicating used occs
-        if (curOcc == null) {
-            curOcc = 0;
-            fldMap.put(url.trim(), curOcc);
-        }
-        
-        int val = 1;      // current check bit position
-        int ret = 1;      // possible not used occurrence
-        boolean found = false;
-        
-        outter : for (Field fld : urls) {
-            for (Subfield sub : fld.getSubfields()) {
-                if (url.trim().equals(sub.getContent().trim())) {
-                    if ((curOcc & val) == 0) { // found not used occurrence
-                        curOcc |= val;
-                        fldMap.put(url, curOcc);
-                        found = true;
-                        break outter;
-                    }
-                }    
+            Integer curOcc = fldMap.get(url_D); // bits indicating used occs
+            if (curOcc == null) {
+                curOcc = 0;
+                fldMap.put(url_D, curOcc);
             }
-            if (val > Integer.MAX_VALUE / 2) {  // all positions already used
+
+            int val = 1;      // current check bit position        
+            boolean found = false;
+
+            ret = 1;      // possible not used occurrence
+            outter : for (Field fld : urls) {
+                for (Subfield sub : fld.getSubfields()) {
+                    final String sfldUrl_D = 
+                                   EncDecUrl.decodeUrl(sub.getContent().trim());
+                    if (url_D.equals(sfldUrl_D)) {
+                        if ((curOcc & val) == 0) { // found not used occurrence
+                            curOcc |= val;
+                            fldMap.put(url_D, curOcc);
+                            found = true;
+                            break outter;
+                        }
+                    }    
+                }
+                if (val > Integer.MAX_VALUE / 2) {  // all positions already used
+                    ret = -1;
+                    break;
+                }
+                val *= 2; // go to the next bit position
+                ret++;
+            }      
+            if (!found) {
                 ret = -1;
-                break;
             }
-            val *= 2; // go to the next bit position
-            ret++;
-        }      
-        if (!found) {
+        } catch(Exception ex) {
             ret = -1;
         }
+        
         return ret;
     }
     

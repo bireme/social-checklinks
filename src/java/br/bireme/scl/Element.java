@@ -34,6 +34,7 @@ import java.util.List;
 public class Element {   
     private final String id;
     private final String burl;
+    private final String pburl;
     private final String furl;
     private final String dbase;
     private final String date;
@@ -44,6 +45,7 @@ public class Element {
 
     public Element(final String id, 
                    final String burl, 
+                   final String pburl, 
                    final String furl, 
                    final String dbase, 
                    final String date,
@@ -52,6 +54,7 @@ public class Element {
                    final boolean exported) {
         this.id = id;
         this.burl = burl;
+        this.pburl = pburl;
         this.furl = furl;
         this.dbase = dbase;
         this.user = user;
@@ -69,6 +72,10 @@ public class Element {
         return burl;
     }
 
+    public String getPBurl() {
+        return pburl;
+    }
+    
     public String getFurl() {
         return furl;
     }
@@ -108,6 +115,8 @@ public class Element {
         builder.append(id);
         builder.append("\nburl=");
         builder.append(burl);
+        builder.append("\npburl=");
+        builder.append(pburl);
         builder.append("\nfurl=");
         builder.append(furl);
         builder.append("\nccs=");

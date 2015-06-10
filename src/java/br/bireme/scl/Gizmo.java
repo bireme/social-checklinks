@@ -29,6 +29,7 @@ import static br.bireme.scl.BrokenLinks.FIXED_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
+import static br.bireme.scl.BrokenLinks.PRETTY_BROKEN_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
 import static br.bireme.scl.MongoOperations.EXPORTED_FIELD;
 import static br.bireme.scl.MongoOperations.MST_FIELD;
@@ -104,6 +105,7 @@ public class Gizmo {
             if (!lelem.getBoolean(EXPORTED_FIELD)) {
                 final Element elem = new Element(id,
                                      lelem.getString(BROKEN_URL_FIELD),
+                                     lelem.getString(PRETTY_BROKEN_URL_FIELD),
                                      lelem.getString(FIXED_URL_FIELD),
                                      obj.getString(MST_FIELD),
                                      lelem.getDate(LAST_UPDATE_FIELD).toString(),

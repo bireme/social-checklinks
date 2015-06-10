@@ -23,8 +23,8 @@
 package br.bireme.web;
 
 import br.bireme.scl.CheckUrl;
+import br.bireme.scl.EncDecUrl;
 import java.io.IOException;
-import java.net.URLEncoder;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -56,11 +56,11 @@ public class CheckOneLinkServlet extends HttpServlet {
         request.setCharacterEncoding(CODEC);
         
         final String id = request.getParameter("id");
-        final String url = request.getParameter("url").replace("%20", " ");
-        final String url_E = URLEncoder.encode(url, CODEC);        
-        final String furl = request.getParameter("furl").trim().replace("%20", " ");
-        final String furl_E1 = furl.replace(" ", "%20");
-        final String furl_E2 = URLEncoder.encode(furl, CODEC);
+        final String url_E = EncDecUrl.encodeUrl(request.getParameter("url"), 
+                                                                   CODEC, true);
+        final String furl = request.getParameter("furl").trim();
+        final String furl_E1 = EncDecUrl.encodeUrl(furl, CODEC, false);
+        final String furl_E2 = EncDecUrl.encodeUrl(furl, CODEC, true);
         final String lang = request.getParameter("lang");
         final String group = request.getParameter("group");
         final String collCenterFilter = request.getParameter("collCenterFilter");
