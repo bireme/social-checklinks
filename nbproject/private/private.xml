@@ -3,22 +3,7 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/ShowFixedLinks.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/IdUrl.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/accounts/Authentication.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/web/report.jsp</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/MongoOperations.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/tmp/AddPrettyField.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/Gizmo2Isis.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/web/editRecord.jsp</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/sh/SocialCheckLinks.sh</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/UndoUpdate.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/BrokenLinks.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/sh/backupMongoDb.sh</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/web/list.jsp</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/Gizmo.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/Element.java</file>
-            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/web/index.jsp</file>
+            <file>file:/home/heitor/Projetos/SocialCheckLinks/social-checklinks/src/java/br/bireme/scl/JoinTitle.java</file>
         </group>
     </open-files>
 </project-private>

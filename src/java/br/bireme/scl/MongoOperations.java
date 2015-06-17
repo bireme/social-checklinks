@@ -302,18 +302,15 @@ public class MongoOperations {
         
         if (elem.getDbase() != null) {
             query.append(MST_FIELD, elem.getDbase().trim());
-        }
-        
+        }        
         if (elem.getId() != null) {
             final Pattern pat = Pattern.compile("^" + elem.getId().trim() 
                                                                      + "_\\d+");
             query.append(ID_FIELD, pat);
-        }
-        
+        }        
         if (elem.getFurl() != null) {
             query.append(root + FIXED_URL_FIELD, elem.getFurl().trim());
-        }
-        
+        }        
         if (!elem.getCcs().isEmpty()) {
             final BasicDBList cclst = new BasicDBList();
             for (String centerId : elem.getCcs()) {
@@ -322,16 +319,13 @@ public class MongoOperations {
             final String cc = root + CENTER_FIELD;
             final BasicDBObject in = new BasicDBObject("$in", cclst);        
             query.append(cc, in);
-        }
-        
-        if (elem.getDate() != null) {
-            
+        }        
+        if (elem.getDate() != null) {            
             final SimpleDateFormat simple = new SimpleDateFormat("dd-MM-yyyy");
             final Date date = simple.parse(elem.getDate().trim());
             final BasicDBObject qdate = new BasicDBObject("$gte", date);                        
             query.append(updated, qdate);
-        }
-        
+        }        
         if (elem.getUser() != null) {
             final String user = root + USER_FIELD;
             query.append(user, elem.getUser().trim());
@@ -341,8 +335,7 @@ public class MongoOperations {
         final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
                                                                   .limit(count); 
         final int size = cursor.count();
-        final SimpleDateFormat format = 
-                                    new SimpleDateFormat("dd-MM-yyyy");
+        final SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
         
         while (cursor.hasNext()) {
             final BasicDBObject hdoc = (BasicDBObject)cursor.next();                        

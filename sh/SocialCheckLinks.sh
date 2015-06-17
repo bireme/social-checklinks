@@ -39,7 +39,7 @@ sleep 5m
 echo "Cria backup da base SocialCheckLinks no mongodb"
 bin/mongoexport --host mongodb.bireme.br --db SocialCheckLinks --collection BrokenLinks --out BrokenLinks.bck
 bin/mongoexport --host mongodb.bireme.br --db SocialCheckLinks --collection HistoryBrokenLinks --out HistoryBrokenLinks.bck
-tar -cvzpf --remove-files history/MongoDb_${NOW}.tgz BrokenLinks.bck HistoryBrokenLinks.bck
+tar --remove-files -cvzpf history/MongoDb_${NOW}.tgz BrokenLinks.bck HistoryBrokenLinks.bck
 
 echo "Apaga gizmo anterior"
 if [ -e Gv8broken.giz ]; then
@@ -84,6 +84,20 @@ if [ -s Gv8broken.giz ]; then
         exit 1
     fi
 
+    if [ -s other/LILACS.mst ]; then
+        echo "Transfere a base title de /home/lilacs/update/title/ para o diretorio corrente"
+        scp -p transfer@serverabd:/home/lilacs/update/title/title.{mst,xrf} .
+        if [ $? -ne 0 ]; then
+            sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base title de transfer@serverabd:/home/lilacs/update/title/title para o diretorio corrente." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+            exit 1
+        fi
+        
+        echo "Traz campo 430 da title para LILACS -> LILACSe"
+        sh/joinTitle.sh title 150 930 other/LILACS 30 931 other/LILACSe --inEncoding=ISO-8859-1
+
+        rm title.{mst,xrf}
+    fi
+
     echo "Move bases de dados"
     rm *.{mst,xrf}
     mv other/*.{mst,xrf} .
@@ -106,6 +120,10 @@ do
     #    exit 1
     #fi
 done < config.txt
+
+if [ -s LILACSe.mst ]; then
+    mv LILACSe.* LILACS.*
+fi
 
 clearcol="--clearColl"
 
