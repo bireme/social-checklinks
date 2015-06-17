@@ -86,7 +86,7 @@ if [ -s Gv8broken.giz ]; then
 
     if [ -s other/LILACS.mst ]; then
         echo "Transfere a base title de /home/lilacs/update/title/ para o diretorio corrente"
-        scp -p transfer@serverabd:/home/lilacs/update/title/title.{mst,xrf} .
+        scp -p transfer@serverabd.bireme.br:/home/lilacs/update/title/title.{mst,xrf} .
         if [ $? -ne 0 ]; then
             sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base title de transfer@serverabd:/home/lilacs/update/title/title para o diretorio corrente." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
             exit 1
