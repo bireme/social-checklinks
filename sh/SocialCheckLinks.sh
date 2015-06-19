@@ -8,6 +8,7 @@
 
 
 SERVER=production    # test homolog production
+MONGO_HOST=mongodb.bireme.br
 HOME=/home/javaapps/SocialCheckLinks/social-checklinks
 NOW=$(date +"%Y%m%d")
 NOW2=$(date +"%Y%m%d-%T")
@@ -84,20 +85,6 @@ if [ -s Gv8broken.giz ]; then
         exit 1
     fi
 
-    if [ -s other/LILACS.mst ]; then
-        echo "Transfere a base title de /home/lilacs/update/title/ para o diretorio corrente"
-        scp -p transfer@serverabd.bireme.br:/home/lilacs/update/title/title.{mst,xrf} .
-        if [ $? -ne 0 ]; then
-            sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base title de transfer@serverabd:/home/lilacs/update/title/title para o diretorio corrente." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
-            exit 1
-        fi
-        
-        echo "Traz campo 430 da title para LILACS -> LILACSe"
-        sh/joinTitle.sh title 150 930 other/LILACS 30 931 other/LILACSe --inEncoding=ISO-8859-1
-
-        rm title.{mst,xrf}
-    fi
-
     echo "Move bases de dados"
     rm *.{mst,xrf}
     mv other/*.{mst,xrf} .
@@ -121,8 +108,20 @@ do
     #fi
 done < config.txt
 
-if [ -s LILACSe.mst ]; then
-    mv LILACSe.* LILACS.*
+if [ -s LILACS.mst ]; then
+    echo "Transfere a base title de /home/lilacs/update/title/ para o diretorio corrente"
+    scp -p transfer@serverabd.bireme.br:/home/lilacs/update/title/title.{mst,xrf} .
+    if [ $? -ne 0 ]; then
+        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base title de transfer@serverabd:/home/lilacs/update/title/title para o diretorio corrente." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
+        exit 1
+    fi
+
+    echo "Traz campo 930 da title para LILACS -> LILACSe"
+    sh/joinTitle.sh title 150 930 LILACS 30 930 LILACSe --inEncoding=ISO-8859-1 --mongoHost=$MONGO_HOST
+    mv LILACSe.mst LILACS.mst
+    mv LILACSe.xrf LILACS.xrf
+
+    rm title.{mst,xrf}
 fi
 
 clearcol="--clearColl"
