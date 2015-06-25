@@ -636,7 +636,12 @@ public class MongoOperations {
             }
 
             final String[] inurls = map.keySet().toArray(new String[0]);
-            final int[] results = new CheckUrlArray().check(inurls);
+            final String[] inurls_E = new String[inurls.length];
+            
+            for (int idx = 0; idx < inurls.length; idx++) {
+                inurls_E[idx] = EncDecUrl.encodeUrl(inurls[idx], CODEC, false);
+            }
+            final int[] results = new CheckUrlArray().check(inurls_E);
             final int len = results.length;
 
             for (int idx = 0; idx < len; idx++) {
