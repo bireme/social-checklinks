@@ -61,10 +61,11 @@
     final Set<String> centerIds = (Set<String>)request.getSession()
                                                      .getAttribute("centerIds");
     final int group = Integer.parseInt(request.getParameter("group"));   // fixed urls group
-    final int lgroup = Integer.parseInt(request.getParameter("lgroup")); // list urls group
+    final int lgroup = Integer.parseInt(request.getParameter("lgroup")); // 'list broken urls' group
     final String id = request.getParameter("id");
     final String id2 = id.substring(0, id.lastIndexOf('_'));
-    final boolean undo = (request.getParameter("undo") != null);
+    final String undoStr = request.getParameter("undo");
+    final boolean undo = (undoStr == null) ? false : Boolean.parseBoolean(undoStr);
     final int groupSize = 18;
     final int from = (group * groupSize);
     final int mod = (fixedUrls % groupSize);
@@ -281,7 +282,7 @@
                         <div class="accordion">
                             <div class="pagination pagination-centered">
                                 <ul>
-                                    <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&laquo;</a></li>
+                                    <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'0,lgroup:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',id:'<%=id%>',brokenUrl:'<%=brokenUrl_E%>',url:'<%=url_E%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>',undo:'<%=undo%>'});">&laquo;</a></li>
                                     <%                                        
                                     for (int idx = initGroup; idx < initGroup+5; idx++) {
                                         if (idx == group) {
@@ -290,12 +291,12 @@
                                     <%
                                         } else if (idx <= lastGroup) {
                                     %>
-                                            <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=idx%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});" ><%=idx+1%></a></li>
+                                            <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=idx%>',lgroup:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',id:'<%=id%>',brokenUrl:'<%=brokenUrl_E%>',url:'<%=url_E%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>',undo:'<%=undo%>'});" ><%=idx+1%></a></li>
                                     <%
                                         }
                                     }    
                                     %>
-                                    <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=lastGroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});">&raquo;</a></li>
+                                    <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=lastGroup%>',lgroup:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',id:'<%=id%>',brokenUrl:'<%=brokenUrl_E%>',url:'<%=url_E%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>',undo:'<%=undo%>'});">&raquo;</a></li>
                                 </ul>
                             </div>
                         </div>

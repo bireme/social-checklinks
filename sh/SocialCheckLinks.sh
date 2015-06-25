@@ -10,6 +10,7 @@
 SERVER=production    # test homolog production
 MONGO_HOST=mongodb.bireme.br
 HOME=/home/javaapps/SocialCheckLinks/social-checklinks
+LILACS_OFI=/bases/lilG4/lil.lil/LILACS
 NOW=$(date +"%Y%m%d")
 NOW2=$(date +"%Y%m%d-%T")
 
@@ -122,6 +123,13 @@ if [ -s LILACS.mst ]; then
     mv LILACSe.xrf LILACS.xrf
 
     rm title.{mst,xrf}
+
+    echo "Retira registros novos que ainda nao entraram no ultimo processamento"
+    NEXTMFN=$($LINDG4/mx $LILACS_OFI +control now | grep -Po "^\d+ +")
+    TO=$(expr $NEXTMFN - 1)
+    $LINDG4/mx LILACS to=$TO create=LILACSe -all now
+    mv LILACSe.mst LILACS.mst
+    mv LILACSe.xrf LILACS.xrf
 fi
 
 clearcol="--clearColl"

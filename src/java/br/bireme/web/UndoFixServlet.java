@@ -73,6 +73,9 @@ public class UndoFixServlet extends HttpServlet {
         final String id = request.getParameter("id");
         final String brokenUrl = request.getParameter("brokenUrl");
         final String url = request.getParameter("url");
+        final String dbFilter = request.getParameter("dbFilter");
+        final String collCenterFilter = request.getParameter("collCenterFilter");
+        final String order = request.getParameter("order");
         
         for (IdUrl iu : fixed) {
             if (iu.id.equals(id)) {
@@ -88,7 +91,10 @@ public class UndoFixServlet extends HttpServlet {
         response.sendRedirect(response.encodeRedirectURL(
                    "showFixedUrls.jsp?group=" + group + "&lgroup=" + lgroup 
                   + "&lang=" + lang + "&id=" + id + "&brokenUrl=" + brokenUrl
-                  + "&url=" + url + "&undo=true"));
+                  + "&url=" + url + "&undoUrl=" + undoUrl + "&dbFilter="
+                  + dbFilter + "&collCenterFilter=" + collCenterFilter 
+                  + "&order=" + order + "&undo=true"));
+        
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
