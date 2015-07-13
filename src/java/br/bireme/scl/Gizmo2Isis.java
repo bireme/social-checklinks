@@ -177,11 +177,12 @@ public class Gizmo2Isis {
                 System.err.println("ERROR: mfn [" + elem.mfn + "] url [" +
                                       elem.from + "] not found in this record");
             }
+            outmst.writeRecord(new Record().setMfn(elem.mfn).addFields(flds));
         } else {
             System.err.println("ERROR: skipping mfn [" + elem.mfn + "] mst [" + 
                     elem.mst + "]. Record is not active");
-        }
-        outmst.writeRecord(new Record().setMfn(elem.mfn).addFields(flds));
+            outmst.writeRecord(rec);
+        }        
     }
     
     private static List<GizmoElem> readGizmo(final String gizmoFile,
