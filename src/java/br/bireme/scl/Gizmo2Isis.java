@@ -153,31 +153,33 @@ public class Gizmo2Isis {
         final boolean lilacs = elem.mst.equalsIgnoreCase("lilacs");
         boolean changed = false;
         
-        if (rec.getStatus() != Record.Status.ACTIVE) {
-            throw new BrumaException("mfn[" + elem.mfn + "] is not active");
-        }
-        for (Field fld : rec.getFields()) {
-            final int id = fld.getId();
-            
-            if ((!lilacs) || (id==8)) { // troca campo
-                final Field other = new Field(id, new ArrayList<Subfield>());
+        if (rec.getStatus() == Record.Status.ACTIVE) {
+            for (Field fld : rec.getFields()) {
+                final int id = fld.getId();
 
-                for (Subfield sub: fld) {
-                    if (from.equals(sub.getContent())) {
-                        other.addSubfield(new Subfield(sub.getId(), elem.to));
-                        changed = true; // can not break, repeated fields.
-                    } else {
-                        other.addSubfield(sub);
+                if ((!lilacs) || (id==8)) { // troca campo
+                    final Field other = new Field(id, new ArrayList<Subfield>());
+
+                    for (Subfield sub: fld) {
+                        if (from.equals(sub.getContent())) {
+                            other.addSubfield(new Subfield(sub.getId(), elem.to));
+                            changed = true; // can not break, repeated fields.
+                        } else {
+                            other.addSubfield(sub);
+                        }
                     }
+                    flds.add(other);
+                } else {
+                    flds.add(fld);
                 }
-                flds.add(other);
-            } else {
-                flds.add(fld);
             }
-        }
-        if (!changed) {
-            System.err.println("ERROR: mfn [" + elem.mfn + "] url [" + elem.from 
-                                          + "] not found in this record");
+            if (!changed) {
+                System.err.println("ERROR: mfn [" + elem.mfn + "] url [" +
+                                      elem.from + "] not found in this record");
+            }
+        } else {
+            System.err.println("ERROR: skipping mfn [" + elem.mfn + "] mst [" + 
+                    elem.mst + "]. Record is not active");
         }
         outmst.writeRecord(new Record().setMfn(elem.mfn).addFields(flds));
     }
