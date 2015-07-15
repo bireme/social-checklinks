@@ -74,7 +74,7 @@
     String collCenterFilter = request.getParameter("collCenterFilter");
     collCenterFilter = "null".equals(collCenterFilter) ? null 
                        : (collCenterFilter == null) ? null 
-                                                    : collCenterFilter.trim();
+                                        : collCenterFilter.trim().toUpperCase();
     
     String sgroup = request.getParameter("group");
     int group = ((sgroup == null) || "null".equals(sgroup)) ? 0 
@@ -138,8 +138,8 @@
 	<link rel="stylesheet" type="text/css" href="css/ie.css" />
 	<![endif]-->
 	<script type="text/javascript" src="js/modernizr.js"></script>        
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script LANGUAGE="JavaScript" TYPE="text/javascript">        
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> 
+        <script LANGUAGE="JavaScript" TYPE="text/javascript">                    
             
         function postToUrl(path, params, blank) {
             var form = document.createElement("form");
@@ -321,9 +321,17 @@
                                             <ul style="list-style: none; padding: 0px; margin: 0px;">
                                                 <li class="dropdown">
                                                     <a class="dropdown-toggle" href="#" data-toggle="dropdown">CC<strong class="caret"></strong></a>
-                                                    <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                                                    <div  class="dropdown-menu scrollable-menu" role="menu"  style="padding: 15px; padding-bottom: 0px;height: auto;max-height: 500px;overflow-x: hidden;">
                                                         <ul style="list-style: none; padding: 0px; margin: 0px;">
                                                             <li style="margin-bottom: 8px;"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',idFilter:'<%=idFilter%>',urlFilter:'<%=urlFilter_E1%>',order:'<%=order%>'});"><%=messages.getString("all")%></a></li>
+                                                            <li>
+                                                                <form action='<%=response.encodeRedirectURL("list.jsp?lang=" + lang + "&group=" + group + "&dbFilter=" + dbFilter + "&idFilter=" + idFilter + "&order=" + order)%>' method="post" >
+                                                                    <input name="collCenterFilter" type="text" style="margin-bottom: 0px; max-width: 120px;" placeholder="<%=messages.getString("search_cc")%>" />
+                                                                </form>
+                                                            </li>
+                                                            
+                                                            <li class="divider"></li>
+                                                                                                                
                                                             <%
                                                             for (String id : centerIds)  {                               
                                                             %>    
@@ -371,7 +379,7 @@
                                     <td><%=cur%></td>
                                     <td><%=iu.mst%></td>
                                     <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>"><%=id%></a></td>                                    
-                                    <td><a target="_blank" href="<%=iu.url%>"><%=Tools.limitString(nurl,100)%></a></td>  
+                                    <td><a target="_blank" href="<%=iu.url%>"><%=Tools.limitString(nurl,98)%></a></td>  
                                     <td>
                                     <%
                                     for (String cc : iu.ccs) {
@@ -433,7 +441,7 @@
                 </div> <!-- /container -->
             <!--div id="push"></div-->
 	</div>
-                                                                                                
+              
 	<footer id="footer" class="footer">
             <div class="container">
                 <strong><%=messages.getString("bireme_social_checklinks")%> - V<%= BrokenLinks.VERSION %> - <%=BrokenLinks.VERSION_DATE%></strong><br/>

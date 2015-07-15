@@ -131,18 +131,20 @@ public class AuthenticationServlet extends HttpServlet {
                                      context.getInitParameter("accounts_host"));
                 final JSONObject user = auth.getUser(username, password);                
                                 
-                //if (auth.isAuthenticated(user) && (centerIds != null)) {
                 if (auth.isAuthenticated(user)) {
-                    Set<String> auxCenterIds = auth.getCenterIds(user);
-                    if (auxCenterIds == null) {
-                        auxCenterIds = new HashSet<String>();
-                    }
-                    auxCenterIds.add(auth.getColCenter(user)); // cc may not belong to a net (it not appear in centerIds)
+                    final String centerId = auth.getColCenter(user);                    
                     final DBCollection coll = (DBCollection)context
                                                     .getAttribute("collection");
-                    final Set<String> centerIds = auxCenterIds.contains("BR1.1") 
-                       ? MongoOperations.getCenters(coll)
-                       : MongoOperations.filterCenterFields(coll, auxCenterIds);
+                    final Set<String> centerIds;
+                    if (centerId.equals("BR1.1")) { 
+                        centerIds = MongoOperations.getCenters(coll);
+                    } else {
+                        final Set<String> auxCenterIds = auth.getCenterIds(user);
+                        // cc may not belong to a net (it not appear in centerIds)
+                        auxCenterIds.add(auth.getColCenter(user)); 
+                        centerIds = MongoOperations.filterCenterFields(coll, 
+                                                                  auxCenterIds);
+                    }
                     session.setAttribute("user", username); // Login user.
                     session.setAttribute("centerIds", centerIds);   
                     dispatcher = context.getRequestDispatcher(

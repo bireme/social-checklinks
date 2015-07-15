@@ -84,17 +84,16 @@ public class Authentication {
         if (response == null) {
             throw new NullPointerException("response");
         }
-        String cc = null;
+        final String id;
 
         if (isAuthenticated(response)) {
             final JSONObject jobj = (JSONObject)response.get("data");
-
-            if (jobj != null) {
-                cc = (String)jobj.get("cc");
-            }
+            id = (jobj == null) ? null : (String)jobj.get("cc");
+        } else {
+            id = null;
         }
 
-        return cc;
+        return id;
     }
     
     public Set<String> getCenterIds(final JSONObject response) 

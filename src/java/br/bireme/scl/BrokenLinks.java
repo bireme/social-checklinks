@@ -56,7 +56,7 @@ import java.util.Set;
  * date 20130625
  */
 public class BrokenLinks {
-    public static final String VERSION = "0.7";
+    public static final String VERSION = "0.8";
     public static final String VERSION_DATE = "2015";
 
     /* MongoDb settings */
@@ -115,8 +115,9 @@ public class BrokenLinks {
         "Bad Gateway", "Service Unavailable", "Gateway Timeout", 
         "HTTP Version Not Supported", "HTTP Exception" };
 
-    public static final String[] DEFAULT_ALLOWED_MESS = {"MALFORMED_URL", 
-                      "Not found", "UNKNOWN_HOST_EXCEPTION", "Not Acceptable" };
+    public static final String[] DEFAULT_ALLOWED_MESS = ALL_MESS;           
+    /*(public static final String[] DEFAULT_ALLOWED_MESS = {"MALFORMED_URL", 
+                      "Not found", "UNKNOWN_HOST_EXCEPTION", "Not Acceptable" };*/
     
     public static void createLinks(final String outCheckFile,
                                    final String mstName) throws BrumaException,
