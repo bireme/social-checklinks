@@ -122,15 +122,15 @@ public class Gizmo2Isis {
         assert outmap != null;
                         
         final String from = elem.from;
-        
+        String encoding = encodingMap.get(elem.mst);
+        encoding = (encoding == null) ? BrokenLinks.DEFAULT_MST_ENCODING 
+                                      : encoding;
+            
         System.out.println("applying gizmo at " + elem.mst + ": " + elem.mfn);
         
         Master inmst = inmap.get(elem.mst);
         if (inmst == null) {
-            final File in = new File(inputDir, elem.mst);
-            String encoding = encodingMap.get(elem.mst);
-            encoding = (encoding == null) ? BrokenLinks.DEFAULT_MST_ENCODING 
-                                          : encoding;
+            final File in = new File(inputDir, elem.mst);            
             inmst = MasterFactory.getInstance(in.getPath())
                                              .setInMemoryXrf(false)
                                              .setEncoding(encoding)
@@ -161,7 +161,10 @@ public class Gizmo2Isis {
                     final Field other = new Field(id, new ArrayList<Subfield>());
 
                     for (Subfield sub: fld) {
-                        if (from.equals(sub.getContent())) {
+                        final String content = sub.getContent();
+                        final String content_e = EncDecUrl.encodeUrl(content, 
+                                                               encoding, false);
+                        if (from.equals(content_e)) {
                             other.addSubfield(new Subfield(sub.getId(), elem.to));
                             changed = true; // can not break, repeated fields.
                         } else {

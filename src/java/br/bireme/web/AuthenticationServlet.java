@@ -146,11 +146,13 @@ public class AuthenticationServlet extends HttpServlet {
                                                                   auxCenterIds);
                     }
                     session.setAttribute("user", username); // Login user.
+                    session.setAttribute("cc", centerId);
                     session.setAttribute("centerIds", centerIds);   
                     dispatcher = context.getRequestDispatcher(
                                    "/CenterFilterServlet?lang=" + lang);
                 } else {
                     session.removeAttribute("user");
+                    session.removeAttribute("cc");
                     session.removeAttribute("centerIds");
                     dispatcher = context.getRequestDispatcher(
                                                   "/index.jsp?lang=" + lang 
@@ -171,6 +173,7 @@ public class AuthenticationServlet extends HttpServlet {
             dispatcher = context.getRequestDispatcher(
                                    "/CenterFilterServlet?lang=" + lang);             
             session.setAttribute("user", username); // Login user.
+            session.setAttribute("cc", "BR1.1");
             session.setAttribute("centerIds", ccs);
             dispatcher.forward(request, response);
         }        

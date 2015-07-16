@@ -52,6 +52,7 @@
     final DBCollection coll = (DBCollection)context.getAttribute("collection");           
     final Set<String> databases = (Set<String>)context.getAttribute("databases");
     final Set<String> centerIds = (Set<String>)session.getAttribute("centerIds");
+    final String cc = (String)session.getAttribute("cc");
         
     String dbFilter = request.getParameter("dbFilter");
     dbFilter = "null".equals(dbFilter) ? null : (dbFilter == null) ? null 
@@ -88,7 +89,7 @@
     
     final Set<String> collCenterSet;
     if (collCenterFilter == null) {
-        collCenterSet = centerIds.contains("BR1.1") ? null : centerIds;        
+        collCenterSet = cc.equals("BR1.1") ? null : centerIds;        
     } else {
         collCenterSet = new HashSet<String>();
         collCenterSet.add(collCenterFilter);
@@ -382,13 +383,13 @@
                                     <td><a target="_blank" href="<%=iu.url%>"><%=Tools.limitString(nurl,98)%></a></td>  
                                     <td>
                                     <%
-                                    for (String cc : iu.ccs) {
+                                    for (String ccx : iu.ccs) {
                                         if (first) {
                                             first = false;
                                         } else {
                                             out.print(", ");
                                         }
-                                        out.print(cc);
+                                        out.print(ccx);
                                     }
                                     %>             
                                     </td>

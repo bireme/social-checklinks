@@ -138,16 +138,16 @@ public class BrokenLinks {
                                   DEFAULT_ALLOWED_MESS);
     }
 
-    public static void createLinks(final String outCheckFile,
-                                   final String outEncoding,
-                                   final String mstName,
-                                   final String mstEncoding,
-                                   final String host,
-                                   final int port,
-                                   final String user,
-                                   final String password,
-                                   final boolean clearCol,
-                                   final String[] allowedMessages)
+    public static int createLinks(final String outCheckFile,
+                                  final String outEncoding,
+                                  final String mstName,
+                                  final String mstEncoding,
+                                  final String host,
+                                  final int port,
+                                  final String user,
+                                  final String password,
+                                  final boolean clearCol,
+                                  final String[] allowedMessages)
                                                           throws BrumaException,
                                                                  IOException {
         if (outCheckFile == null) {
@@ -209,12 +209,14 @@ public class BrokenLinks {
                                                 Arrays.asList(allowedMessages));
         final Map<String,Integer> idMap = getIdMfn(mst, idTag);
         int tell = 0;
-
+        int tot = 0;
+        
         if (clearCol) {
             coll.dropIndexes();
             coll.remove(new BasicDBObject());
         }
 
+        System.out.println("Saving documents ...");
         while (true) {
             final String line = in.readLine();
             if (line == null) {
@@ -223,6 +225,9 @@ public class BrokenLinks {
             final String lineT = line.trim();
             if (!lineT.isEmpty()) {                
                 final String[] split = lineT.split(" *\\| *", 4); //id|url|msg|master
+                if (split.length < 4) {
+                    throw new IOException("Wrong line format: " + line);
+                }
                 final int openPos = split[2].indexOf('('); // cut extra data               
                 final String prefix = (openPos > 0) 
                                     ? split[2].substring(0, openPos) : split[2];
@@ -238,6 +243,7 @@ public class BrokenLinks {
                     
                     saveRecord(mName, id, url_e, 
                                      split[2], urlTag, tags, mst, coll, occMap);
+                    tot++;
                 }
                 if (++tell % 5000 == 0) {
                     System.out.println("++" + tell);
@@ -245,7 +251,7 @@ public class BrokenLinks {
             }
         }
 
-        System.out.print("Fixing urls that do not start with http:// ... ");
+        System.out.print("\nFixing urls that do not start with http:// ... ");
         MongoOperations.fixMissingHttp(coll, hColl);
         System.out.println(" - OK");
         
@@ -257,6 +263,8 @@ public class BrokenLinks {
 
         in.close();
         mst.close();
+        
+        return tot;
     }
     
     /**
@@ -606,10 +614,14 @@ public class BrokenLinks {
         }
 
         System.out.println("outFileEncoding=" + fileEncod);
-        System.out.println("outMstEncoding=" + mstEncod);
+        System.out.println("outMstEncoding=" + mstEncod);        
         System.out.println();
         
-        createLinks(args[0], fileEncod, args[1], mstEncod, args[2],
+        final int tot = createLinks(args[0], fileEncod, args[1], mstEncod, args[2],
                     port, user, pswd, clearColl, DEFAULT_ALLOWED_MESS);
+        
+        System.out.println();
+        System.out.println("importedDocuments=" + tot);
+        System.out.println();
     }
 }
