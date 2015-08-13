@@ -434,7 +434,7 @@
                         %>                        
                             <tr>                                    
                                 <td><%=cur%></td>
-                                <td><%=xelem.getDbase()%></td>
+                                <td style="font-size: 13px;"><%=xelem.getDbase()%></td>
                                 <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>"><%=id%></a></td>                                    
                                 <td><a target="_blank" href="<%=furl%>" 
                                        title="<%=burl_D%> &#8594; <%=furl_D%>">
@@ -444,7 +444,7 @@
                                      %>
                                     </a>
                                 </td>                                  
-                                <td>
+                                <td style="font-size: 13px;">
                                 <%
                                 boolean first = true;
                                 final List<String> ccs=xelem.getCcs();
@@ -458,8 +458,8 @@
                                 }
                                 %>             
                                 </td>
-                                <td><%=xelem.getDate()%></td>    
-                                <td><%=xelem.getUser()%></td>
+                                <td style="font-size: 13px;"><%=xelem.getDate()%></td>    
+                                <td style="font-size: 13px;"><%=xelem.getUser()%></td>
                                 <td style="text-align:center"><%=(xelem.isExported() ? "&Chi;" : "")%></td>                                
                                 <td>   
                                     <%

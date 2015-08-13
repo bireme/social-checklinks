@@ -378,10 +378,10 @@
                             %>
                                 <tr>                                    
                                     <td><%=cur%></td>
-                                    <td><%=iu.mst%></td>
+                                    <td style="font-size: 13px;"><%=iu.mst%></td>
                                     <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id%>"><%=id%></a></td>                                    
-                                    <td><a target="_blank" href="<%=iu.url%>"><%=Tools.limitString(nurl,98)%></a></td>  
-                                    <td>
+                                    <td><a target="_blank" href="<%=iu.url%>" title="<%=nurl%>"><%=Tools.limitString(nurl,80)%></a></td>  
+                                    <td style="font-size: 13px;">
                                     <%
                                     for (String ccx : iu.ccs) {
                                         if (first) {
@@ -393,7 +393,7 @@
                                     }
                                     %>             
                                     </td>
-                                    <td><%=iu.since%></td>    
+                                    <td style="font-size: 13px;"><%=iu.since%></td>    
                                     <td>
                                         <% if(!readOnlyMode) { %>
                                             <a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=iu.id%>',url:'<%=nurl%>',furl:'<%=nurl%>',lang:'<%=lang%>',group:'<%=group%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});" title="<%=messages.getString("edit_broken_url")%>" class="btn btn-mini btn-primary"> &nbsp;<%=messages.getString("edit")%>&nbsp;</a>&nbsp;&nbsp;

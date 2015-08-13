@@ -119,6 +119,8 @@ public class BrokenLinks {
     /*(public static final String[] DEFAULT_ALLOWED_MESS = {"MALFORMED_URL", 
                       "Not found", "UNKNOWN_HOST_EXCEPTION", "Not Acceptable" };*/
     
+    private static final long MILISECONDS_IN_A_DAY = 60 * 60 * 24 * 1000;
+    
     public static void createLinks(final String outCheckFile,
                                    final String mstName) throws BrumaException,
                                                                 IOException {
@@ -242,7 +244,7 @@ public class BrokenLinks {
                               EncDecUrl.encodeUrl(split[1], outEncoding, false);
                     
                     saveRecord(mName, id, url_e, 
-                                     split[2], urlTag, tags, mst, coll, occMap);
+                              split[2], urlTag, tags, mst, coll, hColl, occMap);
                     tot++;
                 }
                 if (++tell % 5000 == 0) {
@@ -402,6 +404,7 @@ public class BrokenLinks {
                                       final List<Integer> ccsFlds,                                      
                                       final Master mst,
                                       final DBCollection coll,
+                                      final DBCollection hcoll,
                                   final Map<Integer,Map<String,Integer>> occMap)
                                                          throws BrumaException,
                                                                 IOException {
@@ -413,6 +416,7 @@ public class BrokenLinks {
         assert ccsFlds != null;
         assert mst != null;
         assert coll != null;
+        assert hcoll != null;
         assert occMap != null;
 
         final Record rec = mst.getRecord(id);
@@ -422,7 +426,7 @@ public class BrokenLinks {
                                                               + "Ignoring it!");
             return false;
         }
-
+ 
         final List<Field> urls = rec.getFieldList(urlTag);        
         final Date now = new Date();
         Date date;
@@ -441,41 +445,71 @@ public class BrokenLinks {
         }
 
         final BasicDBObject query = new BasicDBObject(ID_FIELD, id + "_" + occ);
-        final BasicDBObject obj = (BasicDBObject) coll.findOne(query);            
-        if (obj == null) {
-            date = now;
-        } else {
-            date = obj.getDate(LAST_UPDATE_FIELD);
-            if (date == null) {
-                date = obj.getDate(DATE_FIELD);
+        final boolean ret;
+        if (fixedRecently(hcoll, query, now, 60)) {            
+            ret = false;
+        } else {        
+            final BasicDBObject obj = (BasicDBObject) coll.findOne(query);            
+            if (obj == null) {
+                date = now;
             } else {
-                final WriteResult wr = coll.remove(obj, WriteConcern.ACKNOWLEDGED);
-                if (!wr.getCachedLastError().ok()) {
-                    //TODO
+                date = obj.getDate(LAST_UPDATE_FIELD);
+                if (date == null) {
+                    date = obj.getDate(DATE_FIELD);
+                } else {
+                    final WriteResult wr = coll.remove(obj, WriteConcern.ACKNOWLEDGED);
+                    if (!wr.getCachedLastError().ok()) {
+                        //TODO
+                    }
+                    date = obj.getDate(DATE_FIELD);
                 }
-                date = obj.getDate(DATE_FIELD);
             }
+            final String url_d = EncDecUrl.decodeUrl(url);
+            final String url_d_l = (url_d.length() >= 900) 
+                                      ? url_d.substring(0, 900) + "..." : url_d;
+            final String url_l = (url.length() > 900)
+                                        ? url.substring(0, 900) + "..." : url;
+            final BasicDBObject doc = new BasicDBObject();        
+            doc.put(DATE_FIELD, date);
+            doc.put(LAST_UPDATE_FIELD, now);
+            doc.put(MST_FIELD, mstName);
+            doc.put(ID_FIELD, id + "_" + occ);
+            doc.put(BROKEN_URL_FIELD, url_l);
+            doc.put(PRETTY_BROKEN_URL_FIELD, url_d_l);
+            doc.put(MSG_FIELD, err);
+            doc.put(CENTER_FIELD, getCCS(rec, ccsFlds));        
+
+            final WriteResult wres = coll.save(doc, WriteConcern.ACKNOWLEDGED);
+            ret = wres.getCachedLastError().ok();
         }
-        final String url_d = EncDecUrl.decodeUrl(url);
-        final String url_d_l = (url_d.length() >= 900) 
-                                    ? url_d.substring(0, 900) + "..." : url_d;
-        final String url_l = (url.length() > 900)
-                                    ? url.substring(0, 900) + "..." : url;
-        final BasicDBObject doc = new BasicDBObject();        
-        doc.put(DATE_FIELD, date);
-        doc.put(LAST_UPDATE_FIELD, now);
-        doc.put(MST_FIELD, mstName);
-        doc.put(ID_FIELD, id + "_" + occ);
-        doc.put(BROKEN_URL_FIELD, url_l);
-        doc.put(PRETTY_BROKEN_URL_FIELD, url_d_l);
-        doc.put(MSG_FIELD, err);
-        doc.put(CENTER_FIELD, getCCS(rec, ccsFlds));        
-
-        final WriteResult ret = coll.save(doc, WriteConcern.ACKNOWLEDGED);
-
-        return ret.getCachedLastError().ok();
+        return ret;
     }
 
+    private static boolean fixedRecently(final DBCollection hcoll,
+                                         final BasicDBObject query,
+                                         final Date now,
+                                         final int days) {
+        assert hcoll != null;
+        assert query != null;
+        assert now != null;
+        assert days >= 0;
+        
+        final boolean ret;
+        final BasicDBObject obj = (BasicDBObject) hcoll.findOne(query);            
+        if (obj == null) {
+            ret = false;
+        } else {
+            final Date date = obj.getDate(LAST_UPDATE_FIELD);
+            if (date == null) {
+                ret = false;
+            } else {
+                ret = (now.getTime() - date.getTime() <= 
+                                                 (days * MILISECONDS_IN_A_DAY));
+            }
+        }
+        return ret;
+    }
+    
     private static int nextOcc(final String url,
                                final List<Field> urls,
                                final Map<String,Integer> fldMap) {
