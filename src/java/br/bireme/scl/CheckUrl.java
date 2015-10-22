@@ -22,15 +22,14 @@
 
 package br.bireme.scl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 /**
  *
@@ -38,231 +37,67 @@ import java.util.regex.Pattern;
  * date 20130715
  */
 public class CheckUrl {
-    private static final String HTTP_REG_EXP = "HTTP/\\d\\.\\d\\s+(\\d+)";
-
     private static final int CONNECT_TIMEOUT = 5000; //60000; // connect timeout (miliseconds)
     private static final int SO_TIMEOUT = 20000; //5000; //60000; // read timeout (miliseconds)
-    private static final int SO_LINGER = 10; // close timeout (seconds)
-
-    public static final int UNKNOWN = 1000;
-    public static final int IO_EXCEPTION = 1001;
-
-    private static final Pattern pat = Pattern.compile(HTTP_REG_EXP);
-
-    public static int check(final String urlStr) {
-        if (urlStr == null) {
-            throw new NullPointerException("urlStr");
+    private static final int MAX_REDIRECTS = 3;
+    
+    private static final RequestConfig CONFIG = RequestConfig
+                                             .custom()
+                                             .setCircularRedirectsAllowed(false)
+                                             .setConnectTimeout(CONNECT_TIMEOUT)
+                                             .setMaxRedirects(MAX_REDIRECTS)
+                                             .setSocketTimeout(SO_TIMEOUT)
+                                             .build();
+    
+    public static int check(final String url) throws IOException {
+        if (url == null) {
+            throw new NullPointerException();
         }
-        return check(urlStr, 0);
-    }
+        final CloseableHttpClient httpclient = HttpClients.createDefault();
+        int responseCode = -1;
+                
+        try {            
+            final HttpHead httphead = new HttpHead(fixUrl(url));
+            httphead.setConfig(CONFIG);
 
-    public static int check(final String urlStr,
-                            final int times) {
-        if (urlStr == null) {
-            throw new NullPointerException("urlStr");
-        }
-        if (times < 0) {
-            throw new IllegalArgumentException("times[" + times + "] < 0");
-        }
-        if (times > 2) {
-            return 301;  // MOVED_PERMANENTLY
-        }
+            // Create a custom response handler
+            final ResponseHandler<Integer> responseHandler = 
+                                               new ResponseHandler<Integer>() {
 
-        final URL url;
-        final int port;
-
-        Socket socket = null;
-        PrintWriter out = null;
-        BufferedReader inReader = null;
-        int respCode;
-
-        try {
-            url = new URL(urlStr);
-            final String host = url.getHost();
-            if (host.isEmpty()) {
-                throw new IOException("empty host");
-            }
-            final String path = url.getPath();
-            final String query = url.getQuery();
-            //final String mess = "HEAD " + (path.isEmpty() ? "/" : path) // Algumas urls retornam code 500 com HEAD
-            final String mess = "GET " + (path.isEmpty() ? "/" : path)        
-              + ((query == null) ? "" : ("?" + query))
-              + " HTTP/1.1\r\n"
-              //+ "User-Agent: CERN-LineMode/2.15 libwww/2.17b3\r\n"
-              + "User-Agent: curl/7.37.1\r\n"
-              //+ "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:37.0) Gecko/20100101 Firefox/37.0\r\n"
-              + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"      
-              //+ "Accept-Language: pt-BR,pt;q=0.8,en-US;q=0.5,en;q=0.3\r\n"
-              //+ "Accept-Encoding: gzip, deflate\r\n"      
-              + "Host: " + host + "\r\n"
-              + "Connection: close\r\n\r\n";
-
-//System.out.println("Mess=[" + mess + "]");
-            port = url.getPort() == -1 ? 80 : url.getPort();
-            socket = new Socket();
-            socket.setKeepAlive(false);
-            socket.setSoTimeout(SO_TIMEOUT);
-            //socket.setSoLinger(true, SO_LINGER);
-            //socket. setReuseAddress(true);
-
-            final InetSocketAddress isa = new InetSocketAddress(host, port);
-            socket.connect(isa, CONNECT_TIMEOUT);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            inReader = new BufferedReader(new InputStreamReader(
-                                                    socket.getInputStream()));
-            out.println(mess);
-            final String line = inReader.readLine();
-            if (line == null) {
-                respCode = IO_EXCEPTION;
-            } else {
-                respCode = getRespCode(line);
-                if ((respCode == 301) || (respCode == 302)
-                                      || (respCode == 307)) {
-                    respCode = movedUrl(urlStr, inReader, respCode, times);
+                @Override
+                public Integer handleResponse(
+                        final HttpResponse response) 
+                                   throws ClientProtocolException, IOException {
+                    return response.getStatusLine().getStatusCode();                    
                 }
-                /*else if (respCode > 0) {
-                    System.out.println(line);
-                    while(true) {
-                        final String line2 = inReader.readLine();
-                        if (line2 == null) {
-                            break;
-                        }
-                        System.out.println(line2);
-                    }
-                }*/
-            }
-        } catch (Exception ex) {
-//ex.printStackTrace();
-            respCode = IO_EXCEPTION;
+
+            };
+            responseCode = httpclient.execute(httphead, responseHandler);
         } finally {
-            try {
-                if (inReader != null) {
-                    inReader.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
-                if ((socket != null) && (!socket.isClosed())) {
-                    socket.close();
-                }
-            } catch (IOException ioe) {
-//ioe.printStackTrace();
-                respCode = IO_EXCEPTION;
-            }
+            httpclient.close();
         }
-//if (times >= 0) {
-//   System.out.println("times=" + times + " url=[" + urlStr + "] retCode=" + respCode + "  isBroken=" + isBroken(respCode));
-//}
-        return respCode;
+        return responseCode;
     }
-
+    
+    private static String fixUrl(final String url) {
+        assert url != null;
+        
+        final String ret = url.trim().replaceAll(" ", "%20");
+        
+        return ret;
+    }
+    
     public static boolean isBroken(final int code) {
         if (code < 0) {
             throw new IllegalArgumentException("code[" + code + "] < 0");
         }
-        boolean ret = true;
+        final boolean ret;
 
         if ((code == 200) || (code == 401) ||
             (code == 402) || (code == 407)) {
             ret = false;
-        }
-
-        return ret;
-    }
-
-    private static int getRespCode(final String response) {
-        assert response != null;
-
-        final Matcher mat = pat.matcher(response.trim());
-
-        return mat.find() ? Integer.parseInt(mat.group(1)) : UNKNOWN;
-    }
-
-    private static int movedUrl(final String urlStr,
-                                final BufferedReader inReader,
-                                final int checkCode,
-                                final int times) throws IOException {
-        assert urlStr != null;
-        assert inReader != null;
-        assert checkCode >= 300;
-        assert times >= 0;
-
-        int ret = IO_EXCEPTION;
-        final URL url = new URL(urlStr);
-        final String oldHost = url.getHost();
-        final String oldProtocol = url.getProtocol();
-
-        while (true) {
-            String line = inReader.readLine();
-            if (line == null) {
-                break;
-            }
-            line = line.trim();
-            if (line.startsWith("Location:")) {
-                String newUrl = line.substring(9).trim();
-                if (!shouldFollow(urlStr, newUrl)) {
-                    ret = checkCode;
-                    break;
-                } else if (newUrl.startsWith("www")) {
-                    // do nothing
-                } else if (newUrl.startsWith("http")) {
-                    if (newUrl.contains("://localhost")) {
-                        final int idx = newUrl.indexOf('/', 15);
-                        final int port = url.getPort();
-                        final StringBuilder builder = new StringBuilder();
-
-                        builder.append(url.getProtocol());
-                        builder.append("://");
-                        builder.append(oldHost);
-                        if (port != -1) {
-                            builder.append(":");
-                            builder.append(port);
-                        }
-                        builder.append(newUrl.substring(idx));
-                        newUrl = builder.toString();
-                    }
-                } else if (newUrl.charAt(0) == '/') {
-                    newUrl = oldProtocol + "://" + oldHost + newUrl;
-                } else if (newUrl.startsWith("./")) {
-                    newUrl = oldProtocol + "://" +oldHost + newUrl.substring(1);
-                } else {
-                    newUrl = oldProtocol + "://" + oldHost + "/" + newUrl;
-                }
-                ret = check(newUrl, times + 1);
-                break;
-            }
-        }
-
-        return ret;
-    }
-
-    private static boolean shouldFollow (final String oldUrl,
-                                         final String newUrl) {
-        assert oldUrl != null;
-        assert newUrl != null;
-
-        final String old1 = oldUrl.startsWith("http://")
-                                                 ? oldUrl.substring(7) : oldUrl;
-        final String old2 = old1.endsWith("/")
-                                  ? old1.substring(0, old1.length() - 1) : old1;
-        final String new1 = newUrl.startsWith("http://")
-                                                 ? newUrl.substring(7) : newUrl;
-        final String new2 = new1.endsWith("/")
-                                  ? new1.substring(0, new1.length() - 1) : new1;
-
-        final String[] splitOld = old2.split("/");
-        final String[] splitNew = new2.split("/");
-        boolean ret;
-
-        if (splitOld.length == 1) {
-            ret = true;
-        } else if (splitNew.length == 1) {
-            ret = false;
-        } else if (splitOld[splitOld.length - 1]
-                                      .equals(splitNew[splitNew.length - 1])) {
-            ret = true;
         } else {
-            ret = false;
+            ret = true;
         }
 
         return ret;
@@ -273,16 +108,26 @@ public class CheckUrl {
         System.exit(-1);
     }
 
-    public static void main(final String[] args) {
-        final String url =  "http://citrus.uspnet.usp.br/eef/uploads/arquivo/v17 n1 artigo1.pdf";     // 404 error code
-        final String url2 = "http://citrus.uspnet.usp.br/eef/uploads/arquivo/v17%20n1%20artigo1.pdf"; // 200 error code 
-
+    public static void main(final String[] args) throws IOException {
+        //final String url =  "http://citrus.uspnet.usp.br/eef/uploads/arquivo/v17 n1 artigo1.pdf";     // 404 error code
+        //final String url = "http://citrus.uspnet.usp.br/eef/uploads/arquivo/v17%20n1%20artigo1.pdf"; // 200 error code 
+        //final String url = "http://www.scielo.org.co/scielo.php?script=sci_arttext&pid=S0120-548X2006000200005&lng=pt&nrm=iso&tlng=es";
+        //final String url = "http://www.scielo.org.co/scielo.php?script=sci_arttext&pid=S0120-548X2006000200001&lng=en&nrm=iso&tlng=es";
+        //final String url = " http://www2.alasbimnjournal.cl/alasbimn/CDA/sec_a/0,1205,SCID=686&PRT=0,00.html";
+        //final String url = "http://www2.alasbimnjournal.cl/alasbimn/CDA/sec_c/0,1222,SCID=686&PRT=693,00.html";
+        //final String url = "http://www.profamilia.org.co/004_servicios/medios/Feminicidio.pdf?categoria_id=2&PHPSESSID=2e8e18e7b29cae6e0e93b6c7bf9f9e86";
+        //final String url = "http://www.profamilia.com/images/stories/afiches/libros/libros/feminicidio.pdf";
+                
         if (args.length != 1) {
              usage();
         }
 
         System.out.println();
+        //System.out.println("URL=[" + url + "] ");
+        //System.out.println("fURL=[" + fixUrl(url) + "] ");
+        //System.out.println("ErrCode=" + CheckUrl.check(url));
         System.out.print("URL=[" + args[0] + "] ");
+        System.out.println("fURL=[" + fixUrl(args[0]) + "] ");
         System.out.println("ErrCode=" + CheckUrl.check(args[0]));
     }
 }

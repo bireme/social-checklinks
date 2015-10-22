@@ -22,6 +22,7 @@
 
 package br.bireme.scl;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,7 +43,12 @@ public class CheckUrlArray {
 
         @Override
         public void run() {
-            retCode = CheckUrl.check(url);
+            try {
+                retCode = CheckUrl.check(url);
+            } catch (IOException ioe) {
+                Logger.getLogger(CheckUrlArray.class.getName())
+                                                  .log(Level.SEVERE, null, ioe);
+            }
 //System.out.println("retCode=" + retCode);
         }
     }
