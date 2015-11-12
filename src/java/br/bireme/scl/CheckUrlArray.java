@@ -43,12 +43,7 @@ public class CheckUrlArray {
 
         @Override
         public void run() {
-            try {
-                retCode = CheckUrl.check(url);
-            } catch (IOException ioe) {
-                Logger.getLogger(CheckUrlArray.class.getName())
-                                                  .log(Level.SEVERE, null, ioe);
-            }
+            retCode = CheckUrl.check(url);
 //System.out.println("retCode=" + retCode);
         }
     }

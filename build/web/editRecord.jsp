@@ -142,7 +142,7 @@
                   order:'<%=order%>'});              
         }
         
-        function callUrl2(id, url, lang) {
+        function callUrl2(id, url, lang, force) {
             var nurl = document.getElementById('input-1').value;
             var nurl2 = replaceAll(nurl, "%20", " ");
             //var nurl = decodeURIComponent(document.getElementById('input-1').value);
@@ -150,7 +150,7 @@
             postToUrl('<%=response.encodeRedirectURL("CheckManyLinksServlet")%>',
                 {id: id, url: url, furl: nurl2, lang: lang, group: '<%=group%>',
                 dbFilter: '<%=dbFilter%>', collCenterFilter: '<%=collCenterFilter%>',
-                order: '<%=order%>'});
+                order: '<%=order%>', force: force});
         }
                 
         function isVisible(elem) {
@@ -226,6 +226,7 @@
                             <div class="URL-tested2">                                
                                 <input  style="vertical-align:top;" type="url" id="input-1" class="span8" onfocus="hideSave()" value="<%=furl_D%>"/> &nbsp;
                                 <a href="javascript:callUrl('<%=id%>','<%=url_E%>','<%=lang%>');" class="btn btn-primary" title="Test your changes"><%=messages.getString("test")%></a>
+                                <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>', 'force');" class="btn btn-primary enabled"><%=messages.getString("accept")%></a>
                             </div>
 
                             <!--a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++%28id%3A%28LIL-<%=id2%>%29%29" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a-->
@@ -252,7 +253,7 @@
                                 if (isNew || isBroken) {
                                 } else {
                                 %>       
-                                    <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>');" class="btn btn-primary enabled"><%=messages.getString("save")%></a>
+                                    <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>','does not force');" class="btn btn-primary enabled"><%=messages.getString("save")%></a>
                                 <%       
                                 }
                                 %>                                                           							

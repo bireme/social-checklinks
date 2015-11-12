@@ -571,7 +571,8 @@ public class MongoOperations {
                                             final String filter,
                                             final String brokenUrl,
                                             final String fixedUrl,
-                                            final String id)
+                                            final String id,
+                                            final boolean force)
                                                            throws IOException {
         if (coll == null) {
             throw new NullPointerException("coll");
@@ -601,7 +602,7 @@ public class MongoOperations {
         final String[] patterns = Tools.getPatterns(brokenUrl_D, fixedUrl_D);
         
         if ((brokenUrl_D.equals(fixedUrl_D)) || (patterns[0].equals("^"))) {
-            if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl_E))) {
+            if (force || !CheckUrl.isBroken(CheckUrl.check(fixedUrl_E))) {
                 final Set<IdUrl> docs = 
                         getDocsWith(coll, centerIds, filter, 
                                                 Tools.escapeChars(brokenUrl_D));
