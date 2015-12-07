@@ -8,9 +8,10 @@
 
 
 SERVER=production    # test homolog production
-MONGO_HOST=mongodb.bireme.br
 HOME=/home/javaapps/SocialCheckLinks/social-checklinks
-LILACS_OFI=/bases/lilG4/lil.lil/LILACS
+CHECK_LINKS=/home/users/heitor.barbieri/sbt-projects/CheckLinks
+CHECK_LINKS_SERVER=heitor.barbieri@ts20vm.bireme.br
+CHECK_LINKS_PORT=8022
 NOW=$(date +"%Y%m%d")
 NOW2=$(date +"%Y%m%d-%T")
 
@@ -109,38 +110,20 @@ do
     #fi
 done < config.txt
 
-if [ -s LILACS.mst ]; then
-    echo "Transfere a base title de /home/lilacs/update/title/ para o diretorio corrente"
-    scp -p transfer@serverabd.bireme.br:/home/lilacs/update/title/title.{mst,xrf} .
-    if [ $? -ne 0 ]; then
-        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base title de transfer@serverabd:/home/lilacs/update/title/title para o diretorio corrente." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
-        exit 1
-    fi
-
-    echo "Traz campo 930 da title para LILACS -> LILACSe"
-    sh/joinTitle.sh title 150 930 LILACS 30 930 LILACSe --inEncoding=ISO-8859-1 --mongoHost=$MONGO_HOST
-    mv LILACSe.mst LILACS.mst
-    mv LILACSe.xrf LILACS.xrf
-
-    rm title.{mst,xrf}
-
-    echo "Retira registros novos que ainda nao entraram no ultimo processamento"
-    NEXTMFN=$($LINDG4/mx $LILACS_OFI +control now | grep -Po "^\d+ +")
-    TO=$(expr $NEXTMFN - 1)
-    $LINDG4/mx LILACS to=$TO create=LILACSe -all now
-    mv LILACSe.mst LILACS.mst
-    mv LILACSe.xrf LILACS.xrf
-fi
-
 clearcol="--clearColl"
 
 while IFS="|" read db server user path proc lilG4 encoding
 do
     echo "Inicia processo de checagem de links da base $db"
-    /usr/local/bireme/java/FisChecker/genv8notfound.sh $db $lilG4
-
+    #/usr/local/bireme/java/FisChecker/genv8notfound.sh $db $lilG4i
+    sh/genBrokenUrlList.sh $db
+    scp -P $CHECK_LINKS_PORT ${db}_urls.txt $CHECK_LINKS_SERVER:$CHECK_LINKS
+    ssh -p ${CHECK_LINKS_PORT} ${CHECK_LINKS_SERVER} "${CHECK_LINKS}/CheckLinks.sh ${CHECK_LINKS}/${db}_urls.txt ${CHECK_LINKS}/${db}_good.txt ${CHECK_LINKS}/${db}_brk.txt ${CHECK_LINKS}/${db}_2brk.txt IBM-850"
+    scp -P ${CHECK_LINKS_PORT} ${CHECK_LINKS_SERVER}:${CHECK_LINKS}/${db}*.txt .
+    tar -cvzpf history/${db}_urls_${NOW}.tgz ${db}_urls.txt ${db}_good.txt ${db}_brk.txt ${db}_2brk.txt
+    
     echo "Testa se o numero de links quebrados [$db] esta na margem de 10% comparado com a verificacao anterior"
-    val2=$(wc -l /usr/local/bireme/java/FisChecker/output/${db}_out/bases/${db}_v8broken.txt | grep -Po "^\d+")
+    val2=$(wc -l /${db}_2brk.txt | grep -Po "^\d+")
     if [ -f ${db}_broken.txt ]; then
         val1=$(cat ${db}_broken.txt)
     else 
@@ -161,6 +144,8 @@ do
        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Alimenta os links quebrados no Social Check Links." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu appupdate -xp bir@2012#
        exit 1
    fi
+
+   rm ${db}_urls.txt ${db}_good.txt ${db}_brk.txt ${db}_2brk.txt
    clearcol=""
 done < config.txt
 

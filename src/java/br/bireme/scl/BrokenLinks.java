@@ -96,28 +96,49 @@ public class BrokenLinks {
     public static final String DEF_FIELD = ID_FIELD;
     
     /* CheckLinks - HTTP error messages */
-    public static final String[] ALL_MESS = { "OK", "CONNECTION_REFUSED", 
-        "CONNECTION_TIMED_OUT", "UNKNOWN_HOST_EXCEPTION", "MALFORMED_URL", 
-        "SSL_EXCEPTION", "NO_ROUTE_TO_HOST_EXCEPTION", "SOCKET_EXCEPTION", 
-        "FILE_NOT_FOUND_EXCEPTION", "IO_EXCEPTION", "CONNECTION_RESET_BY_PEER", 
-        "ILLEGAL_URL", "BIND_EXCEPTION", "PORT_UNREACHABLE_EXCEPTION", 
-        "UNKNOWN", "Continue", "Switching Protocols", "OK", "Created", 
-        "Accepted", "Non-Authoritative Information", "No Content", 
-        "Reset Content", "Partial Content", "Multiple Choice", 
-        "Moved Permanently", "Found", "See Other", "Not Modified", "Use Proxy", 
-        "(Unused)", "Temporary Redirect", "Bad Request", "Unauthorized", 
-        "Payment Required", "Forbidden", "Not found", "Method Not Allowed", 
-        "Not Acceptable", "Proxy Authentication Required", "Request Timeout", 
-        "Conflict", "Gone", "Length Required", "Precondition Failed", 
-        "Request Entity Too Large", "Request-URI Too Long)", 
-        "Unsupported Media Type", "Requested Range Not Satisfiable", 
-        "Expectation Failed", "Internal Error", "Not implemented", 
-        "Bad Gateway", "Service Unavailable", "Gateway Timeout", 
-        "HTTP Version Not Supported", "HTTP Exception" };
+    public static final String[] ALL_MESS = {"Continue", "Switching Protocols", 
+        "Processing", "OK", "Created", "Accepted", "Non-Authoritative Information", 
+        "No Content", "Reset Content", "Partial Content", "Multi-Status", 
+        "Already Reported", "IM Used", "Multiple Choices", "Moved Permanently", 
+        "Found", "See Other", "Not Modified", "Use Proxy", "Switch Proxy", 
+        "Temporary Redirect", "Permanent Redirect", "Resume Incomplete", 
+        "German Wikipedia", "Bad Request", "Unauthorized", "Payment Required", 
+        "Forbidden", "Not Found", "Method Not Allowed", "Not Acceptable", 
+        "Proxy Authentication Required", "Request Timeout", "Conflict", "Gone", 
+        "Length Required", "Precondition Failed", "Payload Too Large", 
+        "URI Too Long", "Unsupported Media Type", "Range Not Satisfiable", 
+        "Expectation Failed", "I'm a teapot", "Authentication Timeout", 
+        "Method Failure", "Enhance Your Calm", "Misdirected Request", 
+        "Unprocessable Entity", "Locked", "Failed Dependency", 
+        "Upgrade Required", "Precondition Required", "Too Many Requests", 
+        "Request Header Fields Too Large", "Login Timeout", "No Response", 
+        "Retry With", "Blocked by Windows Parental Controls", 
+        "Unavailable For Legal Reasons", "Redirect", "Request Header Too Large", 
+        "Cert Error", "No Cert", "HTTP to HTTPS", "Token expired/invalid", 
+        "Client Closed Request", "Token required", "Internal Server Error", 
+        "Not Implemented", "Bad Gateway", "Service Unavailable", 
+        "Gateway Timeout", "HTTP Version Not Supported", 
+        "Variant Also Negotiates", "Insufficient Storage", "Loop Detected", 
+        "Bandwidth Limit Exceeded", "Not Extended", 
+        "Network Authentication Required", "Unknown Error", 
+        "Origin Connection Time-out", "Network read timeout error", 
+        "Network connect timeout error", };
 
+    /* CheckLinks - HTTP error codes */
+    public static final Integer[] ALL_CODES = { 100, 101, 102, 200, 201, 202, 203,
+        204, 205, 206, 207, 208, 226, 300, 301, 302, 303, 304, 305, 306, 307, 308, 
+        400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 
+        414, 415, 416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 426, 428,
+        429, 431, 440, 444, 449, 450, 451, 494,495, 496, 497, 498, 499, 
+        500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 520, 521,
+        522, 598, 599, 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 
+        1009, 1010, 1011, 1012, 1013, 1100};
+    
     public static final String[] DEFAULT_ALLOWED_MESS = ALL_MESS;           
     /*(public static final String[] DEFAULT_ALLOWED_MESS = {"MALFORMED_URL", 
                       "Not found", "UNKNOWN_HOST_EXCEPTION", "Not Acceptable" };*/
+    
+    public static final Integer[] DEFAULT_ALLOWED_CODES = ALL_CODES;
     
     private static final long MILISECONDS_IN_A_DAY = 60 * 60 * 24 * 1000;
     
@@ -126,7 +147,7 @@ public class BrokenLinks {
                                                                 IOException {
         createLinks(outCheckFile, DEFAULT_FILE_ENCODING, mstName,
             DEFAULT_MST_ENCODING, DEFAULT_HOST, DEFAULT_PORT, null, null, true,
-            DEFAULT_ALLOWED_MESS);
+            DEFAULT_ALLOWED_CODES);
     }
 
     public static void createLinks(final String outCheckFile,
@@ -137,7 +158,7 @@ public class BrokenLinks {
                                                              IOException {
         createLinks(outCheckFile, outEncoding, mstName, mstEncoding, host,
                                   DEFAULT_PORT, null, null, true,
-                                  DEFAULT_ALLOWED_MESS);
+                                  DEFAULT_ALLOWED_CODES);
     }
 
     public static int createLinks(final String outCheckFile,
@@ -149,7 +170,7 @@ public class BrokenLinks {
                                   final String user,
                                   final String password,
                                   final boolean clearCol,
-                                  final String[] allowedMessages)
+                                  final Integer[] allowedCodes)
                                                           throws BrumaException,
                                                                  IOException {
         if (outCheckFile == null) {
@@ -170,8 +191,8 @@ public class BrokenLinks {
         if (port <= 0) {
             throw new IllegalArgumentException("port <= 0");
         }
-        if (allowedMessages == null) {
-            throw new NullPointerException("allowedMessages");
+        if (allowedCodes == null) {
+            throw new NullPointerException("allowedCodes");
         }
         
         final Master mst = MasterFactory.getInstance(mstName)
@@ -207,8 +228,8 @@ public class BrokenLinks {
             throw new IOException("Missing Isis url fields");
         }
         final List<Integer> tags = getIsisCcFields(mName, ccColl);
-        final Set<String> allowedMess = new HashSet<String>(
-                                                Arrays.asList(allowedMessages));
+        final Set<Integer> allowedCodeSet = new HashSet<Integer>(
+                                                Arrays.asList(allowedCodes));
         final Map<String,Integer> idMap = getIdMfn(mst, idTag);
         int tell = 0;
         int tot = 0;
@@ -226,25 +247,21 @@ public class BrokenLinks {
             }
             final String lineT = line.trim();
             if (!lineT.isEmpty()) {                
-                final String[] split = lineT.split(" *\\| *", 4); //id|url|msg|master
-                if (split.length < 4) {
+                final String[] split = lineT.split(" *\\| *"); //master|id|url|err_code
+                if (split.length != 4) {
                     throw new IOException("Wrong line format: " + line);
                 }
-                final int openPos = split[2].indexOf('('); // cut extra data               
-                final String prefix = (openPos > 0) 
-                                    ? split[2].substring(0, openPos) : split[2];
-
-                if (allowedMess.contains(prefix.trim())) {
-                    final Integer id = idMap.get(split[0]); 
+                if (allowedCodeSet.contains(Integer.parseInt(split[3].trim()))) {
+                    final Integer id = idMap.get(split[1]); 
                     if (id == null) {
-                        throw new IOException("id[" + split[0] + "] not found");
+                        throw new IOException("id[" + split[1] + "] not found");
                     }
                     
                     final String url_e = 
-                              EncDecUrl.encodeUrl(split[1], outEncoding, false);
+                              EncDecUrl.encodeUrl(split[2], outEncoding, false);
                     
                     saveRecord(mName, id, url_e, 
-                              split[2], urlTag, tags, mst, coll, hColl, occMap);
+                              split[3], urlTag, tags, mst, coll, hColl, occMap);
                     tot++;
                 }
                 if (++tell % 5000 == 0) {
@@ -652,7 +669,7 @@ public class BrokenLinks {
         System.out.println();
         
         final int tot = createLinks(args[0], fileEncod, args[1], mstEncod, args[2],
-                    port, user, pswd, clearColl, DEFAULT_ALLOWED_MESS);
+                    port, user, pswd, clearColl, DEFAULT_ALLOWED_CODES);
         
         System.out.println();
         System.out.println("importedDocuments=" + tot);
