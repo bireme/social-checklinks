@@ -56,8 +56,8 @@ import java.util.Set;
  * date 20130625
  */
 public class BrokenLinks {
-    public static final String VERSION = "0.8";
-    public static final String VERSION_DATE = "2015";
+    public static final String VERSION = "0.9";
+    public static final String VERSION_DATE = "2016";
 
     /* MongoDb settings */
     public static final String DEFAULT_FILE_ENCODING = "IBM850";
@@ -91,7 +91,7 @@ public class BrokenLinks {
     public static final String CC_TAGS_FIELD = "ccTags";
     
     /* HistoryBrokenLinks collection fields */
-    public static final String ELEM_LST_FIELD = "elems";
+    public static final String ELEM_LST_FIELD = "elems";    
 
     public static final String DEF_FIELD = ID_FIELD;
     
@@ -257,11 +257,13 @@ public class BrokenLinks {
                         throw new IOException("id[" + split[1] + "] not found");
                     }
                     
-                    final String url_e = 
+                    if (shouldSave(id, hColl)) {
+                        final String url_e = 
                               EncDecUrl.encodeUrl(split[2], outEncoding, false);
                     
-                    saveRecord(mName, id, url_e, 
+                        saveRecord(mName, id, url_e, 
                               split[3], urlTag, tags, mst, coll, hColl, occMap);
+                    }
                     tot++;
                 }
                 if (++tell % 5000 == 0) {
@@ -412,7 +414,7 @@ public class BrokenLinks {
         flds.append(MST_FIELD, 1);
         coll.ensureIndex(flds);
     }
-
+    
     private static boolean saveRecord(final String mstName,
                                       final int id,
                                       final String url,
@@ -607,6 +609,29 @@ public class BrokenLinks {
         return lst;
     }
 
+    private static boolean shouldSave(final int id,
+                                      final DBCollection hcoll) {
+        assert id > 0;
+        assert hcoll != null;
+        
+        boolean ret = true;
+        final BasicDBObject query = new BasicDBObject(ID_FIELD, 
+                                      new BasicDBObject("$regex", id + "_\\d"));
+        final DBCursor cursor = hcoll.find(query);
+
+        while (cursor.hasNext()) {
+            final BasicDBObject obj = (BasicDBObject)cursor.next();
+            if (obj != null) {
+                if (obj.getDate(LAST_UPDATE_FIELD) != null) {
+                    ret = false;
+                    break;
+                }
+            }
+        }
+        
+        return ret;            
+    }
+    
     private static boolean removeOldDocs(final DBCollection coll) {
         assert coll != null;
         

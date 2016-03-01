@@ -68,7 +68,9 @@ public class CheckOneLinkServlet extends HttpServlet {
         final String sorder = request.getParameter("order");
         final String order = "null".equals(sorder) ? "descending" : sorder;
         final String sdbFilter = request.getParameter("dbFilter");
-        final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;    
+        final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter; 
+        final String sisNew = request.getParameter("new");
+        final String isNew = "null".equals(sisNew) ? "0" : sisNew; 
     
         final int errCode = CheckUrl.check(furl_E1);
         final boolean isBroken = CheckUrl.isBroken(errCode);
@@ -79,7 +81,8 @@ public class CheckOneLinkServlet extends HttpServlet {
                       + "&lang=" + lang + "&group=" + group 
                       + "&dbFilter=" + dbFilter                     
                       + "&collCenterFilter=" + collCenterFilter 
-                      + "&order=" + order);
+                      + "&order=" + order
+                      + "&new=" + isNew);
         dispatcher.forward(request, response);
     }
 

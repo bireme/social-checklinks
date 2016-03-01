@@ -41,9 +41,9 @@
         return;
     }
     
-    // status = -1 (new), 1 (broken) and 0 (not broken) 
+    // status = 1 (broken) and 0 (not broken) 
     final int status = Integer.parseInt(request.getParameter("status"));    
-    final boolean isNew = (status == -1);
+    final boolean isNew = "1".equals((String)request.getParameter("new"));
     final boolean isBroken = (status == 1);    
     final String user = (String)session.getAttribute("user");
     final String id = request.getParameter("id");
@@ -171,6 +171,14 @@
     </head>
     
     <body style="background-color:#f7faff">
+        <!--%
+            if (isNew && !isBroken) {
+                response.sendRedirect("CheckManyLinksServlet?id=" + id + "&url=" +
+                url_E + "&furl=" + url_E + "&lang=" + lang + "&group=" + group +
+                "&dbFilter=" + dbFilter + "&collCenterFilter=" + collCenterFilter +
+                "&order=" + order + "&force=force");
+            }
+        %-->
 	<div id="wrap">
             <div class="navbar navbar-inverse navbar-fixed-top">
                 <div class="navbar-inner">
@@ -192,10 +200,10 @@
                                 <li class="dropdown">
                                     <a href="http://reddes.bvsalud.org/" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("language")%> <b class="caret"></b></a>
                                     <ul class="dropdown-menu">                                                                
-                                        <li <%if(lang.equals("en")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'en',group:'<%=group%>'});">English</a></li>
-                                        <li <%if(lang.equals("pt")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'pt',group:'<%=group%>'});">Português</a></li>
-                                        <li <%if(lang.equals("es")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'es',group:'<%=group%>'});">Español</a></li>
-                                        <!--li <%if(lang.equals("fr")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'fr',group:'<%=group%>'});">Francés</a></li-->
+                                        <li <%if(lang.equals("en")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'en',group:'<%=group%>',new:'1'});">English</a></li>
+                                        <li <%if(lang.equals("pt")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'pt',group:'<%=group%>',new:'1'});">Português</a></li>
+                                        <li <%if(lang.equals("es")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'es',group:'<%=group%>',new:'1'});">Español</a></li>
+                                        <!--li <%if(lang.equals("fr")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'fr',group:'<%=group%>',new:'1'});">Francés</a></li-->
                                     </ul>
                                 </li>
                                 <li class="dropdown">
@@ -225,8 +233,18 @@
                             <div class="URL-tested">URL: <a target="_blank" href="<%=url_E%>"><%=url_D%></a> &#8594; ?</div>
                             <div class="URL-tested2">                                
                                 <input  style="vertical-align:top;" type="url" id="input-1" class="span8" onfocus="hideSave()" value="<%=furl_D%>"/> &nbsp;
+                            <%
+                            if (isBroken) {
+                            %>        
                                 <a href="javascript:callUrl('<%=id%>','<%=url_E%>','<%=lang%>');" class="btn btn-primary" title="Test your changes"><%=messages.getString("test")%></a>
-                                <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>', 'force');" class="btn btn-primary enabled"><%=messages.getString("accept")%></a>
+                            <%
+                            }
+                            if (isNew || isBroken) {
+                            %>
+                                <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>', 'force');" class="btn btn-primary enabled" title="<%=messages.getString("accept_tip")%>"><%=messages.getString("accept")%></a>                                
+                            <%
+                            }
+                            %>                                
                             </div>
 
                             <!--a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++%28id%3A%28LIL-<%=id2%>%29%29" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a-->
@@ -250,10 +268,10 @@
 
                             <div class="ctrl">
                                 <%
-                                if (isNew || isBroken) {
+                                if (isBroken) {
                                 } else {
                                 %>       
-                                    <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>','does not force');" class="btn btn-primary enabled"><%=messages.getString("save")%></a>
+                                <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>','does not force');" class="btn btn-primary enabled" title="<%=messages.getString("save_tip")%>"><%=messages.getString("save")%></a>
                                 <%       
                                 }
                                 %>                                                           							

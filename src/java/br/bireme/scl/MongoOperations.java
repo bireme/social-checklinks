@@ -93,6 +93,7 @@ public class MongoOperations {
     public static final String EXPORTED_FIELD = "exported";
     public static final String MST_FIELD = "mst";
     public static final String CODEC = "UTF-8";
+    public static final String LEAVE_AS_IT_IS = "leave_as_it_is";
 
     public static Set<String> getCenters(final DBCollection coll) {
         if (coll == null) {
@@ -387,7 +388,8 @@ public class MongoOperations {
                                          final String docId,
                                          final String fixedUrl,
                                          final String user,
-                                         final boolean automatic)
+                                         final boolean automatic,
+                                         final boolean force)
                                                            throws IOException {
         if (coll == null) {
             throw new NullPointerException("coll");
@@ -433,6 +435,7 @@ public class MongoOperations {
         final String brokenUrl_D = EncDecUrl.decodeUrl(brokenUrl);
         final String fixedUrl_E = EncDecUrl.encodeUrl(fixedUrl, CODEC, false);
         //final String fixedUrl_D = EncDecUrl.decodeUrl(fixedUrl);
+        final Date date = new Date();
         final BasicDBObject hcurdoc = new BasicDBObject();
         hcurdoc.append(BROKEN_URL_FIELD, brokenUrl)               
                .append(PRETTY_BROKEN_URL_FIELD, brokenUrl_D)
@@ -441,8 +444,11 @@ public class MongoOperations {
                .append(CENTER_FIELD, (BasicDBList)doc.get(CENTER_FIELD))               
                .append(AUTO_FIX_FIELD, automatic)
                .append(EXPORTED_FIELD, false)
-               .append(LAST_UPDATE_FIELD, new Date())
+               .append(LAST_UPDATE_FIELD, date)
                .append(USER_FIELD, user);
+        if (force) {
+               hcurdoc.append(LEAVE_AS_IT_IS, date);
+        }
                               
         lsthdoc.add(0, hcurdoc);
         
@@ -452,7 +458,7 @@ public class MongoOperations {
 
         return ret1 && ret2;
     }
-
+    
     public static boolean undoUpdateDocument(final DBCollection coll,
                                              final DBCollection hcoll,
                                              final String docId,
@@ -611,10 +617,10 @@ public class MongoOperations {
                         IdUrl iu2 = new IdUrl(iu.id, fixedUrl, iu.ccs, iu.since, 
                                                                         iu.mst); 
                         ret.add(iu2);
-                        if (!updateDocument(coll, hcoll, iu2.id, iu2.url, user,
-                                                                       false)) {
-                          throw new IOException("could not update document id="
-                                                                   + iu2.id);
+                        if (!updateDocument(coll, hcoll, iu2.id, iu2.url, 
+                                                          user, false, force)) {
+                            throw new IOException("could not update " + 
+                                                   "document id=" + iu2.id);
                         }
                         break;
                     }
@@ -650,7 +656,7 @@ public class MongoOperations {
                     for (IdUrl iu : map.get(inurls[idx])) {                    
                         ret.add(iu);
                         if (!updateDocument(coll, hcoll, iu.id, iu.url, user,
-                                                  !fixedUrl_D.equals(iu.url))) {
+                                           !fixedUrl_D.equals(iu.url), force)) {
                             throw new IOException(
                                        "could not update document id=" + iu.id);
                         }
@@ -684,7 +690,7 @@ public class MongoOperations {
                 if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl))) {
                     if (!Tools.isDomain(fixedUrl)) {
                         if (!updateDocument(coll, hcoll, id, fixedUrl, "system",
-                                                                        true)) {
+                                                                 true, false)) {
                             throw new IOException("could not update document id=" 
                                                                           + id);
                         }
