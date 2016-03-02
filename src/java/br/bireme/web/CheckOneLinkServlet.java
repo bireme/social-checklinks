@@ -73,6 +73,7 @@ public class CheckOneLinkServlet extends HttpServlet {
         final String isNew = "null".equals(sisNew) ? "0" : sisNew; 
     
         final int errCode = CheckUrl.check(furl_E1);
+        final String errMsg = CheckUrl.getMessage(errCode);
         final boolean isBroken = CheckUrl.isBroken(errCode);
         final ServletContext context = getServletContext();
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
@@ -82,7 +83,9 @@ public class CheckOneLinkServlet extends HttpServlet {
                       + "&dbFilter=" + dbFilter                     
                       + "&collCenterFilter=" + collCenterFilter 
                       + "&order=" + order
-                      + "&new=" + isNew);
+                      + "&new=" + isNew
+                      + "&errCode=" + errCode
+                      + "&errMsg=" + errMsg);
         dispatcher.forward(request, response);
     }
 

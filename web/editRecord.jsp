@@ -65,7 +65,11 @@
     final String lang2 = lang.equals("null") ? "en" : lang.equals("fr") 
                                                     ? "en" :lang;    
     final String sdbFilter = request.getParameter("dbFilter");
-    final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;    
+    final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;  
+    final String serrCode = request.getParameter("errCode");
+    final String errCode = "null".equals(serrCode) ? "0" : serrCode;
+    final String serrMsg = request.getParameter("errMsg");
+    final String errMsg = "null".equals(serrCode) ? "UNKNOWN" : serrMsg;
 %>
 
 <!-- ================================================== -->
@@ -200,10 +204,10 @@
                                 <li class="dropdown">
                                     <a href="http://reddes.bvsalud.org/" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("language")%> <b class="caret"></b></a>
                                     <ul class="dropdown-menu">                                                                
-                                        <li <%if(lang.equals("en")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'en',group:'<%=group%>',new:'1'});">English</a></li>
-                                        <li <%if(lang.equals("pt")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'pt',group:'<%=group%>',new:'1'});">Português</a></li>
-                                        <li <%if(lang.equals("es")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'es',group:'<%=group%>',new:'1'});">Español</a></li>
-                                        <!--li <%if(lang.equals("fr")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'fr',group:'<%=group%>',new:'1'});">Francés</a></li-->
+                                        <li <%if(lang.equals("en")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'en',group:'<%=group%>',new:'1',errCode:'<%=errCode%>',errMsg:'<%=errMsg%>'});">English</a></li>
+                                        <li <%if(lang.equals("pt")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'pt',group:'<%=group%>',new:'1',errCode:'<%=errCode%>',errMsg:'<%=errMsg%>'});">Português</a></li>
+                                        <li <%if(lang.equals("es")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'es',group:'<%=group%>',new:'1',errCode:'<%=errCode%>',errMsg:'<%=errMsg%>'});">Español</a></li>
+                                        <!--li <%if(lang.equals("fr")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'fr',group:'<%=group%>',new:'1',errCode:'<%=errCode%>',errMsg:'<%=errMsg%>'});">Francés</a></li-->
                                     </ul>
                                 </li>
                                 <li class="dropdown">
@@ -231,6 +235,13 @@
                         <div class="seg-q">
                             <div class="URL-tested">ID: <a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id2%>"><%=id2%></a></div>
                             <div class="URL-tested">URL: <a target="_blank" href="<%=url_E%>"><%=url_D%></a> &#8594; ?</div>
+                            <%
+                            if (isBroken) {
+                            %>
+                            <div class="URL-tested">ERR: <%=errCode%> (<%=errMsg%>)</div>
+                            <%
+                            }
+                            %>
                             <div class="URL-tested2">                                
                                 <input  style="vertical-align:top;" type="url" id="input-1" class="span8" onfocus="hideSave()" value="<%=furl_D%>"/> &nbsp;
                             <%
