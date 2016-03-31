@@ -122,7 +122,7 @@ public class TabulateField {
         final String str;
         DBObject dbo = obj;
         
-        for (int idx=0; idx < len-1; idx++) {
+        for (int idx = 0; idx < len-1; idx++) {
             final String elem = split[idx];
                         
             mat.reset(elem);
@@ -154,7 +154,7 @@ public class TabulateField {
         return str;
     }
     private static void usage() {
-        System.err.println("usage: TabulateField <host> <-path=<x/y[0]/z>" +
+        System.err.println("usage: TabulateField <host> -path=<x/y[0]/z>" +
                 "\n\t\t     [-port=<port>]" +
                 "\n\t\t     [-user=<user> -password=<pswd>]" +
                 "\n\t\t     [-database=<dbase>] [-collection=<col>]");

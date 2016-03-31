@@ -268,11 +268,13 @@ public class BrokenLinks {
 
         System.out.print("\nFixing urls that do not start with http:// ... ");
         MongoOperations.fixMissingHttp(coll, hColl);
-        System.out.println(" - OK");
-        
-        //Creates an index if it does not exist. Index all documents.
+        System.out.println(" OK");
+                
+        System.out.print("\nCreating an index if it does not exist. " +
+                                                "Indexing all documents ... ");
         createIndex(coll, hColl);       
-
+        System.out.println(" OK");
+        
         in.close();
         mst.close();
         
@@ -646,7 +648,7 @@ public class BrokenLinks {
     private static void usage() {
         System.err.println("usage: BrokenLinks <outFile> <mstName> <host>"
      + "\n\t\t[-outFileEncoding=<outFileEncod>] [-outMstEncoding=<outMstEncod>]"
-     + "\n\t\t[-port=<port>] [-user=<user> -password=<pswd>] [--clearColl]");
+     + "\n\t\t[-port=<port>] [-user=<user> -password=<pswd>]");
         System.exit(1);
     }
 
