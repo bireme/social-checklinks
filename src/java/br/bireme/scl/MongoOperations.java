@@ -672,7 +672,8 @@ public class MongoOperations {
     }
     
     public static void fixMissingHttp(final DBCollection coll,
-                                      final DBCollection hcoll)
+                                      final DBCollection hcoll,
+                                      final boolean showTell)
                                                            throws IOException {
         if (coll == null) {
             throw new NullPointerException("coll");
@@ -681,7 +682,8 @@ public class MongoOperations {
             throw new NullPointerException("hcoll");
         }
         final String HTTP = "http://";        
-        final DBCursor cursor = coll.find();        
+        final DBCursor cursor = coll.find();
+        int tell = 0;
         
         while (cursor.hasNext()) {
             final DBObject dbo = cursor.next();
@@ -699,6 +701,11 @@ public class MongoOperations {
                                                                           + id);
                         }
                     }
+                }
+            }
+            if (showTell) {
+                if (++tell % 5000 == 0) {
+                    System.out.println("++" + tell);
                 }
             }
         }
