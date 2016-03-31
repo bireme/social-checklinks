@@ -691,10 +691,10 @@ public class MongoOperations {
 
             if (!url.startsWith(HTTP)) {
                 final String fixedUrl = HTTP + url;
-                final String id = (String) dbo.get(ID_FIELD);
-            
-                if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl))) {
-                    if (!Tools.isDomain(fixedUrl)) {
+                            
+                if (!Tools.isDomain(fixedUrl)) {
+                    if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl))) {                    
+                        final String id = (String) dbo.get(ID_FIELD);
                         if (!updateDocument(coll, hcoll, id, fixedUrl, "system",
                                                                  true, false)) {
                             throw new IOException("could not update document id=" 
@@ -704,7 +704,7 @@ public class MongoOperations {
                 }
             }
             if (showTell) {
-                if (++tell % 5000 == 0) {
+                if (++tell % 500 == 0) {
                     System.out.println("++" + tell);
                 }
             }
