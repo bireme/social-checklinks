@@ -30,6 +30,7 @@ import static br.bireme.scl.BrokenLinks.ELEM_LST_FIELD;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
+import static br.bireme.scl.BrokenLinks.LEAVE_AS_IT_IS;
 import static br.bireme.scl.BrokenLinks.MSG_FIELD;
 import static br.bireme.scl.BrokenLinks.PRETTY_BROKEN_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
@@ -93,7 +94,6 @@ public class MongoOperations {
     public static final String EXPORTED_FIELD = "exported";
     public static final String MST_FIELD = "mst";
     public static final String CODEC = "UTF-8";
-    public static final String LEAVE_AS_IT_IS = "leave_as_it_is";
 
     public static Set<String> getCenters(final DBCollection coll) {
         if (coll == null) {
@@ -252,7 +252,11 @@ public class MongoOperations {
             }
             final BasicDBObject in = new BasicDBObject("$in", cclst);
             query.append(CENTER_FIELD, in);
-        }                
+        }
+        
+        // Verify if it is the second check.
+        query.append(LAST_UPDATE_FIELD, new BasicDBObject("$exists", true));
+        
         final BasicDBObject sort = new BasicDBObject(DATE_FIELD, 
                                                       decreasingOrder ? -1 : 1);
         final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)

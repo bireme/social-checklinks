@@ -91,7 +91,8 @@ public class BrokenLinks {
     public static final String CC_TAGS_FIELD = "ccTags";
     
     /* HistoryBrokenLinks collection fields */
-    public static final String ELEM_LST_FIELD = "elems";    
+    public static final String ELEM_LST_FIELD = "elems";
+    public static final String LEAVE_AS_IT_IS = "leave_as_it_is";     
 
     public static final String DEF_FIELD = ID_FIELD;
     
@@ -146,7 +147,7 @@ public class BrokenLinks {
                                    final String mstName) throws BrumaException,
                                                                 IOException {
         createLinks(outCheckFile, DEFAULT_FILE_ENCODING, mstName,
-            DEFAULT_MST_ENCODING, DEFAULT_HOST, DEFAULT_PORT, null, null, true,
+            DEFAULT_MST_ENCODING, DEFAULT_HOST, DEFAULT_PORT, null, null,
             DEFAULT_ALLOWED_CODES);
     }
 
@@ -157,7 +158,7 @@ public class BrokenLinks {
                                    final String host) throws BrumaException,
                                                              IOException {
         createLinks(outCheckFile, outEncoding, mstName, mstEncoding, host,
-                                  DEFAULT_PORT, null, null, true,
+                                  DEFAULT_PORT, null, null, 
                                   DEFAULT_ALLOWED_CODES);
     }
 
@@ -169,7 +170,6 @@ public class BrokenLinks {
                                   final int port,
                                   final String user,
                                   final String password,
-                                  final boolean clearCol,
                                   final Integer[] allowedCodes)
                                                           throws BrumaException,
                                                                  IOException {
@@ -234,10 +234,7 @@ public class BrokenLinks {
         int tell = 0;
         int tot = 0;
         
-        if (clearCol) {
-            coll.dropIndexes();
-            coll.remove(new BasicDBObject());
-        }
+        coll.dropIndexes();
 
         System.out.println("Saving documents ...");
         while (true) {
@@ -256,14 +253,11 @@ public class BrokenLinks {
                     if (id == null) {
                         throw new IOException("id[" + split[1] + "] not found");
                     }
-                    
-                    if (shouldSave(id, hColl)) {
-                        final String url_e = 
+                    final String url_e = 
                               EncDecUrl.encodeUrl(split[2], outEncoding, false);
                     
-                        saveRecord(mName, id, url_e, 
-                              split[3], urlTag, tags, mst, coll, hColl, occMap);
-                    }
+                    saveRecord(mName, id, url_e, split[3], urlTag, tags, mst, 
+                               coll, hColl, occMap);
                     tot++;
                 }
                 if (++tell % 5000 == 0) {
@@ -276,11 +270,8 @@ public class BrokenLinks {
         MongoOperations.fixMissingHttp(coll, hColl);
         System.out.println(" - OK");
         
-        //removeOldDocs(coll);
-        
-        if (clearCol) {
-            createIndex(coll);
-        }
+        //Creates an index if it does not exist. Index all documents.
+        createIndex(coll, hColl);       
 
         in.close();
         mst.close();
@@ -405,14 +396,20 @@ public class BrokenLinks {
         return map;
     }
     
-    private static void createIndex(final DBCollection coll) {
+    private static void createIndex(final DBCollection coll,
+                                    final DBCollection hcoll) {
         assert coll != null;
+        assert hcoll != null;
 
         final BasicDBObject flds = new BasicDBObject();
         flds.append(CENTER_FIELD, 1);
         flds.append(BROKEN_URL_FIELD, 1); //Btree::insert: key too large to index
         flds.append(MST_FIELD, 1);
         coll.ensureIndex(flds);
+        
+        final BasicDBObject hflds = new BasicDBObject();
+        hflds.append(LEAVE_AS_IT_IS, 1);
+        hcoll.ensureIndex(hflds);
     }
     
     private static boolean saveRecord(final String mstName,
@@ -448,7 +445,7 @@ public class BrokenLinks {
  
         final List<Field> urls = rec.getFieldList(urlTag);        
         final Date now = new Date();
-        Date date;
+        final Date date;
         
         Map<String,Integer> fldMap = occMap.get(id);
         if (fldMap == null) {
@@ -465,23 +462,24 @@ public class BrokenLinks {
 
         final BasicDBObject query = new BasicDBObject(ID_FIELD, id + "_" + occ);
         final boolean ret;
-        if (fixedRecently(hcoll, query, now, 60)) {            
+        if (fixedRecently(hcoll, query, now, 60) || 
+                                                 shouldIgnore(hcoll, id, occ)) {            
             ret = false;
         } else {        
-            final BasicDBObject obj = (BasicDBObject) coll.findOne(query);            
+            final BasicDBObject obj = (BasicDBObject) coll.findOne(query);
+            final boolean newDoc;            
             if (obj == null) {
+                newDoc = true;
                 date = now;
             } else {
-                date = obj.getDate(LAST_UPDATE_FIELD);
-                if (date == null) {
-                    date = obj.getDate(DATE_FIELD);
-                } else {
-                    final WriteResult wr = coll.remove(obj, WriteConcern.ACKNOWLEDGED);
-                    if (!wr.getCachedLastError().ok()) {
-                        //TODO
-                    }
-                    date = obj.getDate(DATE_FIELD);
-                }
+                newDoc = false;
+                date = obj.getDate(DATE_FIELD);
+                
+                final WriteResult wr = coll.remove(obj, 
+                                                   WriteConcern.ACKNOWLEDGED);
+                if (!wr.getCachedLastError().ok()) {
+                    //TODO
+                }                
             }
             final String url_d = EncDecUrl.decodeUrl(url);
             final String url_d_l = (url_d.length() >= 900) 
@@ -490,7 +488,9 @@ public class BrokenLinks {
                                         ? url.substring(0, 900) + "..." : url;
             final BasicDBObject doc = new BasicDBObject();        
             doc.put(DATE_FIELD, date);
-            doc.put(LAST_UPDATE_FIELD, now);
+            if (!newDoc) {
+                doc.put(LAST_UPDATE_FIELD, now);
+            }
             doc.put(MST_FIELD, mstName);
             doc.put(ID_FIELD, id + "_" + occ);
             doc.put(BROKEN_URL_FIELD, url_l);
@@ -529,6 +529,20 @@ public class BrokenLinks {
         return ret;
     }
     
+    private static boolean shouldIgnore(final DBCollection hcoll,
+                                        final int id,
+                                        final int occ) {
+        assert hcoll != null;
+        assert id > 0;
+        assert occ >= 0;
+        
+        final BasicDBObject query = new BasicDBObject(ID_FIELD, id + "_" + occ)
+                                                  .append(LEAVE_AS_IT_IS, true);
+        
+        
+        return hcoll.findOne(query) != null;
+    }
+    
     private static int nextOcc(final String url,
                                final List<Field> urls,
                                final Map<String,Integer> fldMap) {
@@ -564,7 +578,7 @@ public class BrokenLinks {
                         }
                     }    
                 }
-                if (val > Integer.MAX_VALUE / 2) {  // all positions already used
+                if (val > Integer.MAX_VALUE / 2) { // all positions already used
                     ret = -1;
                     break;
                 }
@@ -609,29 +623,6 @@ public class BrokenLinks {
         return lst;
     }
 
-    private static boolean shouldSave(final int id,
-                                      final DBCollection hcoll) {
-        assert id > 0;
-        assert hcoll != null;
-        
-        boolean ret = true;
-        final BasicDBObject query = new BasicDBObject(ID_FIELD, 
-                                      new BasicDBObject("$regex", id + "_\\d"));
-        final DBCursor cursor = hcoll.find(query);
-
-        while (cursor.hasNext()) {
-            final BasicDBObject obj = (BasicDBObject)cursor.next();
-            if (obj != null) {
-                if (obj.getDate(LAST_UPDATE_FIELD) != null) {
-                    ret = false;
-                    break;
-                }
-            }
-        }
-        
-        return ret;            
-    }
-    
     private static boolean removeOldDocs(final DBCollection coll) {
         assert coll != null;
         
@@ -644,7 +635,8 @@ public class BrokenLinks {
             final Date auxDate = obj.getDate(LAST_UPDATE_FIELD);
             if ((auxDate == null) || 
                              (now.getTime() - auxDate.getTime()) > 60*60*1000) {
-                final WriteResult wr = coll.remove(obj, WriteConcern.ACKNOWLEDGED);
+                final WriteResult wr = coll.remove(obj, 
+                                                   WriteConcern.ACKNOWLEDGED);
                 ret = ret && wr.getCachedLastError().ok();
             }
         }
@@ -666,7 +658,6 @@ public class BrokenLinks {
         String mstEncod = DEFAULT_MST_ENCODING;
         String user = null;
         String pswd = null;
-        boolean clearColl = false;
 
         if (len < 3) {
             usage();
@@ -682,8 +673,6 @@ public class BrokenLinks {
                 user = args[idx].substring(6);
             } else if (args[idx].startsWith("-password=")) {
                 pswd = args[idx].substring(10);
-            } else if (args[idx].equals("--clearColl")) {
-                clearColl = true;
             } else {
                 usage();
             }
@@ -693,8 +682,9 @@ public class BrokenLinks {
         System.out.println("outMstEncoding=" + mstEncod);        
         System.out.println();
         
-        final int tot = createLinks(args[0], fileEncod, args[1], mstEncod, args[2],
-                    port, user, pswd, clearColl, DEFAULT_ALLOWED_CODES);
+        final int tot = createLinks(args[0], fileEncod, args[1], mstEncod, 
+                                    args[2], port, user, pswd, 
+                                    DEFAULT_ALLOWED_CODES);
         
         System.out.println();
         System.out.println("importedDocuments=" + tot);
