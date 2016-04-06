@@ -9,9 +9,8 @@
 
 SERVER=production    # test homolog production
 HOME=/home/javaapps/SocialCheckLinks/social-checklinks
-CHECK_LINKS=/home/users/heitor.barbieri/sbt-projects/CheckLinks
-CHECK_LINKS_SERVER=heitor.barbieri@ts20vm.bireme.br
-CHECK_LINKS_PORT=8022
+CHECK_LINKS=/home/javaapps/sbt-projects/CheckLinks
+CHECK_LINKS_SERVER=heitor.barbieri@ts30vm.bireme.br
 NOW=$(date +"%Y%m%d")
 NOW2=$(date +"%Y%m%d-%T")
 
@@ -110,8 +109,6 @@ do
     #fi
 done < config.txt
 
-clearcol="--clearColl"
-
 while IFS="|" read db server user path proc lilG4 encoding
 do
     echo "Inicia processo de checagem de links da base $db"
@@ -119,9 +116,10 @@ do
     sh/genBrokenUrlList.sh $db
 #mv ${db}_urls.txt ${db}_urls_original.txt
 #head -200 ${db}_urls_original.txt > ${db}_urls.txt
-    scp -P $CHECK_LINKS_PORT ${db}_urls.txt $CHECK_LINKS_SERVER:$CHECK_LINKS
-    ssh -p ${CHECK_LINKS_PORT} ${CHECK_LINKS_SERVER} "${CHECK_LINKS}/CheckLinks.sh ${CHECK_LINKS}/${db}_urls.txt ${CHECK_LINKS}/${db}_good.txt ${CHECK_LINKS}/${db}_brk.txt ${CHECK_LINKS}/${db}_2brk.txt IBM-850 &> ${CHECK_LINKS}/logs/log_${NOW2}.txt"
-    scp -P ${CHECK_LINKS_PORT} ${CHECK_LINKS_SERVER}:${CHECK_LINKS}/${db}*.txt .
+    scp ${db}_urls.txt $CHECK_LINKS_SERVER:$CHECK_LINKS
+    ssh ${CHECK_LINKS_SERVER} "${CHECK_LINKS}/CheckLinks.sh ${CHECK_LINKS}/${db}_urls.txt ${CHECK_LINKS}/${db}_good.txt ${CHECK_LINKS}/${db}_brk.txt ${CHECK_LINKS}/${db}_2brk.txt IBM-850 &> ${CHECK_LINKS}/logs/log_${NOW2}.txt"
+    #ssh ${CHECK_LINKS_SERVER} "${CHECK_LINKS}/CheckLinks.sh ${CHECK_LINKS}/${db}_urls.txt ${CHECK_LINKS}/${db}_good.txt ${CHECK_LINKS}/${db}_brk.txt  IBM-850 &> ${CHECK_LINKS}/logs/log_${NOW2}.txt"
+    scp ${CHECK_LINKS_SERVER}:${CHECK_LINKS}/${db}*.txt .
     tar -cvzpf history/${db}_urls_${NOW}.tgz ${db}_urls.txt ${db}_good.txt ${db}_brk.txt ${db}_2brk.txt
     
     echo "Testa se o numero de links quebrados [$db] esta na margem de 10% comparado com a verificacao anterior"
@@ -141,14 +139,13 @@ do
     echo $val2 > ${db}_broken.txt
 
     echo "Alimenta os links quebrados no Social Check Links"
-    sh/$SERVER/loadBrokenLinks.sh ${db} ${clearcol}
+    sh/$SERVER/loadBrokenLinks.sh ${db}
     if [ $? -ne 0 ]; then
        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Alimenta os links quebrados no Social Check Links." -t lilacsdb@bireme.org -cc ofi@bireme.org -s esmeralda.bireme.br -xu serverofi -xp bir@2012#
        exit 1
    fi
 
    rm ${db}_urls.txt ${db}_good.txt ${db}_brk.txt ${db}_2brk.txt
-   clearcol=""
 done < config.txt
 
 echo "Desbloqueia escrita na interface web do Social Check Links"
