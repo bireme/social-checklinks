@@ -9,4 +9,5 @@ NOW=$(date +"%Y%m%d-%T")
 HOME=/home/javaapps/SocialCheckLinks/social-checklinks
 
 $HOME/sh/SocialCheckLinks.sh &> $HOME/history/nohup/nohup_$NOW
+$HOME/sh/CheckOneByOne.sh &>> $HOME/history/nohup/nohup_$NOW
 
