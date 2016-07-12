@@ -152,6 +152,10 @@ do
        exit 1
    fi
 
+   #if [ ${db}=='LILACS' ]; then
+   #	scp ${db}_2brk.txt transfer@serverofi4.bireme.br/bases/lilG4/lil.lil/LILACS_v8broken.txt
+   #fi
+
    rm ${db}_urls.txt ${db}_good.txt ${db}_brk.txt ${db}_2brk.txt
 done < config.txt
 
