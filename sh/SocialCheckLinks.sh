@@ -76,6 +76,14 @@ do
     tar -czpvf history/${db}_${NOW}.tgz ${db}_url.mst ${db}_url.xrf
     tar -czpvf ${db}_${NOW}.tgz ${db}.mst ${db}.xrf
     rm ${db}_url.{mst,xrf}
+
+    echo apaga campo de url ou registro inteiro conforme flags da colecao HistoryBroken Links do Social Check Links
+    sh/updateIsis.sh mongodb.bireme.br ${db} 8 ${db}_report_${NOW}.txt
+    if [ $? -ne 0 ]; then
+        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Executa gizmo nas bases de dados." -t lilacsdb@bireme.org -cc ofi@bireme.org barbieri@paho.org -s esmeralda.bireme.br -xu serverofi -xp bir@2012#
+        exit 1
+    fi
+
 done < config.txt
 
 if [ -s Gv8broken.giz ]; then
@@ -107,6 +115,15 @@ do
     #    sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base $db apos aplicacao do gizmo para local de origem." -t lilacsdb@bireme.org -cc ofi@bireme.org barbieri@.paho.org -s esmeralda.bireme.br -xu serverofi -xp bir@2012#
     #    exit 1
     #fi
+
+    echo "Transfere o relatorio de campos e registros apagados para local de origem"
+    scp -p ${db}_report_${NOW}.txt $user@$server:$path
+    if [ $? -ne 0 ]; then
+        sendemail -f appofi@bireme.org -u "Social Check Links Error - `date '+%Y%m%d'`" -m "Transfere a base compactada ${db}.tgz original para local de origem." -t lilacsdb@bireme.org -cc ofi@bireme.org barbieri@paho.org -s esmeralda.bireme.br -xu serverofi -xp bir@2012#
+        exit 1
+    fi
+    rm ${db}_report_${NOW}.txt
+
 done < config.txt
 
 while IFS="|" read db server user path proc lilG4 encoding

@@ -22,15 +22,18 @@
 
 package br.bireme.scl;
 
+import static br.bireme.scl.BrokenLinks.ASSOCIATED_DOC;
 import static br.bireme.scl.BrokenLinks.BROKEN_LINKS_COL;
 import static br.bireme.scl.BrokenLinks.BROKEN_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.CENTER_FIELD;
 import static br.bireme.scl.BrokenLinks.DATE_FIELD;
+import static br.bireme.scl.BrokenLinks.DO_NOT_FORCE;
 import static br.bireme.scl.BrokenLinks.ELEM_LST_FIELD;
+import static br.bireme.scl.BrokenLinks.FUTURE_CHECKS;
 import static br.bireme.scl.BrokenLinks.HISTORY_COL;
 import static br.bireme.scl.BrokenLinks.ID_FIELD;
 import static br.bireme.scl.BrokenLinks.LAST_UPDATE_FIELD;
-import static br.bireme.scl.BrokenLinks.LEAVE_AS_IT_IS;
+import static br.bireme.scl.BrokenLinks.LINK_ASSOCIATED_DOC;
 import static br.bireme.scl.BrokenLinks.MSG_FIELD;
 import static br.bireme.scl.BrokenLinks.PRETTY_BROKEN_URL_FIELD;
 import static br.bireme.scl.BrokenLinks.SOCIAL_CHECK_DB;
@@ -95,7 +98,7 @@ public class MongoOperations {
     public static final String MST_FIELD = "mst";
     public static final String CODEC = "UTF-8";
 
-    public static Set<String> getCenters(final DBCollection coll) {
+    /*public static Set<String> getCenters0(final DBCollection coll) {
         if (coll == null) {
             throw new NullPointerException("coll");
         }
@@ -109,6 +112,13 @@ public class MongoOperations {
         cursor.close();
 
         return set;
+    }*/
+    
+    public static Set<String> getCenters(final DBCollection coll) {
+        if (coll == null) {
+            throw new NullPointerException("coll");
+        }
+        return new TreeSet<String>(coll.distinct(CENTER_FIELD));
     }
     
     public static Set<String> getDatabases(final DBCollection coll) {
@@ -391,9 +401,9 @@ public class MongoOperations {
                                          final DBCollection hcoll,
                                          final String docId,
                                          final String fixedUrl,
-                                         final String user,
-                                         final boolean automatic,
-                                         final boolean force)
+                                         final String user,                                         
+                                         final String option,
+                                         final boolean automatic)
                                                            throws IOException {
         if (coll == null) {
             throw new NullPointerException("coll");
@@ -409,6 +419,9 @@ public class MongoOperations {
         }
         if (user == null) {
             throw new NullPointerException("user");
+        }
+        if (option == null) {
+            throw new NullPointerException("option");
         }
         if (fixedUrl.length() >= 900) {
             throw new IOException("fixedUrl is too long >= 900. [" + fixedUrl 
@@ -450,8 +463,12 @@ public class MongoOperations {
                .append(EXPORTED_FIELD, false)
                .append(LAST_UPDATE_FIELD, date)
                .append(USER_FIELD, user);
-        if (force) {
-               hcurdoc.append(LEAVE_AS_IT_IS, date);
+        if (option.equals(FUTURE_CHECKS)) {
+            hcurdoc.append(FUTURE_CHECKS, date);
+        } else if (option.equals(LINK_ASSOCIATED_DOC)) {
+            hcurdoc.append(LINK_ASSOCIATED_DOC, date);
+        } else if (option.equals(ASSOCIATED_DOC)) {
+            hcurdoc.append(ASSOCIATED_DOC, date);
         }
                               
         lsthdoc.add(0, hcurdoc);
@@ -582,7 +599,7 @@ public class MongoOperations {
                                             final String brokenUrl,
                                             final String fixedUrl,
                                             final String id,
-                                            final boolean force)
+                                            final String option)
                                                            throws IOException {
         if (coll == null) {
             throw new NullPointerException("coll");
@@ -605,11 +622,15 @@ public class MongoOperations {
         if (id == null) {
             throw new NullPointerException("id");
         }
+        if (option == null) {
+            throw new NullPointerException("option");
+        }
         final Set<IdUrl> ret = new HashSet<IdUrl>();        
         final String brokenUrl_D = EncDecUrl.decodeUrl(brokenUrl);
         final String fixedUrl_D = EncDecUrl.decodeUrl(fixedUrl);
         final String fixedUrl_E = EncDecUrl.encodeUrl(fixedUrl, CODEC, false);
         final String[] patterns = Tools.getPatterns(brokenUrl_D, fixedUrl_D);
+        final boolean force = !option.equals(DO_NOT_FORCE);
         
         if ((brokenUrl_D.equals(fixedUrl_D)) || (patterns[0].equals("^"))) {
             if (force || !CheckUrl.isBroken(CheckUrl.check(fixedUrl_E))) {
@@ -622,7 +643,7 @@ public class MongoOperations {
                                                                         iu.mst); 
                         ret.add(iu2);
                         if (!updateDocument(coll, hcoll, iu2.id, iu2.url, 
-                                                          user, false, force)) {
+                                                         user, option, false)) {
                             throw new IOException("could not update " + 
                                                    "document id=" + iu2.id);
                         }
@@ -660,7 +681,7 @@ public class MongoOperations {
                     for (IdUrl iu : map.get(inurls[idx])) {                    
                         ret.add(iu);
                         if (!updateDocument(coll, hcoll, iu.id, iu.url, user,
-                                           !fixedUrl_D.equals(iu.url), force)) {
+                                          option, !fixedUrl_D.equals(iu.url))) {
                             throw new IOException(
                                        "could not update document id=" + iu.id);
                         }
@@ -696,7 +717,7 @@ public class MongoOperations {
                     if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl))) {                    
                         final String id = (String) dbo.get(ID_FIELD);
                         if (!updateDocument(coll, hcoll, id, fixedUrl, "system",
-                                                                 true, false)) {
+                                                          DO_NOT_FORCE, true)) {
                             throw new IOException("could not update document id=" 
                                                                           + id);
                         }

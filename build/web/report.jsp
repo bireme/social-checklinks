@@ -55,7 +55,14 @@
     final ServletContext context = getServletContext();
     final DBCollection coll = (DBCollection)context.getAttribute("historycoll");           
     final Set<String> databases = (Set<String>)context.getAttribute("databases");
-    final Set<String> centerIds = (Set<String>)session.getAttribute("centerIds");
+    
+    //final Set<String> centerIds = (Set<String>)session.getAttribute("centerIds");
+    // If is not BR1.1 get centers from Bireme Accounts else get from Mongo 
+    // because we want all centers that can change anytime (dynamic).
+    final String cc = (String)session.getAttribute("cc");
+    final Set<String> centerIds = (cc.equals("BR1.1")) 
+        ? new HashSet<String>(MongoOperations.getCenters(coll))
+        : (Set<String>)session.getAttribute("centerIds");
     
     //--------------- List Broken Links paramenters ----------------------------
     
@@ -448,13 +455,13 @@
                                 <%
                                 boolean first = true;
                                 final List<String> ccs=xelem.getCcs();
-                                for (String cc : ccs) {
+                                for (String cc_ : ccs) {
                                     if (first) {
                                         first = false;
                                     } else {
                                         out.print(", ");
                                     }
-                                    out.print(cc);
+                                    out.print(cc_);
                                 }
                                 %>             
                                 </td>

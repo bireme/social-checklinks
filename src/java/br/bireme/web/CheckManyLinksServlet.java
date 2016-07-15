@@ -84,11 +84,11 @@ public class CheckManyLinksServlet extends HttpServlet {
         final String order = "null".equals(sorder) ? "descending" : sorder;
         final String sdbFilter = request.getParameter("dbFilter");
         final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;
-        final boolean force = "force".equals(request.getParameter("force"));
+        final String option = request.getParameter("option");
         
         final Set<IdUrl> fixed_E = MongoOperations.fixRelatedUrls(coll, hcoll,
                 user, centerIds, collCenterFilter, brokenUrl_D, fixedUrl_D, id, 
-                                                                         force);
+                                                                         option);
         
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
                 "/showFixedUrls.jsp?group=0&lgroup=" + group 

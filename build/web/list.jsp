@@ -51,8 +51,13 @@
     final boolean readOnlyMode = (Boolean)context.getAttribute("readOnlyMode");
     final DBCollection coll = (DBCollection)context.getAttribute("collection");           
     final Set<String> databases = (Set<String>)context.getAttribute("databases");
-    final Set<String> centerIds = (Set<String>)session.getAttribute("centerIds");
     final String cc = (String)session.getAttribute("cc");
+    
+    // If is not BR1.1 get centers from Bireme Accounts else get from Mongo 
+    // because we want all centers that can change anytime (dynamic).
+    final Set<String> centerIds = (cc.equals("BR1.1")) 
+        ? new HashSet<String>(MongoOperations.getCenters(coll))
+        : (Set<String>)session.getAttribute("centerIds");
         
     String dbFilter = request.getParameter("dbFilter");
     dbFilter = "null".equals(dbFilter) ? null : (dbFilter == null) ? null 
@@ -89,7 +94,7 @@
     
     final Set<String> collCenterSet;
     if (collCenterFilter == null) {
-        collCenterSet = cc.equals("BR1.1") ? null : centerIds;        
+        collCenterSet = cc.equals("BR1.1") ? null : centerIds;
     } else {
         collCenterSet = new HashSet<String>();
         collCenterSet.add(collCenterFilter);

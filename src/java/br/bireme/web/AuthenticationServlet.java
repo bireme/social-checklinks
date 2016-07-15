@@ -169,11 +169,11 @@ public class AuthenticationServlet extends HttpServlet {
         } else {            
             final Set<String> ccs = new HashSet<String>();
             ccs.add("PE1.1");
-            ccs.add("BR1.1");
+            ccs.add("PE373.9");
             dispatcher = context.getRequestDispatcher(
                                    "/CenterFilterServlet?lang=" + lang);             
             session.setAttribute("user", username); // Login user.
-            session.setAttribute("cc", "BR1.1");
+            session.setAttribute("cc", "PE373.9");
             session.setAttribute("centerIds", ccs);
             dispatcher.forward(request, response);
         }        

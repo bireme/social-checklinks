@@ -56,7 +56,7 @@ import java.util.Set;
  * date 20130625
  */
 public class BrokenLinks {
-    public static final String VERSION = "0.9";
+    public static final String VERSION = "1.0";
     public static final String VERSION_DATE = "2016";
 
     /* MongoDb settings */
@@ -92,9 +92,16 @@ public class BrokenLinks {
     
     /* HistoryBrokenLinks collection fields */
     public static final String ELEM_LST_FIELD = "elems";
-    public static final String LEAVE_AS_IT_IS = "leave_as_it_is";     
+    
+    // Do not include the link into future checks
+    public static final String FUTURE_CHECKS = "future_checks";
+    // Exclude the links from associated database record
+    public static final String LINK_ASSOCIATED_DOC = "link_associated_doc";
+    // Exclude the associated database record
+    public static final String ASSOCIATED_DOC = "associated_doc";
 
     public static final String DEF_FIELD = ID_FIELD;
+    public static final String DO_NOT_FORCE = "do_not_force";
     
     /* CheckLinks - HTTP error messages */
     public static final String[] ALL_MESS = {"Continue", "Switching Protocols", 
@@ -409,7 +416,9 @@ public class BrokenLinks {
         coll.ensureIndex(flds);
         
         final BasicDBObject hflds = new BasicDBObject();
-        hflds.append(LEAVE_AS_IT_IS, 1);
+        hflds.append(FUTURE_CHECKS, 1);
+        hflds.append(LINK_ASSOCIATED_DOC, 1);
+        hflds.append(ASSOCIATED_DOC, 1);
         hcoll.ensureIndex(hflds);
     }
     
@@ -537,10 +546,16 @@ public class BrokenLinks {
         assert id > 0;
         assert occ >= 0;
         
+        final BasicDBList or = new BasicDBList();
+        or.add(new BasicDBObject(FUTURE_CHECKS, 
+                                           new BasicDBObject("$exists", true)));
+        or.add(new BasicDBObject(LINK_ASSOCIATED_DOC, 
+                                           new BasicDBObject("$exists", true)));
+        or.add(new BasicDBObject(ASSOCIATED_DOC, 
+                                           new BasicDBObject("$exists", true)));
+        
         final BasicDBObject query = new BasicDBObject(ID_FIELD, id + "_" + occ)
-                                                  .append(LEAVE_AS_IT_IS, true);
-        
-        
+                                                             .append("$or", or);       
         return hcoll.findOne(query) != null;
     }
     

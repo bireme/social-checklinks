@@ -146,22 +146,31 @@
                   order:'<%=order%>'});              
         }
         
-        function callUrl2(id, url, lang, force) {
+        function callUrl2(id, url, lang, option) {
             var nurl = document.getElementById('input-1').value;
             var nurl2 = replaceAll(nurl, "%20", " ");
             //var nurl = decodeURIComponent(document.getElementById('input-1').value);
-
+            alert('url=' + url);
+            alert('nurl=' + nurl2);
+            var opt = "";
+            if (option === "<%=BrokenLinks.DO_NOT_FORCE%>") {
+                opt = option;
+            } else {
+                opt = whichIsSelected();
+            }
+alert('aqui');
             postToUrl('<%=response.encodeRedirectURL("CheckManyLinksServlet")%>',
                 {id: id, url: url, furl: nurl2, lang: lang, group: '<%=group%>',
                 dbFilter: '<%=dbFilter%>', collCenterFilter: '<%=collCenterFilter%>',
-                order: '<%=order%>', force: force});
+                order: '<%=order%>', option: opt});
         }
                 
         function isVisible(elem) {
             return elem.offsetWidth > 0 || elem.offsetHeight > 0;
         }
+        
         function hideSave() {
-            var danger = document.getElementById("alert-danger");            
+            var danger = document.getElementById("alert-danger");
            
             if (danger && isVisible(danger)) {                
                 danger.style.display = 'none';
@@ -171,6 +180,21 @@
             }
         }
         
+        function whichIsSelected() {
+            alert('aqui0');
+            var option = "<%=BrokenLinks.DO_NOT_FORCE%>";
+            alert('aqui1');
+            if (document.getElementById('optionsRadios1').checked) {
+                option = "<%=BrokenLinks.FUTURE_CHECKS%>";
+            } else if (document.getElementById('optionsRadios2').checked) {
+                option = "<%=BrokenLinks.LINK_ASSOCIATED_DOC%>";
+            } else if (document.getElementById('optionsRadios3').checked) {   
+                option = "<%=BrokenLinks.ASSOCIATED_DOC%>";
+            }
+            alert('aqui2');
+            return option;
+        }
+    
         </script>                
     </head>
     
@@ -250,11 +274,6 @@
                                 <a href="javascript:callUrl('<%=id%>','<%=url_E%>','<%=lang%>');" class="btn btn-primary" title="Test your changes"><%=messages.getString("test")%></a>
                             <%
                             }
-                            if (isNew || isBroken) {
-                            %>
-                                <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>', 'force');" class="btn btn-primary enabled" title="<%=messages.getString("accept_tip")%>"><%=messages.getString("accept")%></a>                                
-                            <%
-                            }
                             %>                                
                             </div>
 
@@ -280,9 +299,27 @@
                             <div class="ctrl">
                                 <%
                                 if (isBroken) {
+                                %>    
+                                <br/>
+                                <div class="URL-tested"><%=messages.getString("other_otions")%>:</div>
+                                      
+                                  <label class="radio">
+                                    <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
+                                    <%=messages.getString("future_checks")%>
+                                  </label>
+                                  <label class="radio">
+                                    <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+                                    <%=messages.getString("link_associated_document")%>
+                                  </label>
+                                  <label class="radio">
+                                    <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3">
+                                    <%=messages.getString("associated_document")%>
+                                  </label>
+                                  <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>', '');" class="btn btn-mini enabled"><%=messages.getString("submit")%></a>
+                                <%    
                                 } else {
                                 %>       
-                                <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>','does not force');" class="btn btn-primary enabled" title="<%=messages.getString("save_tip")%>"><%=messages.getString("save")%></a>
+                                <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>', <%=BrokenLinks.DO_NOT_FORCE%>);" class="btn btn-primary enabled" title="<%=messages.getString("save_tip")%>"><%=messages.getString("save")%></a>
                                 <%       
                                 }
                                 %>                                                           							
