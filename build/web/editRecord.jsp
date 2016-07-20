@@ -138,7 +138,6 @@
            
            //var nurl2 = encodeURI(nurl);
            //var nurl2 = decodeURI(nurl);
-           //alert('nurl=' + nurl2);
            
            postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', 
                  {id:id, url:url, furl:nurl2, lang:lang, group:'<%=group%>',
@@ -149,16 +148,12 @@
         function callUrl2(id, url, lang, option) {
             var nurl = document.getElementById('input-1').value;
             var nurl2 = replaceAll(nurl, "%20", " ");
-            //var nurl = decodeURIComponent(document.getElementById('input-1').value);
-            alert('url=' + url);
-            alert('nurl=' + nurl2);
             var opt = "";
             if (option === "<%=BrokenLinks.DO_NOT_FORCE%>") {
                 opt = option;
             } else {
                 opt = whichIsSelected();
             }
-alert('aqui');
             postToUrl('<%=response.encodeRedirectURL("CheckManyLinksServlet")%>',
                 {id: id, url: url, furl: nurl2, lang: lang, group: '<%=group%>',
                 dbFilter: '<%=dbFilter%>', collCenterFilter: '<%=collCenterFilter%>',
@@ -181,9 +176,7 @@ alert('aqui');
         }
         
         function whichIsSelected() {
-            alert('aqui0');
             var option = "<%=BrokenLinks.DO_NOT_FORCE%>";
-            alert('aqui1');
             if (document.getElementById('optionsRadios1').checked) {
                 option = "<%=BrokenLinks.FUTURE_CHECKS%>";
             } else if (document.getElementById('optionsRadios2').checked) {
@@ -191,7 +184,6 @@ alert('aqui');
             } else if (document.getElementById('optionsRadios3').checked) {   
                 option = "<%=BrokenLinks.ASSOCIATED_DOC%>";
             }
-            alert('aqui2');
             return option;
         }
     
@@ -258,7 +250,7 @@ alert('aqui');
                     <div class="urlLine">
                         <div class="seg-q">
                             <div class="URL-tested">ID: <a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=id2%>"><%=id2%></a></div>
-                            <div class="URL-tested">URL: <a target="_blank" href="<%=url_E%>"><%=url_D%></a> &#8594; ?</div>
+                            <div class="URL-tested">URL: <a target="_blank" href="<%=url_D%>"><%=url_D%></a> &#8594; ?</div>
                             <%
                             if (isBroken) {
                             %>
