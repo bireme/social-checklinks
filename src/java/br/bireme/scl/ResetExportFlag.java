@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.scl;
 
@@ -46,34 +31,34 @@ public class ResetExportFlag {
                               final int port,
                               final String database,
                               final String collection,
-                              final String sdate) throws UnknownHostException, 
+                              final String sdate) throws UnknownHostException,
                                                          ParseException {
         assert host != null;
         assert port > 0;
         assert database != null;
         assert collection != null;
-        
-        final MongoClient client = new MongoClient(host, port); 
+
+        final MongoClient client = new MongoClient(host, port);
         final DB db = client.getDB(database);
         final DBCollection coll = db.getCollection(collection);
         final String prefix = ELEM_LST_FIELD + ".0.";
         final BasicDBObject query;
         final DBCursor cursor;
-        
-        if (sdate == null) {            
-            query = new BasicDBObject(prefix + EXPORTED_FIELD, true);            
-        } else {            
-            final SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
-            final Date date = simple.parse(sdate);            
 
-            final BasicDBList list = new BasicDBList();        
+        if (sdate == null) {
+            query = new BasicDBObject(prefix + EXPORTED_FIELD, true);
+        } else {
+            final SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
+            final Date date = simple.parse(sdate);
+
+            final BasicDBList list = new BasicDBList();
             list.add(new BasicDBObject(prefix + EXPORTED_FIELD, true));
-            list.add(new BasicDBObject(prefix + LAST_UPDATE_FIELD, 
+            list.add(new BasicDBObject(prefix + LAST_UPDATE_FIELD,
                                               new BasicDBObject("$gte", date)));
-            query = new BasicDBObject("$and", list);                        
+            query = new BasicDBObject("$and", list);
         }
         cursor = coll.find(query);
-        
+
         while (cursor.hasNext()) {
             final BasicDBObject doc = (BasicDBObject)cursor.next();
             final BasicDBList list = (BasicDBList)doc.get(ELEM_LST_FIELD);
@@ -83,21 +68,21 @@ public class ResetExportFlag {
         }
         cursor.close();
     }
-    
+
     private static void usage() {
         System.err.println("usage: ResetExportFlag <mongo_host> <database>"  +
         " <collection> [-init_date=<yyyymmdd>] [-mongo_port=<port>]");
         System.exit(1);
     }
-    
-    public static void main(final String[] args) throws UnknownHostException, 
+
+    public static void main(final String[] args) throws UnknownHostException,
                                                         ParseException {
         if (args.length < 3) {
             usage();
         }
         String date = null;
         int port = BrokenLinks.DEFAULT_PORT;
-        
+
         for (int idx = 3; idx < args.length; idx++) {
             if (args[idx].startsWith("-init_date=")) {
                 date = args[idx].substring(11);
@@ -107,7 +92,7 @@ public class ResetExportFlag {
                 usage();
             }
         }
-        
+
         reset(args[0], port, args[1], args[2], date);
     }
 }

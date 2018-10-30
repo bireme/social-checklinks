@@ -1,23 +1,10 @@
 <%--
+  =========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or 
-    modify it under the terms of the GNU Lesser General Public License as 
-    published by the Free Software Foundation, either version 2.1 of 
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public 
-    License along with Social Check Links. If not, see 
-    <http://www.gnu.org/licenses/>.
-
+  ==========================================================================
 --%>
 
 <%@page language="java"%>
@@ -25,9 +12,9 @@
 <%@page import="java.util.*,br.bireme.scl.*" %>
 <%@page contentType="text/html;charset=UTF-8"%>
 
-<% 
+<%
     request.setCharacterEncoding("UTF-8");
-            
+
     String lang = (String)request.getParameter("lang");
     if (lang == null) {
         lang = "en";
@@ -81,15 +68,15 @@
             </form>
             <%
             if (errMsg != null) {
-            %>                     
+            %>
                 <div class="alert alert-danger fade in">
                     <strong><%=messages.getString("bad_news")%></strong> <%=errMsg%>
                 </div>
             <%
-            }       
+            }
             %>
         </div> <!-- /container -->
-   
+
 	<!-- javascript
         ================================================== -->
         <script src="js/jquery.js"></script>
@@ -104,6 +91,6 @@
         <script src="js/bootstrap-button.js"></script>
         <script src="js/bootstrap-collapse.js"></script>
         <script src="js/bootstrap-carousel.js"></script>
-        <script src="js/bootstrap-typeahead.js"></script>	
+        <script src="js/bootstrap-typeahead.js"></script>
     </body>
 </html>

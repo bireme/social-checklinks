@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2015 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.scl;
 
@@ -48,19 +33,19 @@ import java.util.TreeMap;
  */
 public class ShowBrokenLinks {
     final DBCollection coll;
-    
-    public ShowBrokenLinks(final String host, 
-                           final String database, 
+
+    public ShowBrokenLinks(final String host,
+                           final String database,
                            final String collection) throws UnknownHostException {
         this(host, DEFAULT_PORT, null, null, database, collection);
-        
+
     }
-    
-    public ShowBrokenLinks(final String host, 
+
+    public ShowBrokenLinks(final String host,
                            final int port,
-                           final String user, 
-                           final String password, 
-                           final String database, 
+                           final String user,
+                           final String password,
+                           final String database,
                            final String collection) throws UnknownHostException {
         if (host == null) {
             throw new NullPointerException("host");
@@ -74,7 +59,7 @@ public class ShowBrokenLinks {
         if (collection == null) {
             throw new NullPointerException("collection");
         }
-        
+
         final MongoClient mongoClient = new MongoClient(host, port);
         final DB db = mongoClient.getDB(database);
         if (user != null) {
@@ -83,9 +68,9 @@ public class ShowBrokenLinks {
                 throw new IllegalArgumentException("invalid user/password");
             }
         }
-        coll = db.getCollection(collection);                
+        coll = db.getCollection(collection);
     }
-    
+
     public Map<String,String> statistics() throws IOException {
         final Map<String,String> ret = new TreeMap<String,String>();
         final Map<String,Integer> map = new HashMap<String,Integer>();
@@ -95,9 +80,9 @@ public class ShowBrokenLinks {
             final BasicDBObject dobj = (BasicDBObject)obj;
             final BasicDBList ccList = (BasicDBList)dobj.get(CENTER_FIELD);
             final String cc = (String)ccList.get(0);
-            
+
             if (cc == null) {
-                throw new IOException("null center field. Id=" 
+                throw new IOException("null center field. Id="
                                                     + dobj.getString(ID_FIELD));
             }
             Integer val = map.get(cc);
@@ -105,7 +90,7 @@ public class ShowBrokenLinks {
                 val = 0;
             }
             map.put(cc, val+1);
-        }        
+        }
         cursor.close();
 
         for (Map.Entry<String,Integer> entry : map.entrySet()) {
@@ -114,18 +99,18 @@ public class ShowBrokenLinks {
             final int dif = 999999 - value;
             ret.put(dif + "_" + value + "_" + key , key);
         }
-        
+
         return ret;
     }
-    
+
     private static void usage() {
         System.err.println("usage: ShowBrokenLinks <host> [-port=<port>]" +
                 "\n\t\t     [-user=<user> -password=<pswd>]" +
                 "\n\t\t     [-database=<dbase>] [-collection=<col>]");
         System.exit(1);
     }
-    
-    public static void main(final String[] args) throws UnknownHostException, 
+
+    public static void main(final String[] args) throws UnknownHostException,
                                                         IOException,
                                                         ParseException {
         if (args.length < 1) {
@@ -138,9 +123,9 @@ public class ShowBrokenLinks {
         String password = null;
         String database = SOCIAL_CHECK_DB;
         String collection = BROKEN_LINKS_COL;
-                
+
         for (int idx = 1; idx < args.length; idx++) {
-            if (args[idx].startsWith("-port=")) {                
+            if (args[idx].startsWith("-port=")) {
                 port = Integer.parseInt(args[idx].substring(6));
             } else if (args[idx].startsWith("-user=")) {
                 user = args[idx].substring(6);
@@ -154,23 +139,23 @@ public class ShowBrokenLinks {
                 usage();
             }
         }
-        
-        final ShowBrokenLinks blinks = new ShowBrokenLinks(host, port, user, 
+
+        final ShowBrokenLinks blinks = new ShowBrokenLinks(host, port, user,
                                                 password, database, collection);
         final Map<String,String> map = blinks.statistics();
         int idx = 0;
         int total = 0;
-                
+
         for (Map.Entry<String,String> entry : map.entrySet()) {
             final String key = entry.getKey();
             final int idx1 = key.indexOf('_');
             final int idx2 = key.lastIndexOf('_');
             final String num = key.substring(idx1 + 1, idx2);
-            
-            System.out.println((++idx) + ") CC=" + entry.getValue() + " #=" + 
+
+            System.out.println((++idx) + ") CC=" + entry.getValue() + " #=" +
                                                                            num);
             total += Integer.parseInt(num);
         }
-        System.out.println("\nTotal=" + total);        
+        System.out.println("\nTotal=" + total);
     }
 }

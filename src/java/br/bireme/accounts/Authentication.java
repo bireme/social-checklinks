@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.accounts;
 
@@ -57,7 +42,7 @@ public class Authentication {
     public Authentication(final String host) {
         this(host, DEFAULT_PORT);
     }
-    
+
     public Authentication(final String host,
                           final int port) {
         if (host == null) {
@@ -79,7 +64,7 @@ public class Authentication {
         return (Boolean)response.get("success");
     }
 
-    public String getColCenter(final JSONObject response) 
+    public String getColCenter(final JSONObject response)
                                             throws IOException, ParseException {
         if (response == null) {
             throw new NullPointerException("response");
@@ -95,8 +80,8 @@ public class Authentication {
 
         return id;
     }
-    
-    public Set<String> getCenterIds(final JSONObject response) 
+
+    public Set<String> getCenterIds(final JSONObject response)
                                             throws IOException, ParseException {
         if (response == null) {
             throw new NullPointerException("response");
@@ -108,7 +93,7 @@ public class Authentication {
 
             if (jobj != null) {
                 final JSONArray array = (JSONArray)jobj.get("ccs");
-                if (array != null) {                                        
+                if (array != null) {
                     for (Object array1 : array) {
                         id.add((String) array1);
                     }

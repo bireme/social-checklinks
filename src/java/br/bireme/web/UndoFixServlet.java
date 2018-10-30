@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.web;
 
@@ -42,7 +27,7 @@ import javax.servlet.http.HttpSession;
  */
 public class UndoFixServlet extends HttpServlet {
     private static final String CODEC = "UTF-8";
-    
+
     /**
      * Processes requests for both HTTP
      * <code>GET</code> and
@@ -57,7 +42,7 @@ public class UndoFixServlet extends HttpServlet {
                                   final HttpServletResponse response)
                                          throws ServletException, IOException {
         request.setCharacterEncoding(CODEC);
-        
+
         final ServletContext context = getServletContext();
         final DBCollection coll =
                                (DBCollection)context.getAttribute("collection");
@@ -76,10 +61,10 @@ public class UndoFixServlet extends HttpServlet {
         final String dbFilter = request.getParameter("dbFilter");
         final String collCenterFilter = request.getParameter("collCenterFilter");
         final String order = request.getParameter("order");
-        
+
         for (IdUrl iu : fixed) {
             if (iu.id.equals(id)) {
-                if (! MongoOperations.undoUpdateDocument(coll, hcoll, iu.id, 
+                if (! MongoOperations.undoUpdateDocument(coll, hcoll, iu.id,
                                                                         true)) {
                    throw new IOException("Undo operation failed.");
                 }
@@ -89,12 +74,12 @@ public class UndoFixServlet extends HttpServlet {
         }
         session.setAttribute("IdUrls", nfixed);
         response.sendRedirect(response.encodeRedirectURL(
-                   "showFixedUrls.jsp?group=" + group + "&lgroup=" + lgroup 
+                   "showFixedUrls.jsp?group=" + group + "&lgroup=" + lgroup
                   + "&lang=" + lang + "&id=" + id + "&brokenUrl=" + brokenUrl
                   + "&url=" + url + "&undoUrl=" + undoUrl + "&dbFilter="
-                  + dbFilter + "&collCenterFilter=" + collCenterFilter 
+                  + dbFilter + "&collCenterFilter=" + collCenterFilter
                   + "&order=" + order + "&undo=true"));
-        
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

@@ -1,25 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2014 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
-
+  ==========================================================================*/
 
 package br.bireme.scl;
 
@@ -31,7 +15,7 @@ import java.util.List;
  * @author Heitor Barbieri
  * date 20140716
  */
-public class Element {   
+public class Element {
     private final String id;
     private final String burl;
     private final String pburl;
@@ -43,11 +27,11 @@ public class Element {
     private final boolean exported;
     private final StringBuilder  builder;
 
-    public Element(final String id, 
-                   final String burl, 
-                   final String pburl, 
-                   final String furl, 
-                   final String dbase, 
+    public Element(final String id,
+                   final String burl,
+                   final String pburl,
+                   final String furl,
+                   final String dbase,
                    final String date,
                    final String user,
                    final List<String> ccs,
@@ -61,7 +45,7 @@ public class Element {
         this.date = date;
         this.ccs = (ccs == null) ? new ArrayList<String>() : ccs;
         this.exported = exported;
-        this.builder = new StringBuilder();        
+        this.builder = new StringBuilder();
     }
 
     public String getId() {
@@ -75,7 +59,7 @@ public class Element {
     public String getPBurl() {
         return pburl;
     }
-    
+
     public String getFurl() {
         return furl;
     }
@@ -87,23 +71,23 @@ public class Element {
     public String getDate() {
         return date;
     }
-    
+
     public String getUser() {
         return user;
     }
-    
+
     public List<String> getCcs() {
         return ccs;
     }
-    
+
     public boolean isExported() {
         return exported;
     }
-    
+
     @Override
     public String toString() {
         boolean first = true;
-        
+
         builder.setLength(0);
         builder.append("date=");
         builder.append(date);

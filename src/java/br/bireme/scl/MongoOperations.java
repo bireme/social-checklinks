@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.scl;
 
@@ -71,26 +56,26 @@ public class MongoOperations {
         public final int size;
         public final List<IdUrl> documents;
 
-        public SearchResult(final int size, 
+        public SearchResult(final int size,
                             final List<IdUrl> documents) {
             this.size = size;
             this.documents = documents;
-        }                
+        }
     }
     public static class SearchResult2 {
         public final int size;
         public final int size2;
         public final List<Element> documents;
 
-        public SearchResult2(final int size, 
+        public SearchResult2(final int size,
                              final int size2,
                              final List<Element> documents) {
             this.size = size;
             this.size2 = size;
             this.documents = documents;
-        }                
+        }
     }
-    
+
     public static final String FIXED_URL_FIELD = "furl";
     public static final String USER_FIELD = "user";
     public static final String AUTO_FIX_FIELD = "autofix";
@@ -113,30 +98,30 @@ public class MongoOperations {
 
         return set;
     }*/
-    
+
     public static Set<String> getCenters(final DBCollection coll) {
         if (coll == null) {
             throw new NullPointerException("coll");
         }
         return new TreeSet<String>(coll.distinct(CENTER_FIELD));
     }
-    
+
     public static Set<String> getDatabases(final DBCollection coll) {
         if (coll == null) {
             throw new NullPointerException("coll");
-        }        
+        }
 
         return new TreeSet<String>(coll.distinct("mst"));
     }
 
-    
+
     public static List<IdUrl> getCenterUrls(final DBCollection coll,
                                             final Set<String> centerIds,
                                             final String filter) {
-        return getCenterUrls(coll, centerIds, filter, 1, Integer.MAX_VALUE, 
+        return getCenterUrls(coll, centerIds, filter, 1, Integer.MAX_VALUE,
                                                                          true);
     }
-    
+
     /**
      * Obtem uma lista com objetos IdUrl obtidos da base de dados MongoDb
      * @param coll coleção onde estão as urls
@@ -170,9 +155,9 @@ public class MongoOperations {
         }
         //final Set<IdUrl> lst = new TreeSet<IdUrl>();
         final List<IdUrl> lst = new ArrayList<IdUrl>();
-        final SimpleDateFormat format = 
+        final SimpleDateFormat format =
                                     new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        final BasicDBObject sort = new BasicDBObject(DATE_FIELD, 
+        final BasicDBObject sort = new BasicDBObject(DATE_FIELD,
                                                        ascendingOrder ? 1 : -1);
 
         if (filter == null) {
@@ -200,14 +185,14 @@ public class MongoOperations {
                                            ccs,
                                     format.format((Date)(doc.get(DATE_FIELD))),
                                            (String)doc.get(MST_FIELD));
-                lst.add(iu);                 
+                lst.add(iu);
             }
             cursor.close();
         } else {
             final BasicDBObject query = new BasicDBObject(CENTER_FIELD, filter);
             final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
                                                                   .limit(count);
-            
+
             while (cursor.hasNext()) {
                 final DBObject doc = cursor.next();
                 final Set<String> ccs = new TreeSet<String>();
@@ -218,13 +203,13 @@ public class MongoOperations {
                                            ccs,
                                       format.format((Date)doc.get(DATE_FIELD)),
                                            (String)doc.get(MST_FIELD));
-                lst.add(iu);                
+                lst.add(iu);
             }
             cursor.close();
         }
         return lst;
     }
-    
+
     public static SearchResult getDocuments(final DBCollection coll,
                                             final String docMast,
                                             final String docId,
@@ -241,10 +226,10 @@ public class MongoOperations {
         }
         if (count < 1) {
             throw new IllegalArgumentException("count[" + count + "] < 1");
-        }        
+        }
         final List<IdUrl> lst = new ArrayList<IdUrl>();
         final BasicDBObject query = new BasicDBObject();
-        
+
         if (docMast != null) {
             query.append(MST_FIELD, docMast);
         }
@@ -263,11 +248,11 @@ public class MongoOperations {
             final BasicDBObject in = new BasicDBObject("$in", cclst);
             query.append(CENTER_FIELD, in);
         }
-        
+
         // Verify if it is the second check.
         query.append(LAST_UPDATE_FIELD, new BasicDBObject("$exists", true));
-        
-        final BasicDBObject sort = new BasicDBObject(DATE_FIELD, 
+
+        final BasicDBObject sort = new BasicDBObject(DATE_FIELD,
                                                       decreasingOrder ? -1 : 1);
         final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
                                                                   .limit(count);
@@ -286,17 +271,17 @@ public class MongoOperations {
                                        ccs,
                                      format.format((Date)(doc.get(DATE_FIELD))),
                                        (String)doc.get(MST_FIELD));
-            lst.add(iu);                 
+            lst.add(iu);
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }
         cursor.close();
-        
+
         return new SearchResult(size, lst);
-    }        
-    
+    }
+
     public static SearchResult2 getHistoryDocuments(final DBCollection coll,
-                                                    final Element elem,                                             
+                                                    final Element elem,
                                                     final int from,
-                                                    final int count) throws 
+                                                    final int count) throws
                                                    IOException, ParseException {
         if (coll == null) {
             throw new NullPointerException("coll");
@@ -309,51 +294,51 @@ public class MongoOperations {
         }
         if (count < 1) {
             throw new IllegalArgumentException("count[" + count + "] < 1");
-        }        
+        }
         final List<Element> lst = new ArrayList<Element>();
         final BasicDBObject query = new BasicDBObject();
         final String root = ELEM_LST_FIELD + ".0.";
-        final String updated = root + LAST_UPDATE_FIELD; 
-        
+        final String updated = root + LAST_UPDATE_FIELD;
+
         if (elem.getDbase() != null) {
             query.append(MST_FIELD, elem.getDbase().trim());
-        }        
+        }
         if (elem.getId() != null) {
-            final Pattern pat = Pattern.compile("^" + elem.getId().trim() 
+            final Pattern pat = Pattern.compile("^" + elem.getId().trim()
                                                                      + "_\\d+");
             query.append(ID_FIELD, pat);
-        }        
+        }
         if (elem.getFurl() != null) {
             query.append(root + FIXED_URL_FIELD, elem.getFurl().trim());
-        }        
+        }
         if (!elem.getCcs().isEmpty()) {
             final BasicDBList cclst = new BasicDBList();
             for (String centerId : elem.getCcs()) {
                 cclst.add(centerId.trim());
             }
             final String cc = root + CENTER_FIELD;
-            final BasicDBObject in = new BasicDBObject("$in", cclst);        
+            final BasicDBObject in = new BasicDBObject("$in", cclst);
             query.append(cc, in);
-        }        
-        if (elem.getDate() != null) {            
+        }
+        if (elem.getDate() != null) {
             final SimpleDateFormat simple = new SimpleDateFormat("dd-MM-yyyy");
             final Date date = simple.parse(elem.getDate().trim());
-            final BasicDBObject qdate = new BasicDBObject("$gte", date);                        
+            final BasicDBObject qdate = new BasicDBObject("$gte", date);
             query.append(updated, qdate);
-        }        
+        }
         if (elem.getUser() != null) {
             final String user = root + USER_FIELD;
             query.append(user, elem.getUser().trim());
         }
-        
+
         final BasicDBObject sort = new BasicDBObject(updated, -1);
         final DBCursor cursor = coll.find(query).sort(sort).skip(from - 1)
-                                                                  .limit(count); 
+                                                                  .limit(count);
         final int size = cursor.count();
         final SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-        
+
         while (cursor.hasNext()) {
-            final BasicDBObject hdoc = (BasicDBObject)cursor.next();                        
+            final BasicDBObject hdoc = (BasicDBObject)cursor.next();
             final BasicDBList elst = (BasicDBList)hdoc.get(ELEM_LST_FIELD);
             final BasicDBObject hcurdoc = (BasicDBObject)elst.get(0);
             if (hcurdoc == null) {
@@ -366,17 +351,17 @@ public class MongoOperations {
                        hcurdoc.getString(PRETTY_BROKEN_URL_FIELD),
                        hcurdoc.getString(FIXED_URL_FIELD),
                        hdoc.getString(MST_FIELD),
-                       format.format((Date)(hcurdoc.get(LAST_UPDATE_FIELD))),                                          
+                       format.format((Date)(hcurdoc.get(LAST_UPDATE_FIELD))),
                        hcurdoc.getString(USER_FIELD),
                        ccs,
                        hcurdoc.getBoolean(EXPORTED_FIELD));
             lst.add(elem2);
         }
         cursor.close();
-        
+
         return new SearchResult2(size, lst.size(), lst);
     }
-                
+
     static Set<IdUrl> getDocsWith(final DBCollection coll,
                                   final Set<String> centerIds,
                                   final String filter,
@@ -401,7 +386,7 @@ public class MongoOperations {
                                          final DBCollection hcoll,
                                          final String docId,
                                          final String fixedUrl,
-                                         final String user,                                         
+                                         final String user,
                                          final String option,
                                          final boolean automatic)
                                                            throws IOException {
@@ -424,7 +409,7 @@ public class MongoOperations {
             throw new NullPointerException("option");
         }
         if (fixedUrl.length() >= 900) {
-            throw new IOException("fixedUrl is too long >= 900. [" + fixedUrl 
+            throw new IOException("fixedUrl is too long >= 900. [" + fixedUrl
                                                                          + "]");
         }
 
@@ -434,7 +419,7 @@ public class MongoOperations {
         if (doc == null) {
             throw new IOException("document not found id[" + docId + "]");
         }
-        
+
         final BasicDBList lsthdoc;
         BasicDBObject hdoc = (BasicDBObject)hcoll.findOne(query);
         if (hdoc == null) {
@@ -447,18 +432,18 @@ public class MongoOperations {
         } else {
             lsthdoc = (BasicDBList)hdoc.get(ELEM_LST_FIELD);
         }
-        
+
         final String brokenUrl = doc.getString(BROKEN_URL_FIELD);
         final String brokenUrl_D = EncDecUrl.decodeUrl(brokenUrl);
         final String fixedUrl_E = EncDecUrl.encodeUrl(fixedUrl, CODEC, false);
         //final String fixedUrl_D = EncDecUrl.decodeUrl(fixedUrl);
         final Date date = new Date();
         final BasicDBObject hcurdoc = new BasicDBObject();
-        hcurdoc.append(BROKEN_URL_FIELD, brokenUrl)               
+        hcurdoc.append(BROKEN_URL_FIELD, brokenUrl)
                .append(PRETTY_BROKEN_URL_FIELD, brokenUrl_D)
                .append(FIXED_URL_FIELD, fixedUrl_E)
                .append(MSG_FIELD, (String)doc.get(MSG_FIELD))
-               .append(CENTER_FIELD, (BasicDBList)doc.get(CENTER_FIELD))               
+               .append(CENTER_FIELD, (BasicDBList)doc.get(CENTER_FIELD))
                .append(AUTO_FIX_FIELD, automatic)
                .append(EXPORTED_FIELD, false)
                .append(LAST_UPDATE_FIELD, date)
@@ -470,16 +455,20 @@ public class MongoOperations {
         } else if (option.equals(ASSOCIATED_DOC)) {
             hcurdoc.append(ASSOCIATED_DOC, date);
         }
-                              
-        lsthdoc.add(0, hcurdoc);
-        
-        final boolean ret1 = coll.remove(doc, WriteConcern.ACKNOWLEDGED)
-                                                           .getLastError().ok();
-        final boolean ret2 = hcoll.save(hdoc).getLastError().ok();
 
-        return ret1 && ret2;
+        lsthdoc.add(0, hcurdoc);
+
+        boolean ret = true;
+        try {
+            coll.remove(doc, WriteConcern.ACKNOWLEDGED);
+            hcoll.save(hdoc);
+        } catch(Exception ex) {
+            ret = false;
+        }
+            
+        return ret;
     }
-    
+
     public static boolean undoUpdateDocument(final DBCollection coll,
                                              final DBCollection hcoll,
                                              final String docId,
@@ -504,10 +493,10 @@ public class MongoOperations {
         final BasicDBList lst = (BasicDBList)hdoc.get(ELEM_LST_FIELD);
         final BasicDBObject hcurdoc = (BasicDBObject)lst.remove(0);
         if (hcurdoc == null) {
-            throw new IOException("document last element found. Id[" + docId 
+            throw new IOException("document last element found. Id[" + docId
                                                                          + "]");
         }
-        final BasicDBObject doc = new BasicDBObject();        
+        final BasicDBObject doc = new BasicDBObject();
         doc.put(DATE_FIELD, hdoc.get(DATE_FIELD));
         doc.put(LAST_UPDATE_FIELD, hcurdoc.get(LAST_UPDATE_FIELD));
         doc.put(MST_FIELD, hdoc.get(MST_FIELD));
@@ -515,27 +504,28 @@ public class MongoOperations {
         doc.put(BROKEN_URL_FIELD, hcurdoc.get(BROKEN_URL_FIELD));
         doc.put(PRETTY_BROKEN_URL_FIELD, hcurdoc.get(PRETTY_BROKEN_URL_FIELD));
         doc.put(MSG_FIELD, hcurdoc.get(MSG_FIELD));
-        doc.put(CENTER_FIELD, hcurdoc.get(CENTER_FIELD));    
-        
-        final boolean ret1 = updateBrokenColl 
-                                    ? coll.save(doc).getLastError().ok() : true;
-        final boolean ret2;
-        
-        if (lst.isEmpty()) {
-            ret2 = hcoll.remove(query, WriteConcern.ACKNOWLEDGED).getLastError()
-                                                                          .ok();
-        } else {
-            ret2 = hcoll.save(hdoc, WriteConcern.ACKNOWLEDGED).getLastError()
-                                                                          .ok();
-        }       
+        doc.put(CENTER_FIELD, hcurdoc.get(CENTER_FIELD));
 
-        return ret1 && ret2;
+        boolean ret = true;
+        
+        try {
+            if (updateBrokenColl) coll.save(doc);
+            if (lst.isEmpty()) {
+                hcoll.remove(query, WriteConcern.ACKNOWLEDGED);
+            } else {
+                hcoll.save(hdoc, WriteConcern.ACKNOWLEDGED);
+            }   
+        } catch(Exception ex) {
+            ret = false;
+        }
+
+        return ret;
     }
-    
+
     public static boolean undoUpdateDocument2(final DBCollection coll,
                                               final DBCollection hcoll,
                                               final String fromDate)
-                                                           throws IOException, 
+                                                           throws IOException,
                                                                 ParseException {
         if (coll == null) {
             throw new NullPointerException("coll");
@@ -544,24 +534,24 @@ public class MongoOperations {
             throw new NullPointerException("hcoll");
         }
         final SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
-        final Date date = (fromDate == null) ? new Date(0) 
+        final Date date = (fromDate == null) ? new Date(0)
                                              : simple.parse(fromDate);
         final String updated = ELEM_LST_FIELD + ".0." + LAST_UPDATE_FIELD;
         final BasicDBObject qdate = new BasicDBObject("$gte", date);
         final BasicDBObject query = new BasicDBObject(updated, qdate);
-        final BasicDBObject sort = new BasicDBObject(updated, -1);  
+        final BasicDBObject sort = new BasicDBObject(updated, -1);
         final DBCursor cursor = coll.find(query).sort(sort);
-        
+
         boolean ret = true;
-                
+
         while (cursor.hasNext()) {
-            final BasicDBObject hdoc = (BasicDBObject)cursor.next();                        
+            final BasicDBObject hdoc = (BasicDBObject)cursor.next();
             final BasicDBList lst = (BasicDBList)hdoc.get(ELEM_LST_FIELD);
             final BasicDBObject hcurdoc = (BasicDBObject)lst.remove(0);
             if (hcurdoc == null) {
                 throw new IOException("document last element found.");
             }
-            final BasicDBObject doc = new BasicDBObject();        
+            final BasicDBObject doc = new BasicDBObject();
             doc.put(DATE_FIELD, hdoc.get(DATE_FIELD));
             doc.put(LAST_UPDATE_FIELD, hcurdoc.get(LAST_UPDATE_FIELD));
             doc.put(MST_FIELD, hdoc.get(MST_FIELD));
@@ -569,23 +559,23 @@ public class MongoOperations {
             doc.put(BROKEN_URL_FIELD, hcurdoc.get(BROKEN_URL_FIELD));
             doc.put(PRETTY_BROKEN_URL_FIELD, hcurdoc.get(PRETTY_BROKEN_URL_FIELD));
             doc.put(MSG_FIELD, hcurdoc.get(MSG_FIELD));
-            doc.put(CENTER_FIELD, hcurdoc.get(CENTER_FIELD));    
+            doc.put(CENTER_FIELD, hcurdoc.get(CENTER_FIELD));
 
-            final boolean ret1 = coll.save(doc).getLastError().ok();
-            final boolean ret2;
-
-            if (lst.isEmpty()) {
-                ret2 = hcoll.remove(query, WriteConcern.ACKNOWLEDGED)
-                                                          .getLastError().ok();
-            } else {
-                ret2 = hcoll.save(hdoc, WriteConcern.ACKNOWLEDGED)
-                                                          .getLastError().ok();
-            } 
-            final boolean auxret = (ret1 && ret2);
-            if (!auxret) {
+            boolean ret2 = true;
+            try {
+                coll.save(doc);
+                if (lst.isEmpty()) {
+                    hcoll.remove(query, WriteConcern.ACKNOWLEDGED);
+                } else {
+                    hcoll.save(hdoc, WriteConcern.ACKNOWLEDGED);
+                }            
+            } catch(Exception ex) {
+                ret2 = false;
+            }
+            if (!ret2) {
                 System.err.println("doc[" + hdoc.get(ID_FIELD) + "] write error");
             }
-            ret &= auxret;
+            ret &= ret2;
         }
 
         return ret;
@@ -625,26 +615,26 @@ public class MongoOperations {
         if (option == null) {
             throw new NullPointerException("option");
         }
-        final Set<IdUrl> ret = new HashSet<IdUrl>();        
+        final Set<IdUrl> ret = new HashSet<IdUrl>();
         final String brokenUrl_D = EncDecUrl.decodeUrl(brokenUrl);
         final String fixedUrl_D = EncDecUrl.decodeUrl(fixedUrl);
         final String fixedUrl_E = EncDecUrl.encodeUrl(fixedUrl, CODEC, false);
         final String[] patterns = Tools.getPatterns(brokenUrl_D, fixedUrl_D);
         final boolean force = !option.equals(DO_NOT_FORCE);
-        
+
         if ((brokenUrl_D.equals(fixedUrl_D)) || (patterns[0].equals("^"))) {
             if (force || !CheckUrl.isBroken(CheckUrl.check(fixedUrl_E))) {
-                final Set<IdUrl> docs = 
-                        getDocsWith(coll, centerIds, filter, 
+                final Set<IdUrl> docs =
+                        getDocsWith(coll, centerIds, filter,
                                                 Tools.escapeChars(brokenUrl_D));
                 for (IdUrl iu : docs) {
                     if (iu.url.equals(brokenUrl_D)) {
-                        IdUrl iu2 = new IdUrl(iu.id, fixedUrl, iu.ccs, iu.since, 
-                                                                        iu.mst); 
+                        IdUrl iu2 = new IdUrl(iu.id, fixedUrl, iu.ccs, iu.since,
+                                                                        iu.mst);
                         ret.add(iu2);
-                        if (!updateDocument(coll, hcoll, iu2.id, iu2.url, 
+                        if (!updateDocument(coll, hcoll, iu2.id, iu2.url,
                                                          user, option, false)) {
-                            throw new IOException("could not update " + 
+                            throw new IOException("could not update " +
                                                    "document id=" + iu2.id);
                         }
                         break;
@@ -652,7 +642,7 @@ public class MongoOperations {
                 }
             }
         } else {
-            final Set<IdUrl> docs = getDocsWith(coll, centerIds, null, 
+            final Set<IdUrl> docs = getDocsWith(coll, centerIds, null,
                                                                    patterns[0]);
             final Set<IdUrl> docs2 = Tools.filterDomains(docs, id);
             final Set<IdUrl> converted = Tools.getConvertedUrls(docs2,
@@ -669,7 +659,7 @@ public class MongoOperations {
 
             final String[] inurls = map.keySet().toArray(new String[0]);
             final String[] inurls_E = new String[inurls.length];
-            
+
             for (int idx = 0; idx < inurls.length; idx++) {
                 inurls_E[idx] = EncDecUrl.encodeUrl(inurls[idx], CODEC, false);
             }
@@ -678,7 +668,7 @@ public class MongoOperations {
 
             for (int idx = 0; idx < len; idx++) {
                 if (!CheckUrl.isBroken(results[idx])) {
-                    for (IdUrl iu : map.get(inurls[idx])) {                    
+                    for (IdUrl iu : map.get(inurls[idx])) {
                         ret.add(iu);
                         if (!updateDocument(coll, hcoll, iu.id, iu.url, user,
                                           option, !fixedUrl_D.equals(iu.url))) {
@@ -691,7 +681,7 @@ public class MongoOperations {
         }
         return ret;
     }
-    
+
     public static void fixMissingHttp(final DBCollection coll,
                                       final DBCollection hcoll,
                                       final boolean showTell)
@@ -702,23 +692,23 @@ public class MongoOperations {
         if (hcoll == null) {
             throw new NullPointerException("hcoll");
         }
-        final String HTTP = "http://";        
+        final String HTTP = "http://";
         final DBCursor cursor = coll.find();
         int tell = 0;
-        
+
         while (cursor.hasNext()) {
             final DBObject dbo = cursor.next();
             final String url = ((String) dbo.get(BROKEN_URL_FIELD)).trim();
 
             if (!url.startsWith(HTTP)) {
                 final String fixedUrl = HTTP + url;
-                            
+
                 if (!Tools.isDomain(fixedUrl)) {
-                    if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl))) {                    
+                    if (!CheckUrl.isBroken(CheckUrl.check(fixedUrl))) {
                         final String id = (String) dbo.get(ID_FIELD);
                         if (!updateDocument(coll, hcoll, id, fixedUrl, "system",
                                                           DO_NOT_FORCE, true)) {
-                            throw new IOException("could not update document id=" 
+                            throw new IOException("could not update document id="
                                                                           + id);
                         }
                     }
@@ -742,7 +732,7 @@ public class MongoOperations {
             throw new NullPointerException("centerIds");
         }
         final Set<String> ret = new TreeSet<String>();
-        
+
         for (String id : centerIds) {
             final BasicDBObject query = new BasicDBObject(CENTER_FIELD, id);
             final DBObject dbo = coll.findOne(query);
@@ -750,10 +740,10 @@ public class MongoOperations {
                 ret.add(id);
             }
         }
-        
+
         return ret;
     }
-    
+
     public static void main(final String[] args) throws UnknownHostException,
                                                                    IOException {
         final MongoClient mongoClient = new MongoClient("ts01vm.bireme.br");

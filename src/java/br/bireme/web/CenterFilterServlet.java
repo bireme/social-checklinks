@@ -1,24 +1,10 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
+  ==========================================================================*/
 
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
 package br.bireme.web;
 
 import java.io.IOException;
@@ -46,28 +32,28 @@ public class CenterFilterServlet extends HttpServlet {
      * @throws javax.servlet.ServletException
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(final HttpServletRequest request, 
+    protected void processRequest(final HttpServletRequest request,
                                   final HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
-        
+
         final String lang = request.getParameter("lang");
         final String order = request.getParameter("order");
         final String collCenterFilter = request.getParameter("collCenterFilter");
         final String dbFilter = request.getParameter("dbFilter");
         final String idFilter = request.getParameter("idFilter");
         final String urlFilter = request.getParameter("urlFilter");
-       
+
         /*final HttpSession session = request.getSession();
         final String collFilterCenter = (String)
                                      session.getAttribute("collFilterCenter");*/
         final ServletContext context = getServletContext();
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
-           "/list.jsp?group=0&lang=" + lang + "&order=" + order + 
-            (collCenterFilter == null ? "" : "&collCenterFilter=" + collCenterFilter) + 
-            (dbFilter == null ? "" : "&dbFilter=" + dbFilter) + 
-            (idFilter == null ? "" : "&idFilter=" + idFilter) + 
+           "/list.jsp?group=0&lang=" + lang + "&order=" + order +
+            (collCenterFilter == null ? "" : "&collCenterFilter=" + collCenterFilter) +
+            (dbFilter == null ? "" : "&dbFilter=" + dbFilter) +
+            (idFilter == null ? "" : "&idFilter=" + idFilter) +
             (urlFilter == null ? "" : "&urlFilter=" + urlFilter));
         dispatcher.forward(request, response);
     }

@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.scl;
 
@@ -82,7 +67,7 @@ public class Tools {
         assert inStr != null;
 
         final String out = inStr.replaceAll(
-                    "([\\^\\$\\\\?\\+\\*\\{\\}\\(\\)\\[\\]\\|\\&\\-\\%])", 
+                    "([\\^\\$\\\\?\\+\\*\\{\\}\\(\\)\\[\\]\\|\\&\\-\\%])",
                                                                       "\\\\$1");
         return out;
     }
@@ -91,7 +76,7 @@ public class Tools {
      * Gera padroes para substituicao de strings nas urls
      * @param brokenUrl ulr quebrada
      * @param fixedUrl  url boa
-     * @return retorna o padrao a ser procurado nas urls e o padrao a ser 
+     * @return retorna o padrao a ser procurado nas urls e o padrao a ser
      *         substituido.
      */
     static String[] getPatterns(final String brokenUrl,
@@ -184,7 +169,7 @@ public class Tools {
 
         return ResourceBundle.getBundle("i18n.MessagesBundle", currentLocale);
     }
-    
+
     public static Set<String> getTitles(final String surl) throws IOException {
         if (surl == null) {
             throw new NullPointerException("surl");
@@ -220,10 +205,10 @@ public class Tools {
         if (!respCodeOk) {
             throw new IOException(builder.toString());
         }
-        
+
         final String pattern = "\\<\\!-- title --\\>\\s+\\<h3\\>(.*?)\\</h3\\>";
         final Matcher mat = Pattern.compile(pattern).matcher(builder.toString());
-        
+
         if (!mat.find()) {
             throw new IOException("Title not found");
         }
@@ -232,7 +217,7 @@ public class Tools {
         for (String title : titles) {
             set.add(title.trim());
         }
-        
+
         return set;
     }
 
@@ -246,7 +231,7 @@ public class Tools {
         }
         final int strLen = in.length();
         final String out;
-        
+
         if (strLen <= len) {
             out = in;
         } else {
@@ -254,8 +239,8 @@ public class Tools {
         }
         return out;
     }
-    
-    public static boolean isDomain(final String surl) 
+
+    public static boolean isDomain(final String surl)
                                                   throws MalformedURLException {
         if (surl == null) {
             throw new NullPointerException("surl");
@@ -263,19 +248,19 @@ public class Tools {
         final Matcher mat = Pattern.compile("([a-zA-Z]{3,10}://)?\\w+/.+")
                                                           .matcher(surl.trim());
         //final URL url = new URL(surl);
-        
+
         return (!mat.find());
     }
-    
+
     /**
-     * 
+     *
      * @param urls list of input urls
      * @param id if some urls are only domain, return only that with this id
      * @return return a set of url that are not only domais except one.
      * @throws java.net.MalformedURLException
      */
     public static Set<IdUrl> filterDomains(final Set<IdUrl> urls,
-                                           final String id) 
+                                           final String id)
                                                   throws MalformedURLException {
         if (urls == null) {
             throw new NullPointerException("urls");
@@ -284,7 +269,7 @@ public class Tools {
             throw new NullPointerException("id");
         }
         final Set<IdUrl> ret = new HashSet<IdUrl>();
-        
+
         for (IdUrl url : urls) {
             if (isDomain(url.url)) {
                 if (url.id.equals(id)) {
@@ -294,10 +279,10 @@ public class Tools {
                 ret.add(url);
             }
         }
-        
+
         return ret;
     }
-    
+
     /**
      * Removes from url patterns %xx not allowed by enc/decoding rules
      * @param in input string
@@ -308,17 +293,17 @@ public class Tools {
             throw new NullPointerException("in");
         }
         final Matcher mat = Pattern.compile(
-                    "(%([^0-9a-fA-F]|[0-9a-fA-F][^0-9a-fA-F]))").matcher(in);        
+                    "(%([^0-9a-fA-F]|[0-9a-fA-F][^0-9a-fA-F]))").matcher(in);
         final StringBuffer sb = new StringBuffer();
- 
+
         while (mat.find()) {
             mat.appendReplacement(sb, "");
         }
         mat.appendTail(sb);
-        
+
         return sb.toString();
     }
-    
+
     public static void main(final String[] args) {
         String[] result;
 

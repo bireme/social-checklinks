@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.scl;
 
@@ -35,7 +20,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,15 +48,15 @@ public class BrokenLinks {
     public static final String DEFAULT_MST_ENCODING = "IBM850";
     public static final String DEFAULT_HOST = "localhost";
     public static final int DEFAULT_PORT = 27017;
-    
+
     /* Database */
     public static final String SOCIAL_CHECK_DB = "SocialCheckLinks";
-    
+
     /* Collections */
     public static final String BROKEN_LINKS_COL = "BrokenLinks";
     public static final String HISTORY_COL = "HistoryBrokenLinks";
     public static final String CC_FIELDS_COL = "IsisCcFields";
-        
+
     /* SOCIAL_CHECK_COL colection fields */
     public static final String ID_FIELD = "_id";
     public static final String CENTER_FIELD = "center";
@@ -83,16 +67,16 @@ public class BrokenLinks {
     public static final String MSG_FIELD = "msg";
     public static final String DATE_FIELD = "date";
     public static final String LAST_UPDATE_FIELD = "updated";
-    
+
     /* CC_FIELDS_COL colection fields */
     public static final String MST_FIELD = "mst";
     public static final String ID_TAG_FIELD = "idTag";
     public static final String URL_TAG_FIELD = "urlTag";
     public static final String CC_TAGS_FIELD = "ccTags";
-    
+
     /* HistoryBrokenLinks collection fields */
     public static final String ELEM_LST_FIELD = "elems";
-    
+
     // Do not include the link into future checks
     public static final String FUTURE_CHECKS = "future_checks";
     // Exclude the links from associated database record
@@ -102,54 +86,54 @@ public class BrokenLinks {
 
     public static final String DEF_FIELD = ID_FIELD;
     public static final String DO_NOT_FORCE = "do_not_force";
-    
+
     /* CheckLinks - HTTP error messages */
-    public static final String[] ALL_MESS = {"Continue", "Switching Protocols", 
-        "Processing", "OK", "Created", "Accepted", "Non-Authoritative Information", 
-        "No Content", "Reset Content", "Partial Content", "Multi-Status", 
-        "Already Reported", "IM Used", "Multiple Choices", "Moved Permanently", 
-        "Found", "See Other", "Not Modified", "Use Proxy", "Switch Proxy", 
-        "Temporary Redirect", "Permanent Redirect", "Resume Incomplete", 
-        "German Wikipedia", "Bad Request", "Unauthorized", "Payment Required", 
-        "Forbidden", "Not Found", "Method Not Allowed", "Not Acceptable", 
-        "Proxy Authentication Required", "Request Timeout", "Conflict", "Gone", 
-        "Length Required", "Precondition Failed", "Payload Too Large", 
-        "URI Too Long", "Unsupported Media Type", "Range Not Satisfiable", 
-        "Expectation Failed", "I'm a teapot", "Authentication Timeout", 
-        "Method Failure", "Enhance Your Calm", "Misdirected Request", 
-        "Unprocessable Entity", "Locked", "Failed Dependency", 
-        "Upgrade Required", "Precondition Required", "Too Many Requests", 
-        "Request Header Fields Too Large", "Login Timeout", "No Response", 
-        "Retry With", "Blocked by Windows Parental Controls", 
-        "Unavailable For Legal Reasons", "Redirect", "Request Header Too Large", 
-        "Cert Error", "No Cert", "HTTP to HTTPS", "Token expired/invalid", 
-        "Client Closed Request", "Token required", "Internal Server Error", 
-        "Not Implemented", "Bad Gateway", "Service Unavailable", 
-        "Gateway Timeout", "HTTP Version Not Supported", 
-        "Variant Also Negotiates", "Insufficient Storage", "Loop Detected", 
-        "Bandwidth Limit Exceeded", "Not Extended", 
-        "Network Authentication Required", "Unknown Error", 
-        "Origin Connection Time-out", "Network read timeout error", 
+    public static final String[] ALL_MESS = {"Continue", "Switching Protocols",
+        "Processing", "OK", "Created", "Accepted", "Non-Authoritative Information",
+        "No Content", "Reset Content", "Partial Content", "Multi-Status",
+        "Already Reported", "IM Used", "Multiple Choices", "Moved Permanently",
+        "Found", "See Other", "Not Modified", "Use Proxy", "Switch Proxy",
+        "Temporary Redirect", "Permanent Redirect", "Resume Incomplete",
+        "German Wikipedia", "Bad Request", "Unauthorized", "Payment Required",
+        "Forbidden", "Not Found", "Method Not Allowed", "Not Acceptable",
+        "Proxy Authentication Required", "Request Timeout", "Conflict", "Gone",
+        "Length Required", "Precondition Failed", "Payload Too Large",
+        "URI Too Long", "Unsupported Media Type", "Range Not Satisfiable",
+        "Expectation Failed", "I'm a teapot", "Authentication Timeout",
+        "Method Failure", "Enhance Your Calm", "Misdirected Request",
+        "Unprocessable Entity", "Locked", "Failed Dependency",
+        "Upgrade Required", "Precondition Required", "Too Many Requests",
+        "Request Header Fields Too Large", "Login Timeout", "No Response",
+        "Retry With", "Blocked by Windows Parental Controls",
+        "Unavailable For Legal Reasons", "Redirect", "Request Header Too Large",
+        "Cert Error", "No Cert", "HTTP to HTTPS", "Token expired/invalid",
+        "Client Closed Request", "Token required", "Internal Server Error",
+        "Not Implemented", "Bad Gateway", "Service Unavailable",
+        "Gateway Timeout", "HTTP Version Not Supported",
+        "Variant Also Negotiates", "Insufficient Storage", "Loop Detected",
+        "Bandwidth Limit Exceeded", "Not Extended",
+        "Network Authentication Required", "Unknown Error",
+        "Origin Connection Time-out", "Network read timeout error",
         "Network connect timeout error", };
 
     /* CheckLinks - HTTP error codes */
     public static final Integer[] ALL_CODES = { 100, 101, 102, 200, 201, 202, 203,
-        204, 205, 206, 207, 208, 226, 300, 301, 302, 303, 304, 305, 306, 307, 308, 
-        400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 
+        204, 205, 206, 207, 208, 226, 300, 301, 302, 303, 304, 305, 306, 307, 308,
+        400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413,
         414, 415, 416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 426, 428,
-        429, 431, 440, 444, 449, 450, 451, 494,495, 496, 497, 498, 499, 
+        429, 431, 440, 444, 449, 450, 451, 494,495, 496, 497, 498, 499,
         500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 520, 521,
-        522, 598, 599, 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 
+        522, 598, 599, 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008,
         1009, 1010, 1011, 1012, 1013, 1100};
-    
-    public static final String[] DEFAULT_ALLOWED_MESS = ALL_MESS;           
-    /*(public static final String[] DEFAULT_ALLOWED_MESS = {"MALFORMED_URL", 
+
+    public static final String[] DEFAULT_ALLOWED_MESS = ALL_MESS;
+    /*(public static final String[] DEFAULT_ALLOWED_MESS = {"MALFORMED_URL",
                       "Not found", "UNKNOWN_HOST_EXCEPTION", "Not Acceptable" };*/
-    
+
     public static final Integer[] DEFAULT_ALLOWED_CODES = ALL_CODES;
-    
+
     private static final long MILISECONDS_IN_A_DAY = 60 * 60 * 24 * 1000;
-    
+
     public static void createLinks(final String outCheckFile,
                                    final String mstName) throws BrumaException,
                                                                 IOException {
@@ -165,7 +149,7 @@ public class BrokenLinks {
                                    final String host) throws BrumaException,
                                                              IOException {
         createLinks(outCheckFile, outEncoding, mstName, mstEncoding, host,
-                                  DEFAULT_PORT, null, null, 
+                                  DEFAULT_PORT, null, null,
                                   DEFAULT_ALLOWED_CODES);
     }
 
@@ -201,7 +185,7 @@ public class BrokenLinks {
         if (allowedCodes == null) {
             throw new NullPointerException("allowedCodes");
         }
-        
+
         final Master mst = MasterFactory.getInstance(mstName)
                                         .setEncoding(mstEncoding).open();
         final String mName = new File(mst.getMasterName()).getName();
@@ -210,20 +194,20 @@ public class BrokenLinks {
         final MongoClient mongoClient = new MongoClient(host, port);
         final DB db = mongoClient.getDB(SOCIAL_CHECK_DB);
         // map -> mfn ->  url,occ
-        final Map<Integer,Map<String,Integer>> occMap = 
+        final Map<Integer,Map<String,Integer>> occMap =
                                     new HashMap<Integer,Map<String,Integer>>();
         final boolean checkPassword = false;
         if (checkPassword) {
-            final boolean auth = db.authenticate(user, password.toCharArray());
+            /*final boolean auth = db.authenticate(user, password.toCharArray());
             if (!auth) {
                 throw new IllegalArgumentException("invalid user/password");
-            }
+            }*/
         }
 
         final DBCollection coll = db.getCollection(BROKEN_LINKS_COL);
         final DBCollection ccColl = db.getCollection(CC_FIELDS_COL);
         final DBCollection hColl = db.getCollection(HISTORY_COL);
-        
+
         if (ccColl.findOne() == null) {
             if (!createCcFieldsCollection(ccColl)) {
                 throw new IOException("CC fields collection creation failed");
@@ -240,7 +224,7 @@ public class BrokenLinks {
         final Map<String,Integer> idMap = getIdMfn(mst, idTag);
         int tell = 0;
         int tot = 0;
-        
+
         coll.dropIndexes();
 
         System.out.println("Saving documents ...");
@@ -250,20 +234,20 @@ public class BrokenLinks {
                 break;
             }
             final String lineT = line.trim();
-            if (!lineT.isEmpty()) {                
+            if (!lineT.isEmpty()) {
                 final String[] split = lineT.split(" *\\| *"); //master|id|url|err_code
                 if (split.length != 4) {
                     throw new IOException("Wrong line format: " + line);
                 }
                 if (allowedCodeSet.contains(Integer.parseInt(split[3].trim()))) {
-                    final Integer id = idMap.get(split[1]); 
+                    final Integer id = idMap.get(split[1]);
                     if (id == null) {
                         throw new IOException("id[" + split[1] + "] not found");
                     }
-                    final String url_e = 
+                    final String url_e =
                               EncDecUrl.encodeUrl(split[2], outEncoding, false);
-                    
-                    saveRecord(mName, id, url_e, split[3], urlTag, tags, mst, 
+
+                    saveRecord(mName, id, url_e, split[3], urlTag, tags, mst,
                                coll, hColl, occMap);
                     tot++;
                 }
@@ -275,18 +259,18 @@ public class BrokenLinks {
 
         System.out.println("\nFixing urls that do not start with http:// ... ");
         MongoOperations.fixMissingHttp(coll, hColl, true);
-                
+
         System.out.print("\nCreating an index if it does not exist. " +
                                                 "Indexing all documents ... ");
-        createIndex(coll, hColl);       
+        createIndex(coll, hColl);
         System.out.println(" OK");
-        
+
         in.close();
         mst.close();
-        
+
         return tot;
     }
-    
+
     /**
      * Creates the CC Fields Collection and insert a lilacs metadoc document.
      * @param coll CC Fields Collection
@@ -294,10 +278,10 @@ public class BrokenLinks {
      */
     private static boolean createCcFieldsCollection(final DBCollection coll) {
         assert coll != null;
-        
+
         final BasicDBObject doc = new BasicDBObject();
         final BasicDBList lst = new BasicDBList();
-        
+
         lst.add(1);
         lst.add(920);
         lst.add(930);
@@ -306,17 +290,22 @@ public class BrokenLinks {
         doc.put(URL_TAG_FIELD, 8);
         doc.put(CC_TAGS_FIELD, lst);
 
-        final WriteResult ret = coll.save(doc, WriteConcern.ACKNOWLEDGED);
+        boolean ret = true;
+        try {
+            coll.save(doc, WriteConcern.ACKNOWLEDGED);
+        } catch(Exception ex) {
+            ret = false;
+        }
 
-        return ret.getCachedLastError().ok();
+        return ret;
     }
-    
+
     private static List<Integer> getIsisCcFields(final String mstName,
-                                                 final DBCollection coll) 
+                                                 final DBCollection coll)
                                                             throws IOException {
         assert mstName != null;
         assert coll != null;
-        
+
         final List<Integer> lst = new ArrayList<Integer>();
         final BasicDBObject query = new BasicDBObject(MST_FIELD, mstName);
         final DBCursor cursor = coll.find(query);
@@ -332,61 +321,61 @@ public class BrokenLinks {
             }
         } else {
             throw new IOException("Missing collection: " + coll.getName());
-        }               
+        }
         cursor.close();
 
-        return lst;        
-    }        
-    
+        return lst;
+    }
+
     private static int getIsisIdField(final String mstName,
-                                      final DBCollection coll) 
+                                      final DBCollection coll)
                                                             throws IOException {
         assert mstName != null;
         assert coll != null;
-        
+
         final BasicDBObject query = new BasicDBObject(MST_FIELD, mstName);
         final BasicDBObject doc = (BasicDBObject)coll.findOne(query);
 
         if (doc == null) {
-            throw new IOException("Missing fields: collection[" + coll.getName() 
+            throw new IOException("Missing fields: collection[" + coll.getName()
                     + "] or master name[" + mstName + "]");
         }
 
         return doc.getInt(ID_TAG_FIELD);
     }
-            
+
     private static int getIsisUrlFields(final String mstName,
-                                        final DBCollection coll) 
+                                        final DBCollection coll)
                                                             throws IOException {
         assert mstName != null;
         assert coll != null;
-        
+
         final BasicDBObject query = new BasicDBObject(MST_FIELD, mstName);
         final BasicDBObject doc = (BasicDBObject)coll.findOne(query);
 
         if (doc == null) {
-            throw new IOException("Missing fields: collection[" + coll.getName() 
+            throw new IOException("Missing fields: collection[" + coll.getName()
                     + "] or master name[" + mstName + "]");
         }
 
         return doc.getInt(URL_TAG_FIELD);
     }
 
-    private static Map<String,Integer> getIdMfn(final Master mst, 
-                                                final int idTag) 
+    private static Map<String,Integer> getIdMfn(final Master mst,
+                                                final int idTag)
                                                          throws BrumaException,
                                                                 IOException {
         assert mst != null;
         assert idTag > 0;
-        
+
         System.out.println("Parsing ids ...");
-        
+
         int cur = 0;
-        
+
         final Map<String,Integer> map = new HashMap<String,Integer>();
         for (Record rec : mst) {
             final int mfn = rec.getMfn();
-            
+
             if (rec.isActive()) {
                 final Field idFld = rec.getField(idTag, 1);
                 if (idFld == null) {
@@ -400,10 +389,10 @@ public class BrokenLinks {
             }
         }
         System.out.println();
-        
+
         return map;
     }
-    
+
     private static void createIndex(final DBCollection coll,
                                     final DBCollection hcoll) {
         assert coll != null;
@@ -413,21 +402,21 @@ public class BrokenLinks {
         flds.append(CENTER_FIELD, 1);
         flds.append(BROKEN_URL_FIELD, 1); //Btree::insert: key too large to index
         flds.append(MST_FIELD, 1);
-        coll.ensureIndex(flds);
-        
+        coll.createIndex(flds);
+
         final BasicDBObject hflds = new BasicDBObject();
         hflds.append(FUTURE_CHECKS, 1);
         hflds.append(LINK_ASSOCIATED_DOC, 1);
         hflds.append(ASSOCIATED_DOC, 1);
-        hcoll.ensureIndex(hflds);
+        hcoll.createIndex(hflds);
     }
-    
+
     private static boolean saveRecord(final String mstName,
                                       final int id,
                                       final String url,
                                       final String err,
                                       final int urlTag,
-                                      final List<Integer> ccsFlds,                                      
+                                      final List<Integer> ccsFlds,
                                       final Master mst,
                                       final DBCollection coll,
                                       final DBCollection hcoll,
@@ -452,65 +441,66 @@ public class BrokenLinks {
                                                               + "Ignoring it!");
             return false;
         }
- 
-        final List<Field> urls = rec.getFieldList(urlTag);        
+
+        final List<Field> urls = rec.getFieldList(urlTag);
         final Date now = new Date();
         final Date date;
-        
+
         Map<String,Integer> fldMap = occMap.get(id);
         if (fldMap == null) {
             fldMap = new HashMap<String,Integer>();
             occMap.put(id, fldMap);
         }
-        
+
         final int occ = nextOcc(url, urls, fldMap);
-        if (occ == -1) {                
+        if (occ == -1) {
             System.err.println("url[" + url + "] not found. mfn=" + id);
-            //throw new IOException("url[" + url + "] not found. mfn=" + id);                
+            //throw new IOException("url[" + url + "] not found. mfn=" + id);
             return false;
         }
 
         final BasicDBObject query = new BasicDBObject(ID_FIELD, id + "_" + occ);
-        final boolean ret;
-        if (fixedRecently(hcoll, query, now, 60) || 
-                                                 shouldIgnore(hcoll, id, occ)) {            
-            ret = false;
-        } else {        
-            final BasicDBObject obj = (BasicDBObject) coll.findOne(query);
-            final boolean newDoc;            
-            if (obj == null) {
-                newDoc = true;
-                date = now;
-            } else {
-                newDoc = false;
-                date = obj.getDate(DATE_FIELD);
-                
-                final WriteResult wr = coll.remove(obj, 
-                                                   WriteConcern.ACKNOWLEDGED);
-                if (!wr.getCachedLastError().ok()) {
-                    //TODO
-                }                
-            }
-            final String url_d = EncDecUrl.decodeUrl(url);
-            final String url_d_l = (url_d.length() >= 900) 
-                                      ? url_d.substring(0, 900) + "..." : url_d;
-            final String url_l = (url.length() > 900)
-                                        ? url.substring(0, 900) + "..." : url;
-            final BasicDBObject doc = new BasicDBObject();        
-            doc.put(DATE_FIELD, date);
-            if (!newDoc) {
-                doc.put(LAST_UPDATE_FIELD, now);
-            }
-            doc.put(MST_FIELD, mstName);
-            doc.put(ID_FIELD, id + "_" + occ);
-            doc.put(BROKEN_URL_FIELD, url_l);
-            doc.put(PRETTY_BROKEN_URL_FIELD, url_d_l);
-            doc.put(MSG_FIELD, err);
-            doc.put(CENTER_FIELD, getCCS(rec, ccsFlds));        
-
-            final WriteResult wres = coll.save(doc, WriteConcern.ACKNOWLEDGED);
-            ret = wres.getCachedLastError().ok();
+        
+        if (fixedRecently(hcoll, query, now, 60) ||
+                                                 shouldIgnore(hcoll, id, occ)) {
+            return false;
         }
+        
+        final BasicDBObject obj = (BasicDBObject) coll.findOne(query);
+        final boolean newDoc;
+        if (obj == null) {
+            newDoc = true;
+            date = now;
+        } else {
+            newDoc = false;
+            date = obj.getDate(DATE_FIELD);
+            coll.remove(obj, WriteConcern.ACKNOWLEDGED);
+        }
+        final String url_d = EncDecUrl.decodeUrl(url);
+        final String url_d_l = (url_d.length() >= 900)
+                                  ? url_d.substring(0, 900) + "..." : url_d;
+        final String url_l = (url.length() > 900)
+                                    ? url.substring(0, 900) + "..." : url;
+        final BasicDBObject doc = new BasicDBObject();
+        doc.put(DATE_FIELD, date);
+        if (!newDoc) {
+            doc.put(LAST_UPDATE_FIELD, now);
+        }
+        doc.put(MST_FIELD, mstName);
+        doc.put(ID_FIELD, id + "_" + occ);
+        doc.put(BROKEN_URL_FIELD, url_l);
+        doc.put(PRETTY_BROKEN_URL_FIELD, url_d_l);
+        doc.put(MSG_FIELD, err);
+        doc.put(CENTER_FIELD, getCCS(rec, ccsFlds));
+
+        boolean ret = true;
+        
+        try {
+            coll.save(doc, WriteConcern.ACKNOWLEDGED);
+        } catch(Exception ex) {
+            ret = false;
+        }
+       
         return ret;
     }
 
@@ -522,9 +512,9 @@ public class BrokenLinks {
         assert query != null;
         assert now != null;
         assert days >= 0;
-        
+
         final boolean ret;
-        final BasicDBObject obj = (BasicDBObject) hcoll.findOne(query);            
+        final BasicDBObject obj = (BasicDBObject) hcoll.findOne(query);
         if (obj == null) {
             ret = false;
         } else {
@@ -532,42 +522,42 @@ public class BrokenLinks {
             if (date == null) {
                 ret = false;
             } else {
-                ret = (now.getTime() - date.getTime() <= 
+                ret = (now.getTime() - date.getTime() <=
                                                  (days * MILISECONDS_IN_A_DAY));
             }
         }
         return ret;
     }
-    
+
     private static boolean shouldIgnore(final DBCollection hcoll,
                                         final int id,
                                         final int occ) {
         assert hcoll != null;
         assert id > 0;
         assert occ >= 0;
-        
+
         final BasicDBList or = new BasicDBList();
-        or.add(new BasicDBObject(FUTURE_CHECKS, 
+        or.add(new BasicDBObject(FUTURE_CHECKS,
                                            new BasicDBObject("$exists", true)));
-        or.add(new BasicDBObject(LINK_ASSOCIATED_DOC, 
+        or.add(new BasicDBObject(LINK_ASSOCIATED_DOC,
                                            new BasicDBObject("$exists", true)));
-        or.add(new BasicDBObject(ASSOCIATED_DOC, 
+        or.add(new BasicDBObject(ASSOCIATED_DOC,
                                            new BasicDBObject("$exists", true)));
-        
+
         final BasicDBObject query = new BasicDBObject(ID_FIELD, id + "_" + occ)
-                                                             .append("$or", or);       
+                                                             .append("$or", or);
         return hcoll.findOne(query) != null;
     }
-    
+
     private static int nextOcc(final String url,
                                final List<Field> urls,
                                final Map<String,Integer> fldMap) {
         assert url != null;
         assert urls != null;
         assert fldMap != null;
-        
+
         int ret;      // possible not used occurrence
-        
+
         try {
             final String url_D = EncDecUrl.decodeUrl(url.trim());
 
@@ -577,13 +567,13 @@ public class BrokenLinks {
                 fldMap.put(url_D, curOcc);
             }
 
-            int val = 1;      // current check bit position        
+            int val = 1;      // current check bit position
             boolean found = false;
 
             ret = 1;      // possible not used occurrence
             outter : for (Field fld : urls) {
                 for (Subfield sub : fld.getSubfields()) {
-                    final String sfldUrl_D = 
+                    final String sfldUrl_D =
                                    EncDecUrl.decodeUrl(sub.getContent().trim());
                     if (url_D.equals(sfldUrl_D)) {
                         if ((curOcc & val) == 0) { // found not used occurrence
@@ -592,7 +582,7 @@ public class BrokenLinks {
                             found = true;
                             break outter;
                         }
-                    }    
+                    }
                 }
                 if (val > Integer.MAX_VALUE / 2) { // all positions already used
                     ret = -1;
@@ -600,33 +590,33 @@ public class BrokenLinks {
                 }
                 val *= 2; // go to the next bit position
                 ret++;
-            }      
+            }
             if (!found) {
                 ret = -1;
             }
         } catch(Exception ex) {
             ret = -1;
         }
-        
+
         return ret;
     }
-    
-    private static BasicDBList getCCS(final Record rec, 
-                                      final List<Integer> ccsFlds) 
+
+    private static BasicDBList getCCS(final Record rec,
+                                      final List<Integer> ccsFlds)
                                             throws BrumaException, IOException {
         assert rec != null;
         assert ccsFlds != null;
-        
+
         final BasicDBList lst = new BasicDBList();
         final Set<String> set = new HashSet<String>();
-        
+
         for (int ccsFld : ccsFlds) {
             final List<Field> fldList = rec.getFieldList(ccsFld);
-            
+
             for (Field fld : fldList) {
                 final Subfield sub = fld.getSubfield('_', 1);
                 if (sub == null) {
-                    throw new IOException("Missing subfield. Mfn=" 
+                    throw new IOException("Missing subfield. Mfn="
                                        + rec.getMfn() + " tag=" + fld.getId());
                 }
                 set.add(sub.getContent().trim());
@@ -641,24 +631,30 @@ public class BrokenLinks {
 
     private static boolean removeOldDocs(final DBCollection coll) {
         assert coll != null;
-        
+
         final Date now = new Date();
         final DBCursor cursor = coll.find();
-        boolean ret = true;
 
+        boolean ret = true;
+        
         while (cursor.hasNext()) {
             final BasicDBObject obj = (BasicDBObject)cursor.next();
             final Date auxDate = obj.getDate(LAST_UPDATE_FIELD);
-            if ((auxDate == null) || 
+            
+            if ((auxDate == null) ||
                              (now.getTime() - auxDate.getTime()) > 60*60*1000) {
-                final WriteResult wr = coll.remove(obj, 
-                                                   WriteConcern.ACKNOWLEDGED);
-                ret = ret && wr.getCachedLastError().ok();
+                boolean ret1 = true;
+                try {
+                    coll.remove(obj, WriteConcern.ACKNOWLEDGED);
+                } catch(Exception ex) {
+                    ret1 = false;
+                }
+                ret &= ret1;
             }
         }
         return ret;
     }
-    
+
     private static void usage() {
         System.err.println("usage: BrokenLinks <outFile> <mstName> <host>"
      + "\n\t\t[-outFileEncoding=<outFileEncod>] [-outMstEncoding=<outMstEncod>]"
@@ -695,13 +691,13 @@ public class BrokenLinks {
         }
 
         System.out.println("outFileEncoding=" + fileEncod);
-        System.out.println("outMstEncoding=" + mstEncod);        
+        System.out.println("outMstEncoding=" + mstEncod);
         System.out.println();
-        
-        final int tot = createLinks(args[0], fileEncod, args[1], mstEncod, 
-                                    args[2], port, user, pswd, 
+
+        final int tot = createLinks(args[0], fileEncod, args[1], mstEncod,
+                                    args[2], port, user, pswd,
                                     DEFAULT_ALLOWED_CODES);
-        
+
         System.out.println();
         System.out.println("importedDocuments=" + tot);
         System.out.println();

@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or 
-    modify it under the terms of the GNU Lesser General Public License as 
-    published by the Free Software Foundation, either version 2.1 of 
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public 
-    License along with Social Check Links. If not, see 
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.web;
 
@@ -53,36 +38,36 @@ import org.json.simple.JSONObject;
  */
 public class AuthenticationServlet extends HttpServlet {
     private static final String CODEC = "UTF-8";
-    
+
     @Override
     public void init() {
         try {
             final ServletContext context = getServletContext();
             final String host = context.getInitParameter("host");
-            final int port = Integer.parseInt(context.getInitParameter("port")); 
-            final String user = context.getInitParameter("username"); 
-            final String password = context.getInitParameter("password"); 
+            final int port = Integer.parseInt(context.getInitParameter("port"));
+            final String user = context.getInitParameter("username");
+            final String password = context.getInitParameter("password");
             final MongoClient mongoClient = new MongoClient(host, port);
             final DB db = mongoClient.getDB(SOCIAL_CHECK_DB);
-                                    
+
             if (! user.trim().isEmpty()) {
-                final boolean auth = 
-                                  db.authenticate(user, password.toCharArray());        
+                final boolean auth =
+                                  db.authenticate(user, password.toCharArray());
                 if (!auth) {
                     throw new IllegalArgumentException("invalid user/password");
                 }
             }
-            
+
             final DBCollection coll = db.getCollection(BROKEN_LINKS_COL);
-            final DBCollection hcoll = db.getCollection(HISTORY_COL);            
-            final Set<String> databases = 
+            final DBCollection hcoll = db.getCollection(HISTORY_COL);
+            final Set<String> databases =
                                       MongoOperations.getDatabases(coll);
-            
+
             context.setAttribute("userEmail", user.trim());
             context.setAttribute("collection", coll);
             context.setAttribute("historycoll", hcoll);
             context.setAttribute("readOnlyMode", false);
-            context.setAttribute("databases", databases);            
+            context.setAttribute("databases", databases);
         } catch (Exception ex) {
             Logger.getLogger(AuthenticationServlet.class.getName())
                                                    .log(Level.SEVERE, null, ex);
@@ -99,55 +84,55 @@ public class AuthenticationServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(final HttpServletRequest request, 
+    protected void processRequest(final HttpServletRequest request,
                                   final HttpServletResponse response)
                                           throws ServletException, IOException {
-        
+
         request.setCharacterEncoding(CODEC);
-        
+
         final String username = request.getParameter("email");
         final String password = request.getParameter("password");
-        final String lang = request.getParameter("lang");                        
+        final String lang = request.getParameter("lang");
         final ServletContext context = getServletContext();
-        final HttpSession session = request.getSession();          
+        final HttpSession session = request.getSession();
         final ResourceBundle messages = Tools.getMessages(lang);
-        
-        boolean isAccountsWorking = true;    
+
+        boolean isAccountsWorking = true;
         RequestDispatcher dispatcher;
-        
+
         session.removeAttribute("collCenter");
         session.removeAttribute("user");
-        
+
         if (isAccountsWorking) {
-            if ((username == null) || (username.isEmpty()) || 
+            if ((username == null) || (username.isEmpty()) ||
                 (password == null) || (password.isEmpty())) {
-                response.sendRedirect("index.jsp?lang=" + lang 
+                response.sendRedirect("index.jsp?lang=" + lang
                         + "&errMsg=" + messages.getString("login_is_required"));
                 return;
-            }                        
-            
-            try {            
+            }
+
+            try {
                 final Authentication auth = new Authentication(
                                      context.getInitParameter("accounts_host"));
-                final JSONObject user = auth.getUser(username, password);                
-                                
+                final JSONObject user = auth.getUser(username, password);
+
                 if (auth.isAuthenticated(user)) {
-                    final String centerId = auth.getColCenter(user);                    
+                    final String centerId = auth.getColCenter(user);
                     final DBCollection coll = (DBCollection)context
                                                     .getAttribute("collection");
                     final Set<String> centerIds;
-                    if (centerId.equals("BR1.1")) { 
+                    if (centerId.equals("BR1.1")) {
                         centerIds = MongoOperations.getCenters(coll);
                     } else {
                         final Set<String> auxCenterIds = auth.getCenterIds(user);
                         // cc may not belong to a net (it not appear in centerIds)
-                        auxCenterIds.add(auth.getColCenter(user)); 
-                        centerIds = MongoOperations.filterCenterFields(coll, 
+                        auxCenterIds.add(auth.getColCenter(user));
+                        centerIds = MongoOperations.filterCenterFields(coll,
                                                                   auxCenterIds);
                     }
                     session.setAttribute("user", username); // Login user.
                     session.setAttribute("cc", centerId);
-                    session.setAttribute("centerIds", centerIds);   
+                    session.setAttribute("centerIds", centerIds);
                     dispatcher = context.getRequestDispatcher(
                                    "/CenterFilterServlet?lang=" + lang);
                 } else {
@@ -155,28 +140,28 @@ public class AuthenticationServlet extends HttpServlet {
                     session.removeAttribute("cc");
                     session.removeAttribute("centerIds");
                     dispatcher = context.getRequestDispatcher(
-                                                  "/index.jsp?lang=" + lang 
+                                                  "/index.jsp?lang=" + lang
                     + "&errMsg=" + messages.getString("authentication_failed"));
-                }     
+                }
                 dispatcher.forward(request, response);
             } catch(Exception ex) {
                 dispatcher = context.getRequestDispatcher(
                                                     "/index.jsp?lang=" + lang
                           + "&errMsg=" + messages.getString("exception_found")
-                          + "<br/><br/>" + ex.getMessage());                
+                          + "<br/><br/>" + ex.getMessage());
                 dispatcher.forward(request, response);
             }
-        } else {            
+        } else {
             final Set<String> ccs = new HashSet<String>();
             ccs.add("PE1.1");
             ccs.add("PE373.9");
             dispatcher = context.getRequestDispatcher(
-                                   "/CenterFilterServlet?lang=" + lang);             
+                                   "/CenterFilterServlet?lang=" + lang);
             session.setAttribute("user", username); // Login user.
             session.setAttribute("cc", "PE373.9");
             session.setAttribute("centerIds", ccs);
             dispatcher.forward(request, response);
-        }        
+        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

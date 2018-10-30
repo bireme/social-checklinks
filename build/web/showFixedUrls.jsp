@@ -1,26 +1,13 @@
 <%--
+ =========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or 
-    modify it under the terms of the GNU Lesser General Public License as 
-    published by the Free Software Foundation, either version 2.1 of 
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public 
-    License along with Social Check Links. If not, see 
-    <http://www.gnu.org/licenses/>.
-
+  ==========================================================================
 --%>
 
-<%-- 
+<%--
     Document   : showFixedUrls
     Created on : 06/08/2013, 11:53:39
     Author     : Heitor Barbieri
@@ -31,17 +18,17 @@
 <%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*" %>
 <%@page contentType="text/html;charset=UTF-8" %>
 
-<% 
+<%
     final String CODEC = "UTF-8";
     request.setCharacterEncoding(CODEC);
-    
+
     String lang = (String)request.getParameter("lang");
     if (lang == null) {
         lang = "en";
-    }    
+    }
     final ResourceBundle messages = Tools.getMessages(lang);
     final String user = (String)session.getAttribute("user");
-    
+
     if (user == null) {
         response.sendRedirect("index.jsp?lang=" + lang
                                 + "&errMsg=" + messages.getString("timed_out"));
@@ -71,21 +58,21 @@
     final int mod = (fixedUrls % groupSize);
     int lastGroup = (fixedUrls / groupSize);
     lastGroup = ((fixedUrls > 0) && (mod == 0)) ? lastGroup - 1 : lastGroup;
-    final int initGroup = (group <= 1) ? 0 : (group >= lastGroup - 2) 
+    final int initGroup = (group <= 1) ? 0 : (group >= lastGroup - 2)
                                                 ? (lastGroup - 4) : (group - 2);
-    final String collCenterFilter = request.getParameter("collCenterFilter");        
+    final String collCenterFilter = request.getParameter("collCenterFilter");
     final String sorder = request.getParameter("order");
     final String order = "null".equals(sorder) ? "descending" : sorder;
     final String sdbFilter = request.getParameter("dbFilter");
-    final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;    
-    
+    final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;
+
     final Set<IdUrl> fixedX = new HashSet<IdUrl>();
     int current = 0;
     int begin = group * groupSize;
     int end = begin + groupSize - 1;
     for (IdUrl iu : fixed) {
         if (current < begin) {
-            
+
         } else if (current <= end) {
             fixedX.add(iu);
         } else {
@@ -117,10 +104,10 @@
 	<!--[if (lt IE 9)&(!IEMobile)]>
 	<link rel="stylesheet" type="text/css" href="css/ie.css" />
 	<![endif]-->
-	<script type="text/javascript" src="js/modernizr.js"></script>        
-        
+	<script type="text/javascript" src="js/modernizr.js"></script>
+
         <script LANGUAGE="JavaScript" TYPE="text/javascript">
-            
+
         function postToUrl(path, params, blank) {
             var form = document.createElement("form");
             form.setAttribute("method", "post");
@@ -138,27 +125,27 @@
             }
 
             document.body.appendChild(form);
-            
+
             if (blank) {
                 form.setAttribute("target", "_blank");
             }
             form.submit();
         }
-        
+
         function confirmUndo(undoId) {
             if (confirm('<%=messages.getString("undo_confirm")%>')) {
-                 postToUrl('<%=response.encodeRedirectURL("UndoFixServlet")%>', 
-                 {undoUrl:'<%=brokenUrl_E%>', group:'<%=group%>', lgroup:'<%=lgroup%>', 
+                 postToUrl('<%=response.encodeRedirectURL("UndoFixServlet")%>',
+                 {undoUrl:'<%=brokenUrl_E%>', group:'<%=group%>', lgroup:'<%=lgroup%>',
                   lang:'<%=lang%>', id:undoId, brokenUrl:'<%=brokenUrl_E%>',
-                  url:'<%=url_E%>', dbFilter:'<%=dbFilter%>',                     
-                  collCenterFilter:'<%=collCenterFilter%>', 
+                  url:'<%=url_E%>', dbFilter:'<%=dbFilter%>',
+                  collCenterFilter:'<%=collCenterFilter%>',
                   order:'<%=order%>'});
             } else {
                 // Do nothing!
             }
         }
-        
-        </script>        
+
+        </script>
     </head>
     <body style="background-color:#f7faff">
 	<div id="wrap">
@@ -170,14 +157,14 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="brand" href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', 
+                        <a class="brand" href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>',
                            {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("bireme_social_checklinks")%></a>
                         <div class="nav-collapse collapse">
                             <ul class="nav">
-                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', 
+                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>',
                                        {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("home")%></a></li>
-                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("report.jsp")%>', 
-                                       {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("report")%></a></li>       
+                                <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("report.jsp")%>',
+                                       {group:'0',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("report")%></a></li>
                                 <li><a href="http://wiki.bireme.org/<%=lang%>/index.php/Social_Check_Links" target="_blank"><%=messages.getString("about")%></a></li>
                                 <li><a href="http://feedback.bireme.org/feedback/?application=socialchecklinks&version=<%=BrokenLinks.VERSION%>&lang=<%=lang%>" target="_blank"><%=messages.getString("contact")%></a></li>
                             </ul>
@@ -209,7 +196,7 @@
                         <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("list")%></a> <span class="divider">/</span></li>
                         <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', {id:'<%=id%>',group:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>',furl:'<%=url_E%>',url:'<%=brokenUrl_E%>'});"><%=messages.getString("edit")%></a> <span class="divider">/</span></li>
                         <li class="active"><%=messages.getString("show_changed")%></li>
-                    </ul>     
+                    </ul>
                 </div>
                 <h1><%=messages.getString("url_changes")%></h1>
                 <div class="urlEditor">
@@ -231,10 +218,10 @@
                                     <th>#</th>
                                     <th><%=messages.getString("database")%></th>
                                     <th>ID</th>
-                                    <th>URL</th>                                                
+                                    <th>URL</th>
                                     <th>CC</th>
                                     <th><%=messages.getString("since")%></th>
-                                    <th><%=messages.getString("action")%></th>                                                
+                                    <th><%=messages.getString("action")%></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -244,13 +231,13 @@
                                     //final String nurl_E = URLEncoder.encode(iu.url, CODEC);
                                     final String xid = iu.id.substring(0,iu.id.indexOf("_"));
                                     final String url_D2 = EncDecUrl.decodeUrl(iu.url);
-                                    boolean first = true;                                                                                       
+                                    boolean first = true;
                                 %>
-                                    <tr>                                    
+                                    <tr>
                                         <td><%=cur%></td>
                                         <td><%=iu.mst%></td>
                                         <td><a target="_blank" href="http://pesquisa.bvsalud.org/portal/resource/<%=lang%>/lil-<%=xid%>"><%=xid%></a></td>
-                                        <td><a target="_blank" href="<%=iu.url%>" title="<%=url_D2%> ->"><%=url_D2%></a></td>  
+                                        <td><a target="_blank" href="<%=iu.url%>" title="<%=url_D2%> ->"><%=url_D2%></a></td>
                                         <td>
                                         <%
                                         for (String cc : iu.ccs) {
@@ -263,7 +250,7 @@
                                                 out.print(cc);
                                             }
                                         }
-                                        %>             
+                                        %>
                                         </td>
                                         <td><%=iu.since%></td>
                                         <td><a href="javascript:confirmUndo('<%=iu.id%>');" title="<%=messages.getString("undo_last_url")%>" class="btn btn-primary btn-mini pull-right"><%=messages.getString("undo")%></a></td>
@@ -274,16 +261,16 @@
                                 }
                                 %>
                             </tbody>
-                        </table>                
+                        </table>
                     <% } %>
                     <p align="right"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});" class="btn btn-primary btn-small"><%=messages.getString("more_broken_links")%></a></p>
-                    
+
                     <% if (fixedUrls > groupSize) { %>
                         <div class="accordion">
                             <div class="pagination pagination-centered">
                                 <ul>
                                     <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'0,lgroup:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',id:'<%=id%>',brokenUrl:'<%=brokenUrl_E%>',url:'<%=url_E%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>',undo:'<%=undo%>'});">&laquo;</a></li>
-                                    <%                                        
+                                    <%
                                     for (int idx = initGroup; idx < initGroup+5; idx++) {
                                         if (idx == group) {
                                     %>
@@ -294,13 +281,13 @@
                                             <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=idx%>',lgroup:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',id:'<%=id%>',brokenUrl:'<%=brokenUrl_E%>',url:'<%=url_E%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>',undo:'<%=undo%>'});" ><%=idx+1%></a></li>
                                     <%
                                         }
-                                    }    
+                                    }
                                     %>
                                     <li class="enabled"><a href="javascript:postToUrl('<%=response.encodeRedirectURL("showFixedUrls.jsp")%>', {group:'<%=lastGroup%>',lgroup:'<%=lgroup%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',id:'<%=id%>',brokenUrl:'<%=brokenUrl_E%>',url:'<%=url_E%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>',undo:'<%=undo%>'});">&raquo;</a></li>
                                 </ul>
                             </div>
                         </div>
-                    <% } %>            
+                    <% } %>
                 </div>
             </div> <!-- /container -->
             <div id="push"></div>
@@ -325,6 +312,6 @@
     <script src="js/bootstrap-button.js"></script>
     <script src="js/bootstrap-collapse.js"></script>
     <script src="js/bootstrap-carousel.js"></script>
-    <script src="js/bootstrap-typeahead.js"></script>	
+    <script src="js/bootstrap-typeahead.js"></script>
 </body>
 </html>

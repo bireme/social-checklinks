@@ -1,25 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or 
-    modify it under the terms of the GNU Lesser General Public License as 
-    published by the Free Software Foundation, either version 2.1 of 
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public 
-    License along with Social Check Links. If not, see 
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
-
+  ==========================================================================*/
 
 package br.bireme.scl;
 
@@ -29,7 +13,6 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Set;
@@ -47,7 +30,7 @@ public class CopyMongoDb {
                                final String from_port,
                                final String to_port,
                                final boolean appendCollections,
-                               final boolean displayAllIds) 
+                               final boolean displayAllIds)
                                                    throws UnknownHostException, IOException {
         assert from_host != null;
         assert to_host != null;
@@ -55,15 +38,15 @@ public class CopyMongoDb {
         assert to_db != null;
         assert from_port != null;
         assert to_port != null;
-        
+
         final int MAX_LOOP_SIZE = 15000; // MongoException$CursorNotFound
-        final MongoClient fromClient = new MongoClient(from_host, 
+        final MongoClient fromClient = new MongoClient(from_host,
                                                    Integer.parseInt(from_port));
-        final MongoClient toClient = new MongoClient(to_host, 
+        final MongoClient toClient = new MongoClient(to_host,
                                                      Integer.parseInt(to_port));
         final DB fromDb = fromClient.getDB(from_db);
         final DB toDb = toClient.getDB(to_db);
-        
+
         if (!appendCollections) {
             toDb.dropDatabase();
         }
@@ -74,15 +57,15 @@ public class CopyMongoDb {
             if (cname.equals("system.indexes")) {
                 continue;
             }
-            
+
             final DBCollection fromColl = fromDb.getCollection(cname);
             final DBCollection toColl = toDb.getCollection(cname);
-            
+
             DBCursor cursor = fromColl.find();
             int curr = 0;
-            
+
             System.out.println("Copying collection: " + cname);
-            
+
             while (cursor.hasNext()) {
                 if (curr % MAX_LOOP_SIZE == 0) {
                     if (curr > 0) {
@@ -94,10 +77,9 @@ public class CopyMongoDb {
                     }
                 }
                 final DBObject doc = cursor.next();
-                final WriteResult ret = toColl.save(doc, 
-                                                     WriteConcern.ACKNOWLEDGED);
-
-                if (!ret.getCachedLastError().ok()) {
+                try {
+                    toColl.save(doc,WriteConcern.ACKNOWLEDGED);
+                } catch(Exception ex) {
                     System.err.println("write error doc id=" + doc.get("_id"));
                 }
                 if (++curr % 1000 == 0) {
@@ -108,19 +90,19 @@ public class CopyMongoDb {
                 }
             }
             cursor.close();
-            
+
             System.out.println();
         }
     }
-    
+
     private static void usage() {
         System.err.println("usage: CopyMongoDb <from_host> <to_host> <from_db>"
         + " [-to_db=<name>] [-from_port=<port>] [-to_port=<port>]"
         + " [--appendCollections] [--displayAllIds]");
         System.exit(1);
     }
-    
-    public static void main(final String[] args) throws UnknownHostException, 
+
+    public static void main(final String[] args) throws UnknownHostException,
                                                                    IOException {
         if (args.length < 3) {
             usage();
@@ -130,7 +112,7 @@ public class CopyMongoDb {
         String toPort =  fromPort;
         boolean appendCollections = false;
         boolean displayAllIds = false;
-        
+
         for (int idx = 3; idx < args.length; idx++) {
             if (args[idx].startsWith("-to_db=")) {
                 toDb = args[idx].substring(7);
@@ -146,8 +128,8 @@ public class CopyMongoDb {
                 usage();
             }
         }
-        
-        copyDB(args[0], args[1], args[2], toDb, fromPort, toPort, 
+
+        copyDB(args[0], args[1], args[2], toDb, fromPort, toPort,
                                               appendCollections, displayAllIds);
     }
 }

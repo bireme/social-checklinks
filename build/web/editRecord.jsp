@@ -1,23 +1,10 @@
 <%--
+ =========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or 
-    modify it under the terms of the GNU Lesser General Public License as 
-    published by the Free Software Foundation, either version 2.1 of 
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public 
-    License along with Social Check Links. If not, see 
-    <http://www.gnu.org/licenses/>.
-
+  ==========================================================================
 --%>
 
 <%@page language="java"%>
@@ -25,26 +12,26 @@
 <%@page import="java.util.*,com.mongodb.DBCollection,br.bireme.scl.*,br.bireme.scl.MongoOperations" %>
 <%@page contentType="text/html;charset=UTF-8"%>
 
-<%     
+<%
     final String CODEC = "UTF-8";
     request.setCharacterEncoding(CODEC);
-    
+
     String lang = (String)request.getParameter("lang");
     if (lang == null) {
         lang = "en";
     }
     final ResourceBundle messages = Tools.getMessages(lang);
-    
+
     if (session.getAttribute("user") == null) {
         response.sendRedirect("index.jsp?lang=" + lang
                                 + "&errMsg=" + messages.getString("timed_out"));
         return;
     }
-    
-    // status = 1 (broken) and 0 (not broken) 
-    final int status = Integer.parseInt(request.getParameter("status"));    
+
+    // status = 1 (broken) and 0 (not broken)
+    final int status = Integer.parseInt(request.getParameter("status"));
     final boolean isNew = "1".equals((String)request.getParameter("new"));
-    final boolean isBroken = (status == 1);    
+    final boolean isBroken = (status == 1);
     final String user = (String)session.getAttribute("user");
     final String id = request.getParameter("id");
     final String id2 = id.substring(0, id.lastIndexOf('_'));
@@ -54,18 +41,18 @@
     final String sgroup = request.getParameter("group");
     final String group = "null".equals(sgroup) ? "0" : sgroup;
     final String scollCenterFilter = request.getParameter("collCenterFilter");
-    final String collCenterFilter = "null".equals(scollCenterFilter) ? null 
-                                                            : scollCenterFilter;    
+    final String collCenterFilter = "null".equals(scollCenterFilter) ? null
+                                                            : scollCenterFilter;
     final String sorder = request.getParameter("order");
-    final String order = (sorder == null) ? "descending" 
+    final String order = (sorder == null) ? "descending"
                               : ("null".equals(sorder) ? "descending" : sorder);
     final String furl = request.getParameter("furl");
     final String furl_D = EncDecUrl.decodeUrl(furl);
     final String furl_E = EncDecUrl.encodeUrl(furl, CODEC, true);
-    final String lang2 = lang.equals("null") ? "en" : lang.equals("fr") 
-                                                    ? "en" :lang;    
+    final String lang2 = lang.equals("null") ? "en" : lang.equals("fr")
+                                                    ? "en" :lang;
     final String sdbFilter = request.getParameter("dbFilter");
-    final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;  
+    final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;
     final String serrCode = request.getParameter("errCode");
     final String errCode = "null".equals(serrCode) ? "0" : serrCode;
     final String serrMsg = request.getParameter("errMsg");
@@ -95,20 +82,20 @@
 	<link rel="stylesheet" type="text/css" href="css/ie.css" />
 	<![endif]-->
 	<script type="text/javascript" src="js/modernizr.js"></script>
-                
+
         <script LANGUAGE="JavaScript" TYPE="text/javascript">
-        
+
         function postToUrl(path, params, blank) {
             var form = document.createElement("form");
             form.setAttribute("charset", "UTF-8");
             form.setAttribute("method", "post");
-            form.setAttribute("action", path);            
+            form.setAttribute("action", path);
 
             for (var key in params) {
                 if ((key !== null) && (params.hasOwnProperty(key))) {
-                    var value = params[key];  
+                    var value = params[key];
                     var hiddenField = document.createElement("input");
-                    
+
                     hiddenField.setAttribute("type", "hidden");
                     hiddenField.setAttribute("name", key);
                     hiddenField.setAttribute("value", value);
@@ -118,33 +105,33 @@
             }
 
             document.body.appendChild(form);
-            
+
             if (blank) {
                 form.setAttribute("target", "_blank");
             }
             form.submit();
         }
-               
+
         function replaceAll(string, token, newtoken) {
             while (string.indexOf(token) !== -1) {
  		string = string.replace(token, newtoken);
             }
             return string;
-        }               
-        
+        }
+
         function callUrl(id, url, lang) {
            var nurl = document.getElementById('input-1').value;
            var nurl2 = replaceAll(nurl, "%20", " ");
-           
+
            //var nurl2 = encodeURI(nurl);
            //var nurl2 = decodeURI(nurl);
-           
-           postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>', 
+
+           postToUrl('<%=response.encodeRedirectURL("CheckOneLinkServlet")%>',
                  {id:id, url:url, furl:nurl2, lang:lang, group:'<%=group%>',
-                  dbFilter:'<%=dbFilter%>', collCenterFilter:'<%=collCenterFilter%>', 
-                  order:'<%=order%>'});              
+                  dbFilter:'<%=dbFilter%>', collCenterFilter:'<%=collCenterFilter%>',
+                  order:'<%=order%>'});
         }
-        
+
         function callUrl2(id, url, lang, option) {
             var nurl = document.getElementById('input-1').value;
             var nurl2 = replaceAll(nurl, "%20", " ");
@@ -159,37 +146,37 @@
                 dbFilter: '<%=dbFilter%>', collCenterFilter: '<%=collCenterFilter%>',
                 order: '<%=order%>', option: opt});
         }
-                
+
         function isVisible(elem) {
             return elem.offsetWidth > 0 || elem.offsetHeight > 0;
         }
-        
+
         function hideSave() {
             var danger = document.getElementById("alert-danger");
-           
-            if (danger && isVisible(danger)) {                
+
+            if (danger && isVisible(danger)) {
                 danger.style.display = 'none';
             } else {
                 document.getElementById("alert-success").style.display = 'none';
                 document.getElementById("save").style.display = 'none';
             }
         }
-        
+
         function whichIsSelected() {
             var option = "<%=BrokenLinks.DO_NOT_FORCE%>";
             if (document.getElementById('optionsRadios1').checked) {
                 option = "<%=BrokenLinks.FUTURE_CHECKS%>";
             } else if (document.getElementById('optionsRadios2').checked) {
                 option = "<%=BrokenLinks.LINK_ASSOCIATED_DOC%>";
-            } else if (document.getElementById('optionsRadios3').checked) {   
+            } else if (document.getElementById('optionsRadios3').checked) {
                 option = "<%=BrokenLinks.ASSOCIATED_DOC%>";
             }
             return option;
         }
-    
-        </script>                
+
+        </script>
     </head>
-    
+
     <body style="background-color:#f7faff">
         <!--%
             if (isNew && !isBroken) {
@@ -219,7 +206,7 @@
                             <ul class="nav pull-right">
                                 <li class="dropdown">
                                     <a href="http://reddes.bvsalud.org/" class="dropdown-toggle" data-toggle="dropdown"><%=messages.getString("language")%> <b class="caret"></b></a>
-                                    <ul class="dropdown-menu">                                                                
+                                    <ul class="dropdown-menu">
                                         <li <%if(lang.equals("en")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'en',group:'<%=group%>',new:'1',errCode:'<%=errCode%>',errMsg:'<%=errMsg%>'});">English</a></li>
                                         <li <%if(lang.equals("pt")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'pt',group:'<%=group%>',new:'1',errCode:'<%=errCode%>',errMsg:'<%=errMsg%>'});">Português</a></li>
                                         <li <%if(lang.equals("es")) {%> class="disabled"<%}%>><a href="javascript:postToUrl('<%=response.encodeRedirectURL("editRecord.jsp")%>', {id:'<%=id%>',url:'<%=url_E%>',furl:'<%=furl_E%>',status:'<%=status%>',lang:'es',group:'<%=group%>',new:'1',errCode:'<%=errCode%>',errMsg:'<%=errMsg%>'});">Español</a></li>
@@ -243,7 +230,7 @@
                     <ul class="breadcrumb">
                         <li><a href="javascript:postToUrl('<%=response.encodeRedirectURL("list.jsp")%>', {group:'<%=group%>',lang:'<%=lang%>',dbFilter:'<%=dbFilter%>',collCenterFilter:'<%=collCenterFilter%>',order:'<%=order%>'});"><%=messages.getString("list")%></a> <span class="divider">/</span></li>
                         <li class="active"><%=messages.getString("edit")%></li>
-                    </ul>     
+                    </ul>
                 </div>
                 <h1><%=messages.getString("edit_url")%></h1>
                 <div class="urlEditor">
@@ -258,15 +245,15 @@
                             <%
                             }
                             %>
-                            <div class="URL-tested2">                                
+                            <div class="URL-tested2">
                                 <input  style="vertical-align:top;" type="url" id="input-1" class="span8" onfocus="hideSave()" value="<%=furl_D%>"/> &nbsp;
                             <%
                             if (isBroken) {
-                            %>        
+                            %>
                                 <a href="javascript:callUrl('<%=id%>','<%=url_E%>','<%=lang%>');" class="btn btn-primary" title="Test your changes"><%=messages.getString("test")%></a>
                             <%
                             }
-                            %>                                
+                            %>
                             </div>
 
                             <!--a href="http://pesquisa.bvsalud.org/regional/?lang=<%=lang2%>&q=++%28id%3A%28LIL-<%=id2%>%29%29" title="<%=messages.getString("see_bibliographic_record")%>" target="_blank" class="btn btn-mini btn-primary"><i class="icon-eye-open icon-white"></i> <%=messages.getString("see")%></a-->
@@ -286,15 +273,15 @@
                                 </div>
                             <%
                             }
-                            %>   
+                            %>
 
                             <div class="ctrl">
                                 <%
                                 if (isBroken) {
-                                %>    
+                                %>
                                 <br/>
                                 <div class="URL-tested"><%=messages.getString("other_otions")%>:</div>
-                                      
+
                                   <label class="radio">
                                     <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
                                     <%=messages.getString("future_checks")%>
@@ -308,16 +295,16 @@
                                     <%=messages.getString("associated_document")%>
                                   </label>
                                   <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>', '');" class="btn btn-mini enabled"><%=messages.getString("submit")%></a>
-                                <%    
+                                <%
                                 } else {
-                                %>       
+                                %>
                                 <a id="save" href="javascript:callUrl2('<%=id%>','<%=url_E%>','<%=lang%>', <%=BrokenLinks.DO_NOT_FORCE%>);" class="btn btn-primary enabled" title="<%=messages.getString("save_tip")%>"><%=messages.getString("save")%></a>
-                                <%       
+                                <%
                                 }
-                                %>                                                           							
+                                %>
                             </div>
-                        </div>          
-                    </div>				
+                        </div>
+                    </div>
                 </div>
             </div> <!-- /container -->
             <div id="push"></div>
@@ -343,6 +330,6 @@
         <script src="js/bootstrap-button.js"></script>
         <script src="js/bootstrap-collapse.js"></script>
         <script src="js/bootstrap-carousel.js"></script>
-        <script src="js/bootstrap-typeahead.js"></script>	
+        <script src="js/bootstrap-typeahead.js"></script>
     </body>
 </html>

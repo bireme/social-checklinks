@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.scl;
 
@@ -41,7 +26,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -94,7 +78,7 @@ public class Gizmo {
         while (cursor.hasNext()) {
             final BasicDBObject obj = (BasicDBObject)cursor.next();
             final String id = obj.getString(ID_FIELD);
-            final BasicDBList lst = (BasicDBList)obj.get(ELEM_LST_FIELD);            
+            final BasicDBList lst = (BasicDBList)obj.get(ELEM_LST_FIELD);
             if (lst == null) {
                 throw new NullPointerException("Elem list espected");
             }
@@ -113,12 +97,12 @@ public class Gizmo {
                                      null,
                                      false);
                 col.add(elem);
-                
-                lelem.put(EXPORTED_FIELD, true);
-                final WriteResult res = coll.save(obj, 
-                                                     WriteConcern.ACKNOWLEDGED);
 
-                if (!res.getCachedLastError().ok()) {
+                lelem.put(EXPORTED_FIELD, true);
+                
+                try {
+                    coll.save(obj,WriteConcern.ACKNOWLEDGED);
+                } catch(Exception ex) {
                     throw new IOException("write doc[" + obj.getString(ID_FIELD)
                                                                   + "] failed");
                 }
@@ -155,7 +139,7 @@ public class Gizmo {
             final String[] split = elem.getId().split("_", 2);
             final String burl = elem.getBurl().trim();
             final String furl = elem.getFurl().trim();
-            out.append(burl + "|" + furl + "|" + elem.getDbase() + "|" + split[0] 
+            out.append(burl + "|" + furl + "|" + elem.getDbase() + "|" + split[0]
                                 + "|" + split[1] + "|" + elem.getDate() + "\n");
         }
 

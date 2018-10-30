@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or 
-    modify it under the terms of the GNU Lesser General Public License as 
-    published by the Free Software Foundation, either version 2.1 of 
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public 
-    License along with Social Check Links. If not, see 
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.web;
 
@@ -37,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ReadOnlyModeServlet extends HttpServlet {
     private static final String CODEC = "UTF-8";
-    
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -47,24 +32,24 @@ public class ReadOnlyModeServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(final HttpServletRequest request, 
+    protected void processRequest(final HttpServletRequest request,
                                   final HttpServletResponse response)
                                           throws ServletException, IOException {
-        
+
         request.setCharacterEncoding(CODEC);
         response.setContentType("text/html;charset=UTF-8");
-        
+
         PrintWriter out = response.getWriter();
         try {
             final boolean readOnlyMode = Boolean.parseBoolean(
                                           request.getParameter("readOnlyMode"));
             final ServletContext context = getServletContext();
             context.setAttribute("readOnlyMode", readOnlyMode);
-            
+
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet ReadOnlyModeServlet</title>");            
+            out.println("<title>Servlet ReadOnlyModeServlet</title>");
             out.println("</head>");
             out.println("<body>");
             out.println("<h1>Read Only Mode = " + readOnlyMode + "</h1>");

@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.web;
 
@@ -58,7 +43,7 @@ public class CheckManyLinksServlet extends HttpServlet {
                                   final HttpServletResponse response)
                                          throws ServletException, IOException {
         request.setCharacterEncoding(CODEC);
-        
+
         final ServletContext context = getServletContext();
         final DBCollection coll =
                                (DBCollection)context.getAttribute("collection");
@@ -67,9 +52,9 @@ public class CheckManyLinksServlet extends HttpServlet {
         final HttpSession session = request.getSession();
         final String user = (String)session.getAttribute("user");
         final Set<String> centerIds = (Set<String>)request.getSession()
-                                                     .getAttribute("centerIds");         
-        final String brokenUrl = request.getParameter("url");        
-        final String brokenUrl_E = EncDecUrl.encodeUrl(brokenUrl, CODEC, true);        
+                                                     .getAttribute("centerIds");
+        final String brokenUrl = request.getParameter("url");
+        final String brokenUrl_E = EncDecUrl.encodeUrl(brokenUrl, CODEC, true);
         final String brokenUrl_D = EncDecUrl.decodeUrl(brokenUrl);
         final String fixedUrl = request.getParameter("furl");
         final String fixedUrl_E = EncDecUrl.encodeUrl(fixedUrl, CODEC, true);
@@ -78,21 +63,21 @@ public class CheckManyLinksServlet extends HttpServlet {
         final String group = request.getParameter("group");
         final String id = request.getParameter("id");
         final String scollCenterFilter = request.getParameter("collCenterFilter");
-        final String collCenterFilter = "null".equals(scollCenterFilter) ? null 
-                                                            : scollCenterFilter;            
+        final String collCenterFilter = "null".equals(scollCenterFilter) ? null
+                                                            : scollCenterFilter;
         final String sorder = request.getParameter("order");
         final String order = "null".equals(sorder) ? "descending" : sorder;
         final String sdbFilter = request.getParameter("dbFilter");
         final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;
         final String option = request.getParameter("option");
-        
+
         final Set<IdUrl> fixed_E = MongoOperations.fixRelatedUrls(coll, hcoll,
-                user, centerIds, collCenterFilter, brokenUrl_D, fixedUrl_D, id, 
+                user, centerIds, collCenterFilter, brokenUrl_D, fixedUrl_D, id,
                                                                          option);
-        
+
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
-                "/showFixedUrls.jsp?group=0&lgroup=" + group 
-            + "&dbFilter=" + dbFilter + "&lang=" + lang 
+                "/showFixedUrls.jsp?group=0&lgroup=" + group
+            + "&dbFilter=" + dbFilter + "&lang=" + lang
             + "&id=" + id + "&brokenUrl=" + brokenUrl_E + "&url=" + fixedUrl_E
             + "&collCenterFilter=" + collCenterFilter + "&order=" + order);
 

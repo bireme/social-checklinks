@@ -1,24 +1,10 @@
 /*=========================================================================
 
-    Copyright © 2015 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
+  ==========================================================================*/
 
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
 package br.bireme.scl;
 
 import static br.bireme.scl.BrokenLinks.DEFAULT_HOST;
@@ -48,9 +34,9 @@ public class JoinTitle {
     public static final String COL_NAME= "TITLE";
     public static final String INDEX_TAG = "indexTag";
     public static final String RETURN_TAG = "retTag";
-    
+
     private final DB db;
-        
+
     public JoinTitle(final String host,
                      final int port) throws UnknownHostException {
         if (host == null) {
@@ -59,13 +45,13 @@ public class JoinTitle {
         if (port <= 0) {
             throw new IllegalArgumentException("port <= 0");
         }
-        
+
         final MongoClient mongoClient = new MongoClient(host, port);
-        
+
         mongoClient.dropDatabase(DB_NAME);
         db = mongoClient.getDB(DB_NAME);
     }
-    
+
     public void join(final String titlePath,
                      final String titleEncoding,
                      final int indexTag,
@@ -74,28 +60,28 @@ public class JoinTitle {
                      final String inMstEncoding,
                      final int joinTag,
                      final int newTag,
-                     final String outMstName) throws UnknownHostException, 
+                     final String outMstName) throws UnknownHostException,
                                                                 BrumaException {
-        final DBCollection title = getTitle(titlePath, titleEncoding, indexTag, 
-                                                                     returnTag);        
+        final DBCollection title = getTitle(titlePath, titleEncoding, indexTag,
+                                                                     returnTag);
         joinTitle(title, inMstName, inMstEncoding, joinTag, newTag, outMstName);
         db.dropDatabase();
     }
-    
+
     private DBCollection getTitle(final String mstName,
                                   final String mstEncoding,
                                   final int indexTag,
-                                  final int returnTag) throws 
+                                  final int returnTag) throws
                                           UnknownHostException, BrumaException {
         assert mstName != null;
         assert indexTag > 0;
         assert returnTag > 0;
-        
+
         final DBCollection coll = db.getCollection(COL_NAME);
         coll.ensureIndex(new BasicDBObject(INDEX_TAG, 1));
 
         final Master mst = MasterFactory.getInstance(mstName)
-                                        .setEncoding(mstEncoding).open();        
+                                        .setEncoding(mstEncoding).open();
         for (Record rec : mst) {
             if (rec.isActive()) {
                 final int mfn = rec.getMfn();
@@ -119,12 +105,12 @@ public class JoinTitle {
                     }
                 }
             }
-        }         
+        }
         mst.close();
-        
+
         return coll;
     }
-    
+
     private void joinTitle(final DBCollection title,
                            final String inMstName,
                            final String inMstEncoding,
@@ -138,29 +124,29 @@ public class JoinTitle {
         assert joinTag > 0;
         assert newTag > 0;
         assert outMstName != null;
-        
+
         final Master inMst = MasterFactory.getInstance(inMstName)
                                         .setEncoding(inMstEncoding).open();
         final Master outMst = (Master) MasterFactory.getInstance(outMstName)
                                         .asAnotherMaster(inMst).forceCreate();
-        
+
         int cur = 0;
         for (Record rec : inMst) {
             if (++cur % 10000 == 0) {
                 System.out.println("++" + cur);
             }
             if (rec.isActive()) {
-//System.out.println("out encoding=" + outMstEncoding);                
+//System.out.println("out encoding=" + outMstEncoding);
                 for (Field fld : rec.getFieldList(joinTag)) {
                     final String str = removeAccents(fld.getContent())
                                                                  .toUpperCase();
                     final BasicDBObject doc = (BasicDBObject)title.findOne(
                                              new BasicDBObject(INDEX_TAG, str));
                     if (doc == null) {
-                        //System.out.println("rec mfn=" + rec.getMfn() + " tag=" 
+                        //System.out.println("rec mfn=" + rec.getMfn() + " tag="
                         //        + INDEX_TAG + " content=" + fld.getContent());
                     } else {
-                        final BasicDBList lst = 
+                        final BasicDBList lst =
                                               (BasicDBList) doc.get(RETURN_TAG);
                         for (Object obj : lst) {
                             rec.addField(newTag, (String)obj);
@@ -174,24 +160,24 @@ public class JoinTitle {
         inMst.close();
         outMst.close();
     }
-    
+
     private String removeAccents(final String text) {
         return text == null ? null :
             Normalizer.normalize(text, Normalizer.Form.NFD)
             .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
     }
-    
+
     private static void usage() {
-        System.err.println("usage: JoinTitle \n\t\t<title mst> " + 
+        System.err.println("usage: JoinTitle \n\t\t<title mst> " +
           "\n\t\t<indexTag> \n\t\t<returnTag> \n\t\t<in mst> " +
           "\n\t\t<joinTag> " + "\n\t\t<newTag> \n\t\t<out mst> " +
-          "\n\t\t[--titleEncoding=<title encoding>] " + 
+          "\n\t\t[--titleEncoding=<title encoding>] " +
           "\n\t\t[--inEncoding=<in encoding>] " +
           "\n\t\t[--mongoHost=<host>] \n\t\t[--mongoPort=<port>]");
         System.exit(1);
     }
-    
-    public static void main(final String[] args) throws BrumaException, 
+
+    public static void main(final String[] args) throws BrumaException,
                                                           UnknownHostException {
         if (args.length < 7) {
             usage();
@@ -199,8 +185,8 @@ public class JoinTitle {
         String titleEncoding = DEFAULT_MST_ENCODING;
         String outEncoding = DEFAULT_MST_ENCODING;
         String host = DEFAULT_HOST;
-        int port = DEFAULT_PORT;        
-        
+        int port = DEFAULT_PORT;
+
         for (int idx = 7; idx < args.length; idx++) {
             if (args[idx].startsWith("--titleEncoding=")) {
                 titleEncoding = args[idx].substring(16);
@@ -214,11 +200,11 @@ public class JoinTitle {
                 usage();
             }
         }
-        
-        final JoinTitle jt = new JoinTitle(host, port);        
-        jt.join(args[0], titleEncoding, Integer.parseInt(args[1]), 
+
+        final JoinTitle jt = new JoinTitle(host, port);
+        jt.join(args[0], titleEncoding, Integer.parseInt(args[1]),
                 Integer.parseInt(args[2]), args[3], outEncoding,
                 Integer.parseInt(args[4]), Integer.parseInt(args[5]),
-                args[6]);                
-    }    
+                args[6]);
+    }
 }

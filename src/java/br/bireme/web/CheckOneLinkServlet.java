@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.web;
 
@@ -54,9 +39,9 @@ public class CheckOneLinkServlet extends HttpServlet {
                                   final HttpServletResponse response)
                                          throws ServletException, IOException {
         request.setCharacterEncoding(CODEC);
-        
+
         final String id = request.getParameter("id");
-        final String url_E = EncDecUrl.encodeUrl(request.getParameter("url"), 
+        final String url_E = EncDecUrl.encodeUrl(request.getParameter("url"),
                                                                    CODEC, true);
         final String furl = request.getParameter("furl").trim();
         final String furl_E1 = EncDecUrl.encodeUrl(furl, CODEC, false);
@@ -64,14 +49,14 @@ public class CheckOneLinkServlet extends HttpServlet {
         final String lang = request.getParameter("lang");
         final String group = request.getParameter("group");
         final String collCenterFilter = request.getParameter("collCenterFilter");
-        
+
         final String sorder = request.getParameter("order");
         final String order = "null".equals(sorder) ? "descending" : sorder;
         final String sdbFilter = request.getParameter("dbFilter");
-        final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter; 
+        final String dbFilter = "null".equals(sdbFilter) ? null : sdbFilter;
         final String sisNew = request.getParameter("new");
-        final String isNew = "null".equals(sisNew) ? "0" : sisNew; 
-    
+        final String isNew = "null".equals(sisNew) ? "0" : sisNew;
+
         final int errCode = CheckUrl.check(furl_E1);
         final String errMsg = CheckUrl.getMessage(errCode);
         final boolean isBroken = CheckUrl.isBroken(errCode);
@@ -79,9 +64,9 @@ public class CheckOneLinkServlet extends HttpServlet {
         final RequestDispatcher dispatcher = context.getRequestDispatcher(
                                    "/editRecord.jsp?id=" + id + "&url=" + url_E
                       + "&furl=" + furl_E2 + "&status=" + (isBroken ? 1 : 0)
-                      + "&lang=" + lang + "&group=" + group 
-                      + "&dbFilter=" + dbFilter                     
-                      + "&collCenterFilter=" + collCenterFilter 
+                      + "&lang=" + lang + "&group=" + group
+                      + "&dbFilter=" + dbFilter
+                      + "&collCenterFilter=" + collCenterFilter
                       + "&order=" + order
                       + "&new=" + isNew
                       + "&errCode=" + errCode

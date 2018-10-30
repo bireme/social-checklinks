@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2013 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Check Links.
-
-    Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.scl;
 
@@ -60,14 +45,14 @@ public class CheckUrl {
     public static final int UNKNOWN_HOST_EXCEPTION = 1008;
     public static final int SOCKET_EXCEPTION = 1009;
     public static final int SOCKET_TIMEOUT_EXCEPTION = 1010;
-    public static final int TRUNCATED_CHUNK_EXCEPTION = 1011;    
+    public static final int TRUNCATED_CHUNK_EXCEPTION = 1011;
     public static final int SSL_PROTOCOL_EXCEPTION = 1012;
     public static final int SSL_HANDSHAKE_EXCEPTION = 1013;
     public static final int SSL_UNVERIFIED_PEER_EXCEPTION = 1014;
     public static final int NO_HTTP_RESPONSE_EXCEPTION = 1015;
 
     public static final int UNKNOWN = 1100;
-    
+
     private static final Map<Integer,String> messages = mapMessages();
 
     private static final RequestConfig CONFIG = RequestConfig
@@ -200,16 +185,16 @@ public class CheckUrl {
 
         return ret;
     }
-    
+
     public static String getMessage(final int code) {
         final String msg = messages.get(code);
-        
+
         return (msg == null) ? "UNKNOWN" : msg;
     }
-    
+
     private static Map<Integer,String> mapMessages() {
         final HashMap<Integer,String> map = new HashMap<Integer,String>();
-        
+
         map.put(100, "Continue");
         map.put(101, "Switching Protocols");
         map.put(102, "Processing (WebDAV; RFC 2518)");
@@ -288,7 +273,7 @@ public class CheckUrl {
         map.put(1014, "SSL_UNVERIFIED_PEER_EXCEPTION");
         map.put(1015, "NO_HTTP_RESPONSE_EXCEPTION");
         map.put(1100, "UNKNOWN");
-        
+
         return map;
     }
 

@@ -1,24 +1,9 @@
 /*=========================================================================
 
-    Copyright © 2014 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
-
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
+  ==========================================================================*/
 
 package br.bireme.scl;
 
@@ -61,19 +46,19 @@ import java.util.List;
  */
 public class ShowFixedLinks {
     final DBCollection coll;
-    
-    public ShowFixedLinks(final String host, 
-                          final String database, 
+
+    public ShowFixedLinks(final String host,
+                          final String database,
                           final String collection) throws UnknownHostException {
         this(host, DEFAULT_PORT, null, null, database, collection);
-        
+
     }
-    
-    public ShowFixedLinks(final String host, 
+
+    public ShowFixedLinks(final String host,
                           final int port,
-                          final String user, 
-                          final String password, 
-                          final String database, 
+                          final String user,
+                          final String password,
+                          final String database,
                           final String collection) throws UnknownHostException {
         if (host == null) {
             throw new NullPointerException("host");
@@ -87,7 +72,7 @@ public class ShowFixedLinks {
         if (collection == null) {
             throw new NullPointerException("collection");
         }
-        
+
         final MongoClient mongoClient = new MongoClient(host, port);
         final DB db = mongoClient.getDB(database);
         if (user != null) {
@@ -96,11 +81,11 @@ public class ShowFixedLinks {
                 throw new IllegalArgumentException("invalid user/password");
             }
         }
-        coll = db.getCollection(collection);                
+        coll = db.getCollection(collection);
     }
-    
+
     public List<Element> showExportedLinks(final List<String> ccs,
-                                           final String fromDate) 
+                                           final String fromDate)
                                                          throws ParseException {
         /*if (ccs == null) {
             throw new NullPointerException("ccs");
@@ -108,26 +93,26 @@ public class ShowFixedLinks {
         final List<Element> lst = new ArrayList<Element>();
         final SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
         final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
-        final Date date = (fromDate == null) ? new Date(0) 
+        final Date date = (fromDate == null) ? new Date(0)
                                              : simple.parse(fromDate);
         final String updated = ELEM_LST_FIELD + ".0." + LAST_UPDATE_FIELD;
         final BasicDBObject qdate = new BasicDBObject("$gte", date);
         final BasicDBObject query = new BasicDBObject(updated, qdate);
-        final BasicDBObject sort = new BasicDBObject(updated, -1);  
+        final BasicDBObject sort = new BasicDBObject(updated, -1);
         final DBCursor cursor = coll.find(query).sort(sort);
-                
+
         while (cursor.hasNext()) {
-            final BasicDBObject doc = (BasicDBObject)cursor.next();            
+            final BasicDBObject doc = (BasicDBObject)cursor.next();
             final BasicDBList elems = (BasicDBList)doc.get(ELEM_LST_FIELD);
-            final BasicDBObject upd = (BasicDBObject)elems.get(0);            
+            final BasicDBObject upd = (BasicDBObject)elems.get(0);
             final BasicDBList ccLst = (BasicDBList)upd.get(CENTER_FIELD);
             final List<String> ccs2 = new ArrayList<String>();
-                
+
             for (Object cc : ccLst) {
                 ccs2.add((String)cc);
             }
-            
-            if (ccs == null) {                    
+
+            if (ccs == null) {
                 final String id = doc.getString(ID_FIELD);
                 final Element elem = new Element(
                                      id.substring(0, id.indexOf('_')),
@@ -159,23 +144,23 @@ public class ShowFixedLinks {
                         break;
                     }
                 }
-            }                        
+            }
         }
         cursor.close();
-        
+
         System.out.println("size=" + lst.size() + "\n");
-        
+
         return lst;
     }
-    
+
     static String element2CSV(final Element elem) {
         assert elem != null;
-        
-        return elem.getDate() + "\t" + elem.getUser() + "\t" + elem.getDbase() + 
-           "\t" + elem.getId() + "\t" + elem.getBurl() + "\t" + elem.getFurl() + 
+
+        return elem.getDate() + "\t" + elem.getUser() + "\t" + elem.getDbase() +
+           "\t" + elem.getId() + "\t" + elem.getBurl() + "\t" + elem.getFurl() +
            "\t" + elem.getCcs().get(0) + "\t" + elem.isExported() + "\n";
     }
-    
+
     private static void usage() {
         System.err.println("usage: ShowFixedLinks <host> [-port=<port>]" +
                 "\n\t\t     [-user=<user> -password=<pswd>]" +
@@ -186,8 +171,8 @@ public class ShowFixedLinks {
                 "\n\t\t     [--csv_format]");
         System.exit(1);
     }
-    
-    public static void main(final String[] args) throws UnknownHostException, 
+
+    public static void main(final String[] args) throws UnknownHostException,
                                                         IOException,
                                                         ParseException {
         if (args.length < 1) {
@@ -201,15 +186,15 @@ public class ShowFixedLinks {
         String database = SOCIAL_CHECK_DB;
         String collection = HISTORY_COL;
         String fromDate = "20140101";
-        List<String> ccs = null; 
+        List<String> ccs = null;
         String outFile = null;
         boolean csvFormat = false;
-        
+
         final String csvHeader = "Date\tUser\tDbase\tId\tBrokenUrl\tFixedUrl\t"+
                                                                 "CC\tExported";
-                
+
         for (int idx = 1; idx < args.length; idx++) {
-            if (args[idx].startsWith("-port=")) {                
+            if (args[idx].startsWith("-port=")) {
                 port = Integer.parseInt(args[idx].substring(6));
             } else if (args[idx].startsWith("-user=")) {
                 user = args[idx].substring(6);
@@ -232,11 +217,11 @@ public class ShowFixedLinks {
                 usage();
             }
         }
-        
-        final ShowFixedLinks elinks = new ShowFixedLinks(host, port, user, 
+
+        final ShowFixedLinks elinks = new ShowFixedLinks(host, port, user,
                                                 password, database, collection);
         final List<Element> lst = elinks.showExportedLinks(ccs, fromDate);
-        
+
         if (!lst.isEmpty()) {
             final OutputStream outs = (outFile == null) ? System.out
                                                 : new FileOutputStream(outFile);
@@ -246,7 +231,7 @@ public class ShowFixedLinks {
                 out.append(csvHeader);
                 out.newLine();
             }
-            
+
             for (Element elem : lst) {
                 if (csvFormat) {
                     out.append(element2CSV(elem));
@@ -257,6 +242,6 @@ public class ShowFixedLinks {
                 }
             }
             out.close();
-        }        
+        }
     }
 }

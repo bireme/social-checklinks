@@ -1,24 +1,10 @@
 /*=========================================================================
 
-    Copyright © 2015 BIREME/PAHO/WHO
+    social-checklinks © Pan American Health Organization, 2018.
+    See License at: https://github.com/bireme/social-checklinks/blob/master/LICENSE.txt
 
-    This file is part of Social Check Links.
+  ==========================================================================*/
 
-    Social Check Links is free software: you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public License as
-    published by the Free Software Foundation, either version 2.1 of
-    the License, or (at your option) any later version.
-
-    Social Check Links is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with Social Check Links. If not, see
-    <http://www.gnu.org/licenses/>.
-
-=========================================================================*/
 package br.bireme.scl;
 
 import br.bireme.SendEmail;
@@ -52,44 +38,44 @@ import javax.mail.MessagingException;
  * date: 20150507
  */
 public class SendEmailToCcs {
-        
+
     private class CcProfile {
         final String cc;
         final String name;
         final String email;
         final boolean male;
 
-        public CcProfile(final String cc, 
-                         final String name, 
-                         final String email, 
+        public CcProfile(final String cc,
+                         final String name,
+                         final String email,
                          final boolean male) {
             this.cc = cc;
             this.name = name;
             this.email = email;
             this.male = male;
-        }                        
+        }
     }
-    
+
     private class EmailFrame {
         final String id;
         final String mst;
         final String url;
-        
-        EmailFrame(final String id, 
-                   final String mst, 
+
+        EmailFrame(final String id,
+                   final String mst,
                    final String url) {
             this.id = id;
             this.mst = mst;
             this.url = url;
-        }        
+        }
     }
-    
-    public void sendEmails(final String toFile, 
-                           final String host, 
-                           final int port, 
-                           final String user, 
-                           final String password, 
-                           final String database, 
+
+    public void sendEmails(final String toFile,
+                           final String host,
+                           final int port,
+                           final String user,
+                           final String password,
+                           final String database,
                            final String collection) throws UnknownHostException {
         if (toFile == null) {
             throw new NullPointerException("toFile");
@@ -106,7 +92,7 @@ public class SendEmailToCcs {
         if (collection == null) {
             throw new NullPointerException("collection");
         }
-        
+
         final Map<String,CcProfile> profiles = getProfiles(toFile);
         final MongoClient mongoClient = new MongoClient(host, port);
         final DB db = mongoClient.getDB(database);
@@ -116,19 +102,19 @@ public class SendEmailToCcs {
                 throw new IllegalArgumentException("invalid user/password");
             }
         }
-        final DBCollection coll = db.getCollection(collection);     
-                
-        prepareEmails(coll, profiles);                      
+        final DBCollection coll = db.getCollection(collection);
+
+        prepareEmails(coll, profiles);
     }
-    
+
     private Map<String,CcProfile> getProfiles(String toFile) {
         assert toFile != null;
-        
+
         final Map<String,CcProfile> profiles = new HashMap<String,CcProfile>();
         try {
             final BufferedReader reader = new BufferedReader(
                                                         new FileReader(toFile));
-            
+
             while (true) {
                 final String line = reader.readLine();
                 if (line == null) {
@@ -154,28 +140,28 @@ public class SendEmailToCcs {
             Logger.getLogger(SendEmailToCcs.class.getName()).log(
                                                         Level.SEVERE, null, ex);
         }
-        
+
         return profiles;
     }
 
-    private void prepareEmails(final DBCollection coll, 
+    private void prepareEmails(final DBCollection coll,
                                final Map<String, CcProfile> profiles) {
         assert coll != null;
         assert profiles != null;
-        
+
         final Set<String> ccs = MongoOperations.getCenters(coll);
         final String qry = CENTER_FIELD + ".0";
 
         for (String cc : ccs) {
             final Set<EmailFrame> eset = new HashSet<EmailFrame>();
             final CcProfile ccp = profiles.get(cc);
-            
+
             if (ccp != null) {
                 final BasicDBObject query = new BasicDBObject(qry, cc);
                 final DBCursor cursor = coll.find(query);
 
                 while (cursor.hasNext()) {
-                    final BasicDBObject doc = (BasicDBObject)cursor.next();            
+                    final BasicDBObject doc = (BasicDBObject)cursor.next();
                     final String id = doc.getString(ID_FIELD);
                     final EmailFrame eframe = new EmailFrame(
                                                id.substring(0, id.indexOf('_')),
@@ -188,14 +174,14 @@ public class SendEmailToCcs {
             }
         }
     }
-    
+
     private void sendEmailToCc(final CcProfile profile,
                                final Set<EmailFrame> frames) {
         assert profile != null;
         assert frames  != null;
-        
+
         final StringBuilder msg = new StringBuilder();
-        
+
         msg.append(profile.male ? "Mr. " : "Ms. ");
         msg.append(profile.name);
         msg.append(",\n\n");
@@ -207,7 +193,7 @@ public class SendEmailToCcs {
         msg.append("Please, fix then using the Social Check Links software:\n");
         msg.append("http://socialchecklinks.bireme.org\n\n");
         msg.append("Broken Links:\n\n");
-        
+
         for (EmailFrame frame : frames) {
             msg.append("db: ");
             msg.append(frame.mst);
@@ -217,9 +203,9 @@ public class SendEmailToCcs {
             msg.append(frame.url);
             msg.append("\n\n");
         }
-        
+
         System.out.println("Sending email about broken links to: " + profile.cc);
-        
+
         try {
             SendEmail.send(profile.email,
                     "no-reply-socialchecklinks@paho.org",
@@ -230,7 +216,7 @@ public class SendEmailToCcs {
                     SendEmailToCcs.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private static void usage() {
         System.err.println("usage: SendEmailToCCs <to_file> <host>" +
                 "\n\t\t     [-port=<port>]" +
@@ -238,23 +224,23 @@ public class SendEmailToCcs {
                 "\n\t\t     [-database=<dbase>] [-collection=<col>]");
         System.exit(1);
     }
-    
+
     public static void main(final String[] args) throws UnknownHostException {
         if (args.length < 2) {
             usage();
         }
-        
+
         final String toFile = args[0];
         final String host = args[1];
-        
+
         int port = DEFAULT_PORT;
         String user = null;
         String password = null;
         String database = SOCIAL_CHECK_DB;
         String collection = BROKEN_LINKS_COL;
-                
+
         for (int idx = 2; idx < args.length; idx++) {
-            if (args[idx].startsWith("-port=")) {                
+            if (args[idx].startsWith("-port=")) {
                 port = Integer.parseInt(args[idx].substring(6));
             } else if (args[idx].startsWith("-user=")) {
                 user = args[idx].substring(6);
@@ -268,8 +254,8 @@ public class SendEmailToCcs {
                 usage();
             }
         }
-        
+
         final SendEmailToCcs sec = new SendEmailToCcs();
         sec.sendEmails(toFile, host, port, user, password, database, collection);
-    }        
+    }
 }
