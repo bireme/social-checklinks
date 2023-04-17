@@ -1,0 +1,11 @@
+--------------------------------------------
+Links que deixarão de ser verificados
+--------------------------------------------
+id:768395_1 url:http://acad-medic.s3.amazonaws.com/wp-content/uploads/2012/10/REVISTA-DO-MEDICO-RESIDENTE.pdf user:barbieri@paho.org center:AR625.9 date:Thu Jul 14 16:40:01 BRT 2016
+
+
+--------------------------------------------
+Registros que serão apagados
+--------------------------------------------
+id:761429_1 url:http://www.revistas.unipar.br/veterinaria/article/view/4911/2852 user:barbieri@paho.org center:BR1532.9 date:Fri Jul 15 08:27:01 BRT 2016
+
